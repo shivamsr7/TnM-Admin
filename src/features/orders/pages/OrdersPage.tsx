@@ -43,9 +43,7 @@ export default function OrdersPage() {
       <div className="max-w-sm">
         <SearchBar
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={setSearch}
           placeholder="Search orders..."
         />
       </div>

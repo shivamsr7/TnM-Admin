@@ -57,6 +57,19 @@ export interface Order {
 
   notes: string | null;
 
+shipping_full_name: string | null;
+shipping_phone: string | null;
+shipping_address: string | null;
+shipping_city: string | null;
+shipping_state: string | null;
+shipping_pincode: string | null;
+shipping_landmark: string | null;
+shipping_country: string | null;
+address_type: string | null;
+
+courier_name: string | null;
+tracking_number: string | null;
+
   created_at: string;
 
   updated_at: string;
@@ -78,4 +91,6 @@ export interface OrderItem {
   quantity: number;
 
   total: number;
+
+  
 }

@@ -1,29 +1,45 @@
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
-  value?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+  onChange: (value: string) => void;
   placeholder?: string;
-  className?: string;
 }
 
 export default function SearchBar({
   value,
   onChange,
   placeholder = "Search...",
-  className,
 }: SearchBarProps) {
   return (
-    <div className={`relative w-full max-w-sm ${className ?? ""}`}>
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+    <div className="relative w-full max-w-md">
+
+      <Search
+        size={18}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      />
 
       <Input
         value={value}
-        onChange={onChange}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-10"
+        className="h-11 rounded-xl pl-10 pr-10"
       />
+
+      {value && (
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={() => onChange("")}
+          className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
+        >
+          <X size={16} />
+        </Button>
+      )}
+
     </div>
   );
 }
