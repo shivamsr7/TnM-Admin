@@ -28,8 +28,8 @@ export default function Header({
       toast.error(error.message);
       return;
     }
-
-    toast.success("Logged out successfully");
+    
+    toast.success("Logged out successfully",{duration:1000});
     navigate("/login", { replace: true });
   }
 

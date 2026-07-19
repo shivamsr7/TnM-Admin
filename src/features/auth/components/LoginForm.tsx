@@ -35,7 +35,9 @@ async function onSubmit(data: LoginSchema) {
     return;
   }
 
-  toast.success("Login successful!");
+  toast.success("Login Successful", {
+  duration: 1000,
+});
 
   navigate("/dashboard", { replace: true });
 }
