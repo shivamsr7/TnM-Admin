@@ -50,9 +50,7 @@ export default function CategoriesPage() {
         <div className="w-full md:max-w-sm">
           <SearchBar
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={setSearch}
             placeholder="Search categories..."
           />
         </div>
