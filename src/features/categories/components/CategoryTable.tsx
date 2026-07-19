@@ -1,6 +1,6 @@
-import { Pencil, Trash2 } from "lucide-react";
+
 import ActionMenu from "@/shared/components/admin/ActionMenu";
-import DataTable from "@/components/shared/DataTable";
+import DataTable, { type Column } from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 
 import type { Category } from "../types/category.types";
@@ -16,7 +16,7 @@ export default function CategoryTable({
   onEdit,
   onDelete,
 }: CategoryTableProps) {
-  const columns = [
+  const columns: Column<Category>[] = [
     {
       key: "name" as keyof Category,
       title: "Category",
@@ -24,13 +24,17 @@ export default function CategoryTable({
     {
       key: "parent_id" as keyof Category,
       title: "Parent",
-      render: (value: Category["parent_id"], row: Category) => {
-        if (!value) return "-";
+      render: (value) => {
+  const parentId = value as string | null;
 
-        const parent = data.find((item) => item.id === row.parent_id);
+  if (!parentId) return "-";
 
-        return parent?.name ?? "-";
-      },
+  const parent = data.find(
+    (item) => item.id === parentId
+  );
+
+  return parent?.name ?? "-";
+},
     },
     {
       key: "sort_order" as keyof Category,
@@ -39,22 +43,22 @@ export default function CategoryTable({
     {
       key: "is_active" as keyof Category,
       title: "Status",
-      render: (value: Category["is_active"]) => (
-        <StatusBadge
-          status={value ? "Active" : "Inactive"}
-        />
-      ),
+      render: (value) => (
+  <StatusBadge
+    status={(value as boolean) ? "active" : "inactive"}
+  />
+),
     },
     {
-      key: "id" as keyof Category,
-      title: "Actions",
-      render: (_: Category["id"], row: Category) => (
-        <ActionMenu
-  onEdit={() => onEdit(row)}
-  onDelete={() => onDelete(row)}
-/>
-      ),
-    },
+  key: "id",
+  title: "Actions",
+  render: (_, row) => (
+    <ActionMenu
+      onEdit={() => onEdit(row)}
+      onDelete={() => onDelete(row)}
+    />
+  ),
+},
   ];
 
   return (

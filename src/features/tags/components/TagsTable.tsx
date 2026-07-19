@@ -92,9 +92,9 @@ export default function TagsTable({
           title="Delete Tag"
           description={`Delete "${tag.name}"?`}
           isLoading={deleteTag.isPending}
-          onConfirm={() =>
-            deleteTag.mutate(tag.id)
-          }
+          onConfirm={async () => {
+  await deleteTag.mutateAsync(tag.id);
+}}
           trigger={
             <Button
               variant="destructive"

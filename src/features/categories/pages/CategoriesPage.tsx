@@ -42,7 +42,7 @@ export default function CategoriesPage() {
 
       <PageHeader
         title="Categories"
-        description="Manage product categories"
+        subtitle="Manage product categories"
       />
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

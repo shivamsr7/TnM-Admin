@@ -13,9 +13,9 @@ export const categorySchema = z.object({
 
   parent_id: z.string().nullable().optional(),
 
-  sort_order: z.number().default(0),
+sort_order: z.number(),
 
-  is_active: z.boolean().default(true),
+is_active: z.boolean(),
 });
 
 export type CategorySchema = z.infer<

@@ -1,9 +1,12 @@
-import type { ReactNode } from "react";
+import React from "react";
 
 export interface Column<T extends object> {
   key: keyof T;
   title: string;
-  render?: (value: T[keyof T], row: T) => ReactNode;
+  render?: (
+    value: unknown,
+    row: T
+  ) => React.ReactNode;
 }
 
 interface DataTableProps<T extends object> {
@@ -45,7 +48,7 @@ export default function DataTable<T extends object>({
             data.map((row, index) => (
               <tr
                 key={index}
-                className="border-t hover:bg-gray-50 transition-colors"
+                className="border-t transition-colors hover:bg-gray-50"
               >
                 {columns.map((column) => {
                   const value = row[column.key];
