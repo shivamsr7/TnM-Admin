@@ -29,8 +29,7 @@ export default function SeoSection({ form }: Props) {
     watch("short_description") ||
     "Write a compelling description that encourages customers to click.";
 
-  const metaKeywords =
-    watch("meta_keywords") || "";
+
 
   return (
     <SectionCard

@@ -8,7 +8,7 @@ import EmptyState from "@/components/shared/EmptyState";
 import { Tag } from "lucide-react";
 interface Props {
   brands: Brand[];
-  onDelete: (brand: Brand) => void;
+  onDelete: (brand: Brand) => Promise<void>;
 }
 
 export default function BrandsTable({

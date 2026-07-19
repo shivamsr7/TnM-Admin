@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
 import SectionCard from "@/shared/components/admin/SectionCard";
-import MediaUploader from "@/shared/components/media/MediaUploader";
+import ImageUploader from "@/shared/components/media/ImageUploader";
 
 import {
   collectionSchema,
@@ -171,13 +171,12 @@ export default function CollectionForm({
         title="Banner Image"
         description="Upload a banner image for this collection."
       >
-        <MediaUploader
-          folder="collections"
-          value={watch("banner_image")}
-          onChange={(url) =>
-            setValue("banner_image", url)
-          }
-        />
+        <ImageUploader
+  value={watch("banner_image")}
+  onChange={(url) =>
+    setValue("banner_image", url)
+  }
+/>
       </SectionCard>
 
       <SectionCard
