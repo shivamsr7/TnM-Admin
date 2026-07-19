@@ -1,7 +1,6 @@
 import {
   CheckCircle2,
   Clock3,
-  Package,
   Truck,
   PackageCheck,
   XCircle,
@@ -14,14 +13,6 @@ import {
 
 import { useOrderActivity } from "../hooks/useOrders";
 
-interface Activity {
-  id: string;
-  event_type: string;
-  title: string;
-  description?: string | null;
-  metadata?: Record<string, unknown>;
-  created_at: string;
-}
 
 interface Props {
   orderId: string;
