@@ -136,26 +136,26 @@ export default function ProductForm({
 useEffect(() => {
   if (mode !== "edit" || !productId) return;
 
+  const id = productId;
+
   async function loadProduct() {
     try {
-      const product = await productService.getById(productId);
+      const product = await productService.getById(id);
 
       form.reset({
-  ...product,
-
-  collection_ids:
-    product.product_collections?.map(
-      (item: { collection_id: string }) => item.collection_id
-    ) ?? [],
-
-  tag_ids:
-    product.product_tags?.map(
-      (item: { tag_id: string }) => item.tag_id
-    ) ?? [],
-});
+        ...product,
+        collection_ids:
+          product.product_collections?.map(
+            (item: { collection_id: string }) => item.collection_id
+          ) ?? [],
+        tag_ids:
+          product.product_tags?.map(
+            (item: { tag_id: string }) => item.tag_id
+          ) ?? [],
+      });
 
       const productImages =
-        await productImageService.getByProduct(productId);
+        await productImageService.getByProduct(id);
 
       setImages(
         productImages.map((image) => ({

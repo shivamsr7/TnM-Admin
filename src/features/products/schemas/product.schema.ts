@@ -25,41 +25,41 @@ export const productSchema = z.object({
 
   barcode: z.string().optional(),
 
-  stock: z.number().default(0),
+stock: z.number(),
 
-  low_stock_threshold: z.number().default(5),
+low_stock_threshold: z.number(),
 
-  track_inventory: z.boolean().default(true),
+track_inventory: z.boolean(),
 
-  allow_backorders: z.boolean().default(false),
+allow_backorders: z.boolean(),
 
-  status: z.enum([
-    "draft",
-    "active",
-    "hidden",
-    "archived",
-    "out_of_stock",
-  ]),
+status: z.enum([
+  "draft",
+  "active",
+  "hidden",
+  "archived",
+  "out_of_stock",
+]),
 
-  trending: z.boolean().default(false),
+trending: z.boolean(),
 
-  editors_pick: z.boolean().default(false),
+editors_pick: z.boolean(),
 
-  seo_title: z.string().optional(),
+collection_ids: z.array(z.string()),
 
-  seo_description: z.string().optional(),
+tag_ids: z.array(z.string()),
 
-  meta_keywords: z.string().optional(),
+featured: z.boolean(),
 
-collection_ids: z.array(z.string()).default([]),
+new_arrival: z.boolean(),
 
-tag_ids: z.array(z.string()).default([]),
+best_seller: z.boolean(),
 
-featured: z.boolean().default(false),
+seo_title: z.string().optional(),
 
-new_arrival: z.boolean().default(false),
+seo_description: z.string().optional(),
 
-best_seller: z.boolean().default(false),
+meta_keywords: z.string().optional(),
 });
 
 export type ProductSchema = z.infer<typeof productSchema>;
