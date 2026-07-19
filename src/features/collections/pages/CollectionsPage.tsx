@@ -47,7 +47,7 @@ export default function CollectionsPage() {
       <SearchBar
         placeholder="Search collections..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={setSearch}
       />
 
       <CollectionsTable

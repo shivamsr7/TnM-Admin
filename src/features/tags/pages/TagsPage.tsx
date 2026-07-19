@@ -48,7 +48,7 @@ export default function TagsPage() {
 
       <SearchBar
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={setSearch}
         placeholder="Search tags..."
       />
             {isLoading ? (
