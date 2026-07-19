@@ -34,7 +34,7 @@ export const brandSchema = z.object({
     .or(z.literal(""))
     .optional(),
 
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 
 export type BrandSchema = z.infer<typeof brandSchema>;

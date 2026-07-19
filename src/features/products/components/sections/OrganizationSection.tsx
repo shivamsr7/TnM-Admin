@@ -100,9 +100,9 @@ export default function OrganizationSection({
           <ToggleCard
             title="Featured Product"
             description="Display this product in featured sections across the website."
-            checked={watch("is_featured")}
+            checked={watch("featured")}
             onChange={(checked) =>
-              setValue("is_featured", checked, {
+              setValue("featured", checked, {
                 shouldDirty: true,
               })
             }
@@ -111,9 +111,9 @@ export default function OrganizationSection({
           <ToggleCard
             title="New Arrival"
             description="Highlight this product in the New Arrivals collection."
-            checked={watch("is_new")}
+            checked={watch("new_arrival")}
             onChange={(checked) =>
-              setValue("is_new", checked, {
+              setValue("new_arrival", checked, {
                 shouldDirty: true,
               })
             }
@@ -122,9 +122,9 @@ export default function OrganizationSection({
           <ToggleCard
             title="Best Seller"
             description="Show this product in the Best Sellers section."
-            checked={watch("is_best_seller")}
+            checked={watch("best_seller")}
             onChange={(checked) =>
-              setValue("is_best_seller", checked, {
+              setValue("best_seller", checked, {
                 shouldDirty: true,
               })
             }
