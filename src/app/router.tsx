@@ -26,7 +26,8 @@ import EditCollectionPage from "@/features/collections/pages/EditCollectionPage"
 import TagsPage from "@/features/tags/pages/TagsPage";
 import AddTagPage from "@/features/tags/pages/AddTagPage";
 import EditTagPage from "@/features/tags/pages/EditTagPage";
-
+import OrdersPage from "@/features/orders/pages/OrdersPage";
+import OrderDetailsPage from "@/features/orders/pages/OrderDetailsPage";
 export const router = createBrowserRouter([
   // ---------------- Public Routes ----------------
 
@@ -133,6 +134,16 @@ export const router = createBrowserRouter([
             path: "products/:id/edit",
             element: <EditProductPage />,
           },
+          // Orders
+
+{
+  path: "orders",
+  element: <OrdersPage />,
+},
+{
+  path: "orders/:id",
+  element: <OrderDetailsPage />,
+},
         ],
       },
     ],
