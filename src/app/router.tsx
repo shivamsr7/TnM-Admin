@@ -28,6 +28,7 @@ import AddTagPage from "@/features/tags/pages/AddTagPage";
 import EditTagPage from "@/features/tags/pages/EditTagPage";
 import OrdersPage from "@/features/orders/pages/OrdersPage";
 import OrderDetailsPage from "@/features/orders/pages/OrderDetailsPage";
+import CouponsPage from "@/features/coupons/pages/CouponsPage";
 export const router = createBrowserRouter([
   // ---------------- Public Routes ----------------
 
@@ -143,6 +144,12 @@ export const router = createBrowserRouter([
 {
   path: "orders/:id",
   element: <OrderDetailsPage />,
+},
+// Coupons
+
+{
+  path: "coupons",
+  element: <CouponsPage />,
 },
         ],
       },
