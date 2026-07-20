@@ -1,43 +1,19 @@
 import { supabase } from "@/lib/supabase";
 import type {
-  DashboardData,
   DashboardStats,
-  SalesChartPoint,
   RecentOrder,
-  TopProduct,
-  LowStockProduct,
+  SalesChartResponse,
+  SalesChartData,
 } from "../types/dashboard.types";
 
 class DashboardService {
-  async getDashboardData(): Promise<DashboardData> {
-    const [
-      stats,
-      salesChart,
-      recentOrders,
-      topProducts,
-      lowStockProducts,
-    ] = await Promise.all([
-      this.getStats(),
-      this.getSalesChart(),
-      this.getRecentOrders(),
-      this.getTopProducts(),
-      this.getLowStockProducts(),
-    ]);
 
-    return {
-      stats,
-      salesChart,
-      recentOrders,
-      topProducts,
-      lowStockProducts,
-    };
-  }
 
   // ============================
   // Dashboard Statistics
   // ============================
 
-  private async getStats(): Promise<DashboardStats> {
+  async getDashboardStats(): Promise<DashboardStats> {
     const [{ data: orders }, { data: products }] = await Promise.all([
       supabase.from("orders").select("*"),
       supabase.from("products").select("*"),
@@ -137,15 +113,13 @@ class DashboardService {
   // Sales Chart
   // ============================
 
-  private async getSalesChart(): Promise<SalesChartPoint[]> {
-    return [];
-  }
+
 
   // ============================
   // Recent Orders
   // ============================
 
-  private async getRecentOrders(): Promise<RecentOrder[]> {
+  async getRecentOrders(): Promise<RecentOrder[]> {
     const { data } = await supabase
       .from("orders")
       .select(
@@ -172,36 +146,89 @@ class DashboardService {
   // Top Products
   // ============================
 
-  private async getTopProducts(): Promise<TopProduct[]> {
-    return [];
-  }
+
 
   // ============================
   // Low Stock
   // ============================
 
-  private async getLowStockProducts(): Promise<LowStockProduct[]> {
-    const { data } = await supabase
-      .from("products")
-      .select(
-        `
-        id,
-        name,
-        slug,
-        stock,
-        low_stock_threshold,
-        price,
-        status
-      `
-      )
-      .eq("status", "active")
-      .order("stock")
-      .limit(5);
+ 
+async getSalesChart(
+  period: 7 | 30 | 90
+): Promise<SalesChartResponse> {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - period);
 
-    return ((data ?? []).filter(
-      (p) => p.stock <= p.low_stock_threshold
-    )) as LowStockProduct[];
-  }
+  const { data, error } = await supabase
+    .from("orders")
+    .select(`
+      created_at,
+      total_amount,
+      order_status
+    `)
+    .gte("created_at", startDate.toISOString())
+    .order("created_at");
+
+  if (error) throw error;
+
+  const grouped = new Map<
+    string,
+    SalesChartData
+  >();
+
+  let grossRevenue = 0;
+  let deliveredRevenue = 0;
+  let totalOrders = 0;
+
+  (data ?? []).forEach((order) => {
+    const date = new Date(order.created_at).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+    });
+
+    if (!grouped.has(date)) {
+      grouped.set(date, {
+        date,
+        revenue: 0,
+        deliveredRevenue: 0,
+        orders: 0,
+      });
+    }
+
+    const current = grouped.get(date)!;
+
+    if (
+      order.order_status !== "cancelled" &&
+      order.order_status !== "returned"
+    ) {
+      const amount = Number(order.total_amount);
+
+      current.revenue += amount;
+      grossRevenue += amount;
+    }
+
+    if (order.order_status === "delivered") {
+      const amount = Number(order.total_amount);
+
+      current.deliveredRevenue += amount;
+      deliveredRevenue += amount;
+    }
+
+    current.orders += 1;
+    totalOrders += 1;
+  });
+
+  return {
+    chart: Array.from(grouped.values()),
+
+    summary: {
+      grossRevenue,
+      deliveredRevenue,
+      totalOrders,
+    },
+  };
+}
+  
 }
 
 export const dashboardService = new DashboardService();

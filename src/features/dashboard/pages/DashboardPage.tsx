@@ -2,15 +2,16 @@ import DashboardHeader from "../components/DashboardHeader";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import StatsGrid from "../components/StatsGrid";
 
-import { useDashboard } from "../hooks/useDashboard";
-
+import { useDashboardStats } from "../hooks/useDashboardStats";
+import SalesChart from "../components/SalesChart";
+import RecentOrdersTable from "../components/RecentOrdersTable";
 export default function DashboardPage() {
   const {
-    isLoading,
-    isFetching,
-    error,
-    refetch,
-  } = useDashboard();
+  isLoading,
+  isFetching,
+  error,
+  refetch,
+} = useDashboardStats();
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -47,28 +48,12 @@ export default function DashboardPage() {
       <StatsGrid />
 
       {/* Sales Chart */}
-      <div className="rounded-2xl border bg-white p-8 shadow-sm">
-        <h2 className="text-xl font-semibold">
-          Sales Overview
-        </h2>
-
-        <p className="mt-2 text-gray-500">
-          Coming in the next milestone.
-        </p>
-      </div>
+      <SalesChart />
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* Recent Orders */}
 
-        <div className="rounded-2xl border bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold">
-            Recent Orders
-          </h2>
-
-          <p className="mt-2 text-gray-500">
-            Coming in the next milestone.
-          </p>
-        </div>
+        <RecentOrdersTable />
 
         {/* Top Products */}
 

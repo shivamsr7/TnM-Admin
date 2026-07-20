@@ -77,3 +77,31 @@ export interface DashboardData {
   topProducts: TopProduct[];
   lowStockProducts: LowStockProduct[];
 }
+
+export type SalesPeriod = 7 | 30 | 90;
+
+export interface SalesChartData {
+  date: string;
+  revenue: number;
+  deliveredRevenue: number;
+  orders: number;
+}
+
+export interface SalesSummary {
+  grossRevenue: number;
+  deliveredRevenue: number;
+  totalOrders: number;
+}
+export interface SalesChartResponse {
+  chart: SalesChartData[];
+  summary: SalesSummary;
+}
+export interface TopProduct {
+  id: string;
+  name: string;
+  image: string | null;
+  price: number;
+  totalSold: number;
+  revenue: number;
+  stock: number;
+}

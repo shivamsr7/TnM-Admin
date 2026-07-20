@@ -6,12 +6,12 @@ import {
 } from "lucide-react";
 
 import StatsCard from "./StatsCard";
-import { useDashboard } from "../hooks/useDashboard";
+import { useDashboardStats } from "../hooks/useDashboardStats";
 
 export default function StatsGrid() {
-  const { data, isLoading } = useDashboard();
+  const { data, isLoading } = useDashboardStats();
 
-  const stats = data?.stats;
+  const stats = data;
 
   const revenueGrowth = stats?.revenue.growth ?? 0;
 
