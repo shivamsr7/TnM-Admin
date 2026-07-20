@@ -5,6 +5,7 @@ import StatsGrid from "../components/StatsGrid";
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import SalesChart from "../components/SalesChart";
 import RecentOrdersTable from "../components/RecentOrdersTable";
+import QuickActions from "../components/QuickActions";
 export default function DashboardPage() {
   const {
   isLoading,
@@ -47,8 +48,13 @@ export default function DashboardPage() {
 
       <StatsGrid />
 
-      {/* Sales Chart */}
-      <SalesChart />
+<div className="mt-6">
+  <QuickActions />
+</div>
+
+<div className="mt-6">
+  <SalesChart />
+</div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* Recent Orders */}
