@@ -4,6 +4,7 @@ import type {
   RecentOrder,
   SalesChartResponse,
   SalesChartData,
+  Activity,
 } from "../types/dashboard.types";
 
 class DashboardService {
@@ -108,7 +109,33 @@ class DashboardService {
       },
     };
   }
+async getRecentActivity(): Promise<Activity[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      customer_name,
+      order_status,
+      total_amount,
+      created_at
+    `)
+    .order("created_at", { ascending: false })
+    .limit(8);
 
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((order) => ({
+    id: order.id,
+    type: "order",
+    title: "New Order",
+    description: `${order.order_number} • ${order.customer_name}`,
+    createdAt: order.created_at,
+    route: `/orders/${order.id}`,
+  }));
+}
   // ============================
   // Sales Chart
   // ============================

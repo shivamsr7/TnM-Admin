@@ -6,6 +6,7 @@ import { useDashboardStats } from "../hooks/useDashboardStats";
 import SalesChart from "../components/SalesChart";
 import RecentOrdersTable from "../components/RecentOrdersTable";
 import QuickActions from "../components/QuickActions";
+import ActivityTimeline from "../components/ActivityTimeline";
 export default function DashboardPage() {
   const {
   isLoading,
@@ -60,7 +61,7 @@ export default function DashboardPage() {
         {/* Recent Orders */}
 
         <RecentOrdersTable />
-
+ <ActivityTimeline />
         {/* Top Products */}
 
         <div className="rounded-2xl border bg-white p-8 shadow-sm">

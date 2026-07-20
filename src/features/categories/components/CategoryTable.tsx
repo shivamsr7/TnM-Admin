@@ -4,17 +4,19 @@ import DataTable, { type Column } from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 
 import type { Category } from "../types/category.types";
-
+import { FolderTree } from "lucide-react";
 interface CategoryTableProps {
   data: Category[];
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onManageSubcategories: (category: Category) => void;
 }
 
 export default function CategoryTable({
   data,
   onEdit,
   onDelete,
+  onManageSubcategories
 }: CategoryTableProps) {
   const columns: Column<Category>[] = [
     {
@@ -54,9 +56,16 @@ export default function CategoryTable({
   title: "Actions",
   render: (_, row) => (
     <ActionMenu
-      onEdit={() => onEdit(row)}
-      onDelete={() => onDelete(row)}
-    />
+  onEdit={() => onEdit(row)}
+  onDelete={() => onDelete(row)}
+  extraActions={[
+    {
+      label: "Manage Subcategories",
+      icon: FolderTree,
+      onClick: () => onManageSubcategories(row),
+    },
+  ]}
+/>
   ),
 },
   ];

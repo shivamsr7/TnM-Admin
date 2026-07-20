@@ -11,6 +11,7 @@ import { useCategories } from "../hooks/useCategories";
 import type { Category } from "../types/category.types";
 import CategoryDialog from "../components/CategoryDialog";
 import DeleteCategoryDialog from "../components/DeleteCategoryDialog";
+import ManageSubcategoriesDialog from "../components/ManageSubcategoriesDialog";
 export default function CategoriesPage() {
   const { data = [], isLoading } = useCategories();
 
@@ -22,7 +23,8 @@ export default function CategoriesPage() {
   const [openDialog, setOpenDialog] = useState(false);
 
   const [deleteDialog, setDeleteDialog] = useState(false);
-
+const [subcategoriesDialog, setSubcategoriesDialog] =
+  useState(false);
   const filteredCategories = useMemo(() => {
     if (!search.trim()) return data;
 
@@ -69,16 +71,20 @@ export default function CategoriesPage() {
       </div>
 
       <CategoryTable
-        data={filteredCategories}
-        onEdit={(category) => {
-          setSelectedCategory(category);
-          setOpenDialog(true);
-        }}
-        onDelete={(category) => {
-          setSelectedCategory(category);
-          setDeleteDialog(true);
-        }}
-      />
+  data={filteredCategories}
+  onEdit={(category) => {
+    setSelectedCategory(category);
+    setOpenDialog(true);
+  }}
+  onDelete={(category) => {
+    setSelectedCategory(category);
+    setDeleteDialog(true);
+  }}
+  onManageSubcategories={(category) => {
+    setSelectedCategory(category);
+    setSubcategoriesDialog(true);
+  }}
+/>
 
       {/* Category Dialog */}
 <CategoryDialog
@@ -91,6 +97,11 @@ export default function CategoriesPage() {
 <DeleteCategoryDialog
   open={deleteDialog}
   onOpenChange={setDeleteDialog}
+  category={selectedCategory}
+/>
+<ManageSubcategoriesDialog
+  open={subcategoriesDialog}
+  onOpenChange={setSubcategoriesDialog}
   category={selectedCategory}
 />
     </div>

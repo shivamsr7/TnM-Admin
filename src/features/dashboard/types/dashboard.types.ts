@@ -105,3 +105,17 @@ export interface TopProduct {
   revenue: number;
   stock: number;
 }
+export interface Activity {
+  id: string;
+  type:
+    | "order"
+    | "customer"
+    | "product"
+    | "coupon"
+    | "banner";
+
+  title: string;
+  description: string;
+  createdAt: string;
+  route: string;
+}
