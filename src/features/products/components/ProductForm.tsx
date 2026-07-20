@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-
+import { useSubcategories } from "@/features/categories/hooks/useSubcategories";
 import BasicInfoSection from "./sections/BasicInfoSection";
 import PricingSection from "./sections/PricingSection";
 import InventorySection from "./sections/InventorySection";
@@ -40,6 +40,8 @@ export default function ProductForm({
   const [images, setImages] = useState<ProductImage[]>([]);
   const [saving, setSaving] = useState(false);
 
+
+
   const {
     data: categories = [],
     isLoading: loadingCategories,
@@ -69,7 +71,7 @@ export default function ProductForm({
       slug: "",
 
       category_id: "",
-
+subcategory_id: "",
       brand_id: null,
 
       short_description: "",
@@ -119,19 +121,28 @@ export default function ProductForm({
       meta_keywords: "",
     },
   });
-
+const selectedCategory = form.watch("category_id");
+useEffect(() => {
+  form.setValue("subcategory_id", "");
+}, [selectedCategory]);
+const {
+  data: subcategories = [],
+  isLoading: loadingSubcategories,
+} = useSubcategories(selectedCategory || undefined);
   const isLoading = useMemo(() => {
     return (
-      loadingCategories ||
-      loadingBrands ||
-      loadingCollections ||
-      loadingTags
-    );
+  loadingCategories ||
+  loadingBrands ||
+  loadingCollections ||
+  loadingTags ||
+  loadingSubcategories
+);
   }, [
     loadingCategories,
     loadingBrands,
     loadingCollections,
     loadingTags,
+    loadingSubcategories
   ]);
 useEffect(() => {
   if (mode !== "edit" || !productId) return;
@@ -183,6 +194,10 @@ async function onSubmit(values: ProductSchema) {
       tag_ids = [],
       ...productData
     } = values;
+    const payload = {
+  ...productData,
+  subcategory_id: productData.subcategory_id || null,
+};
 if (!productData.sku?.trim()) {
   delete productData.sku;
 }
@@ -190,16 +205,13 @@ if (!productData.sku?.trim()) {
     let product;
 
 if (mode === "create") {
-  product = await productService.create(productData);
+  product = await productService.create(payload);
 } else {
   if (!productId) {
     throw new Error("Product ID is missing.");
   }
 
-  product = await productService.update(
-    productId,
-    productData
-  );
+  product = await productService.update(productId, payload);
 }
 console.log("Created product:", product);
 console.log("Images:", images);
@@ -346,12 +358,13 @@ navigate("/products");
       {/* Organization + Status */}
       <div className="grid gap-6 xl:grid-cols-2">
         <OrganizationSection
-          form={form}
-          categories={categories}
-          brands={brands}
-          collections={collections}
-          tags={tags}
-        />
+  form={form}
+  categories={categories}
+  subcategories={subcategories}
+  brands={brands}
+  collections={collections}
+  tags={tags}
+/>
 
         <StatusSection
           form={form}

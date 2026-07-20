@@ -7,6 +7,8 @@ export const productSchema = z.object({
 
   category_id: z.string().min(1, "Category is required"),
 
+  subcategory_id: z.string().optional(),
+
   brand_id: z.string().nullable().optional(),
 
   short_description: z.string().optional(),

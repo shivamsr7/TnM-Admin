@@ -16,6 +16,8 @@ interface Props {
   form: UseFormReturn<ProductSchema>;
 
   categories: Option[];
+  subcategories: Option[];
+
   brands: Option[];
   collections: Option[];
   tags: Option[];
@@ -24,6 +26,7 @@ interface Props {
 export default function OrganizationSection({
   form,
   categories,
+  subcategories,
   brands,
   collections,
   tags,
@@ -33,10 +36,14 @@ export default function OrganizationSection({
   return (
     <SectionCard
       title="Organization"
-      description="Assign categories, brands, collections, tags and product visibility."
+      description="Assign categories, subcategories, brands, collections, tags and product visibility."
     >
       <div className="space-y-6">
+
+        {/* Category / Subcategory */}
+
         <div className="grid gap-5 md:grid-cols-2">
+
           <SearchableSelect
             label="Category"
             value={watch("category_id")}
@@ -44,12 +51,37 @@ export default function OrganizationSection({
               value: category.id,
               label: category.name,
             }))}
-            onChange={(value) =>
+            onChange={(value) => {
               setValue("category_id", value, {
+                shouldDirty: true,
+              });
+
+              setValue("subcategory_id", "", {
+                shouldDirty: true,
+              });
+            }}
+          />
+
+          <SearchableSelect
+            label="Subcategory"
+            value={watch("subcategory_id") ?? ""}
+            disabled={!watch("category_id")}
+            options={subcategories.map((subcategory) => ({
+              value: subcategory.id,
+              label: subcategory.name,
+            }))}
+            onChange={(value) =>
+              setValue("subcategory_id", value, {
                 shouldDirty: true,
               })
             }
           />
+
+        </div>
+
+        {/* Brand */}
+
+        <div className="grid gap-5 md:grid-cols-2">
 
           <SearchableSelect
             label="Brand"
@@ -64,9 +96,15 @@ export default function OrganizationSection({
               })
             }
           />
+
+          <div />
+
         </div>
 
+        {/* Collections / Tags */}
+
         <div className="grid gap-5 md:grid-cols-2">
+
           <MultiSelect
             label="Collections"
             value={watch("collection_ids") ?? []}
@@ -94,9 +132,13 @@ export default function OrganizationSection({
               })
             }
           />
+
         </div>
 
+        {/* Product Flags */}
+
         <div className="space-y-4">
+
           <ToggleCard
             title="Featured Product"
             description="Display this product in featured sections across the website."
@@ -129,7 +171,9 @@ export default function OrganizationSection({
               })
             }
           />
+
         </div>
+
       </div>
     </SectionCard>
   );

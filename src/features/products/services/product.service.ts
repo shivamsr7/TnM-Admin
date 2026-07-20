@@ -12,15 +12,25 @@ export const productService = {
     const { data, error } = await supabase
   .from(TABLE)
   .select(`
-    *,
-    categories(name),
-    brands(name),
-    product_images(
-      image_url,
-      is_primary,
-      sort_order
-    )
-  `)
+  *,
+  categories(
+    id,
+    name
+  ),
+  subcategories(
+    id,
+    name
+  ),
+  brands(
+    id,
+    name
+  ),
+  product_images(
+    image_url,
+    is_primary,
+    sort_order
+  )
+`)
   .order("created_at", {
     ascending: false,
   });
@@ -34,14 +44,26 @@ export const productService = {
   const { data, error } = await supabase
     .from(TABLE)
     .select(`
-      *,
-      product_collections(
-        collection_id
-      ),
-      product_tags(
-        tag_id
-      )
-    `)
+  *,
+  categories(
+    id,
+    name
+  ),
+  subcategories(
+    id,
+    name
+  ),
+  brands(
+    id,
+    name
+  ),
+  product_collections(
+    collection_id
+  ),
+  product_tags(
+    tag_id
+  )
+`)
     .eq("id", id)
     .single();
 

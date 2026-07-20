@@ -19,6 +19,7 @@ export interface Product {
   care_instructions: string | null;
 
   category_id: string;
+  subcategory_id: string | null;
   brand_id: string | null;
 
   cost_price: number | null;
@@ -70,6 +71,7 @@ export interface ProductFormData {
   care_instructions?: string;
 
   category_id: string;
+subcategory_id: string | null;
   brand_id?: string | null;
 
   cost_price?: number | null;
