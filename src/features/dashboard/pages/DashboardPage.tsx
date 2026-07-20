@@ -1,54 +1,98 @@
-import StatsCard from "@/features/dashboard/components/StatsCard";
-import {
-  Package,
-  ShoppingCart,
-  Users,
-  IndianRupee,
-} from "lucide-react";
-import PageTitle from "@/components/shared/PageTitle";
-import AppLogo from "@/assets/logo.png";
-export default function Dashboard() {
-  return (
-    <div>
-<PageTitle
-  title={
-    <img
-      src={AppLogo}
-      alt="TnM Jewels"
-      className="h-14 w-auto object-contain"
-    />
+import DashboardHeader from "../components/DashboardHeader";
+import DashboardSkeleton from "../components/DashboardSkeleton";
+import StatsGrid from "../components/StatsGrid";
+
+import { useDashboard } from "../hooks/useDashboard";
+
+export default function DashboardPage() {
+  const {
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useDashboard();
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
   }
-  subtitle="Welcome back to TnM Admin Page."
-/>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <StatsCard
-          title="Products"
-          value={0}
-          icon={Package}
-          iconBgColor="bg-blue-100"
-        />
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-8">
+        <h2 className="text-xl font-semibold text-red-700">
+          Failed to load dashboard
+        </h2>
 
-        <StatsCard
-          title="Orders"
-          value={0}
-          icon={ShoppingCart}
-          iconBgColor="bg-green-100"
-        />
+        <p className="mt-2 text-red-600">
+          Something went wrong while loading dashboard analytics.
+        </p>
 
-        <StatsCard
-          title="Customers"
-          value={0}
-          icon={Users}
-          iconBgColor="bg-yellow-100"
-        />
+        <button
+          onClick={() => refetch()}
+          className="mt-6 rounded-xl bg-red-600 px-5 py-2 text-white transition hover:bg-red-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
-        <StatsCard
-          title="Revenue"
-          value="₹0"
-          icon={IndianRupee}
-          iconBgColor="bg-purple-100"
-        />
+  return (
+    <div className="space-y-8">
+      <DashboardHeader
+        onRefresh={refetch}
+        isRefreshing={isFetching}
+      />
+
+      <StatsGrid />
+
+      {/* Sales Chart */}
+      <div className="rounded-2xl border bg-white p-8 shadow-sm">
+        <h2 className="text-xl font-semibold">
+          Sales Overview
+        </h2>
+
+        <p className="mt-2 text-gray-500">
+          Coming in the next milestone.
+        </p>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        {/* Recent Orders */}
+
+        <div className="rounded-2xl border bg-white p-8 shadow-sm">
+          <h2 className="text-xl font-semibold">
+            Recent Orders
+          </h2>
+
+          <p className="mt-2 text-gray-500">
+            Coming in the next milestone.
+          </p>
+        </div>
+
+        {/* Top Products */}
+
+        <div className="rounded-2xl border bg-white p-8 shadow-sm">
+          <h2 className="text-xl font-semibold">
+            Top Selling Products
+          </h2>
+
+          <p className="mt-2 text-gray-500">
+            Coming in the next milestone.
+          </p>
+        </div>
+      </div>
+
+      {/* Low Stock */}
+
+      <div className="rounded-2xl border bg-white p-8 shadow-sm">
+        <h2 className="text-xl font-semibold">
+          Low Stock Products
+        </h2>
+
+        <p className="mt-2 text-gray-500">
+          Coming in the next milestone.
+        </p>
       </div>
     </div>
   );
