@@ -336,7 +336,7 @@ export default function Sidebar({
 
   onTouchMove={handleTouchMove}
 
-  className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
+  className={`fixed inset-0 z-50 flex h-dvh w-64 flex-col border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
     open
       ? "translate-x-0"
       : "-translate-x-full"
@@ -369,20 +369,25 @@ export default function Sidebar({
 
 
 
-
-  {/* Scrollable Menu */}
+  {/* Scroll Area */}
 
   <div
 
     className="
       mobile-sidebar-scroll
+      min-h-0
       flex-1
       overflow-y-auto
       overscroll-contain
     "
 
     style={{
+
       WebkitOverflowScrolling: "touch",
+
+      paddingBottom:
+        "env(safe-area-inset-bottom)",
+
     }}
 
   >
@@ -390,7 +395,6 @@ export default function Sidebar({
     {navLinks}
 
   </div>
-
 
 
 </aside>
