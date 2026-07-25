@@ -3,13 +3,17 @@ import type { ReactNode } from "react";
 interface SettingCardProps {
   title: string;
   description?: string;
+    icon?: React.ReactNode;
   children: ReactNode;
+
 }
 
 export default function SettingCard({
   title,
   description,
+
   children,
+  
 }: SettingCardProps) {
   return (
     <section
