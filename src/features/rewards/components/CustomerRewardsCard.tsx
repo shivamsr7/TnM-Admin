@@ -8,7 +8,7 @@ import {
 import StatsCard from "@/components/dashboard/StatsCard";
 
 import {
-  useCustomerRewards,
+  useCustomerReward,
 } from "../hooks";
 
 
@@ -25,20 +25,16 @@ export default function CustomerRewardsCard({
   const {
     data,
     isLoading,
-  } = useCustomerRewards(customerId);
+  } = useCustomerReward(customerId);
 
 
 
   if (isLoading) {
 
     return (
-
       <div className="rounded-xl border bg-white p-6 text-center text-gray-500">
-
         Loading rewards...
-
       </div>
-
     );
 
   }
@@ -48,13 +44,9 @@ export default function CustomerRewardsCard({
   if (!data) {
 
     return (
-
       <div className="rounded-xl border bg-white p-6 text-center text-gray-500">
-
         This customer doesn't have a rewards wallet yet.
-
       </div>
-
     );
 
   }
@@ -71,7 +63,7 @@ export default function CustomerRewardsCard({
         title="Available Points"
 
         value={
-          data.available_points ?? 0
+          data.current_points ?? 0
         }
 
         icon={Wallet}
@@ -87,7 +79,7 @@ export default function CustomerRewardsCard({
         title="Lifetime Points"
 
         value={
-          data.lifetime_points ?? 0
+          data.lifetime_earned ?? 0
         }
 
         icon={Gift}
@@ -103,7 +95,7 @@ export default function CustomerRewardsCard({
         title="Redeemed"
 
         value={
-          data.redeemed_points ?? 0
+          data.lifetime_redeemed ?? 0
         }
 
         icon={Trophy}
@@ -119,7 +111,7 @@ export default function CustomerRewardsCard({
         title="Tier"
 
         value={
-          data.tier ?? "Silver"
+          data.tier?.tier_name ?? "Silver"
         }
 
         icon={Crown}
