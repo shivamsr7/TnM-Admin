@@ -326,57 +326,63 @@ export default function Sidebar({
 
 
       {/* Mobile */}
+{/* Mobile */}
 
-      <aside
+<aside
 
-        ref={sidebarRef}
+  ref={sidebarRef}
 
-        onTouchStart={
-          handleTouchStart
-        }
+  onTouchStart={handleTouchStart}
 
-        onTouchMove={
-          handleTouchMove
-        }
+  onTouchMove={handleTouchMove}
 
+  className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
+    open
+      ? "translate-x-0"
+      : "-translate-x-full"
+  }`}
 
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
-          open
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-
-      >
+>
 
 
-        <div className="flex items-center justify-between border-b p-6">
+  {/* Header */}
+
+  <div className="flex shrink-0 items-center justify-between border-b p-6">
+
+    <AppLogo />
 
 
-          <AppLogo />
+    <button
+
+      onClick={onClose}
+
+      className="rounded-md p-2 text-gray-900 hover:bg-gray-100"
+
+    >
+
+      <X size={20} />
+
+    </button>
 
 
-
-          <button
-
-            onClick={onClose}
-
-            className="rounded-md p-2 hover:bg-gray-100"
-
-          >
-
-            <X size={20}/>
-
-          </button>
-
-
-        </div>
+  </div>
 
 
 
-        {navLinks}
+  {/* Scrollable Menu */}
+
+  <div
+
+    className="flex-1 overflow-y-auto overscroll-contain"
+
+  >
+
+    {navLinks}
+
+  </div>
 
 
-      </aside>
+</aside>
 
 
 
