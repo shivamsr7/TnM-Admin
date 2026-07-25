@@ -260,3 +260,28 @@ code {
     @apply bg-background text-foreground;}
   html {
     @apply font-sans;}}
+
+    /* Mobile Sidebar Scrollbar */
+.mobile-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.mobile-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+.mobile-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+
+/* Firefox */
+.mobile-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}

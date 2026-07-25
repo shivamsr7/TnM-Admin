@@ -369,17 +369,28 @@ export default function Sidebar({
 
 
 
+
   {/* Scrollable Menu */}
 
   <div
 
-    className="flex-1 overflow-y-auto overscroll-contain"
+    className="
+      mobile-sidebar-scroll
+      flex-1
+      overflow-y-auto
+      overscroll-contain
+    "
+
+    style={{
+      WebkitOverflowScrolling: "touch",
+    }}
 
   >
 
     {navLinks}
 
   </div>
+
 
 
 </aside>
