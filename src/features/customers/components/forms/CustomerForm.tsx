@@ -50,65 +50,173 @@ export default function CustomerForm({
     },
   });
 
-  useEffect(() => {
-    if (mode !== "edit" || !customerId) return;
+useEffect(() => {
 
-    async function loadCustomer() {
-      try {
-        const customer =
-          await customerService.getById(customerId);
+  if (
+    mode !== "edit" ||
+    !customerId
+  ) {
+    return;
+  }
 
-        form.reset({
-          first_name: customer.first_name,
-          last_name: customer.last_name ?? "",
-          email: customer.email ?? "",
-          phone: customer.phone,
-          status: customer.status,
-          notes: customer.notes ?? "",
-        });
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load customer.");
-      }
-    }
 
-    loadCustomer();
-  }, [mode, customerId, form]);
+  const id = customerId;
 
-  async function onSubmit(values: CustomerSchema) {
+
+  async function loadCustomer() {
+
     try {
-      setSaving(true);
 
-      if (mode === "create") {
-        await customerService.create(values);
+      const customer =
+        await customerService.getById(id);
 
-        toast.success("Customer created successfully.");
-      } else {
-        if (!customerId) {
-          throw new Error("Customer ID is missing.");
-        }
 
-        await customerService.update(
-          customerId,
-          values
-        );
+      form.reset({
 
-        toast.success("Customer updated successfully.");
-      }
+        first_name:
+          customer.first_name,
 
-      navigate("/customers");
+        last_name:
+          customer.last_name ?? "",
+
+        email:
+          customer.email ?? "",
+
+        phone:
+          customer.phone ?? "",
+
+        status:
+          customer.status,
+
+        notes:
+          customer.notes ?? "",
+
+      });
+
+
     } catch (error) {
+
       console.error(error);
 
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to save customer."
+        "Failed to load customer."
       );
-    } finally {
-      setSaving(false);
+
     }
+
   }
+
+
+  loadCustomer();
+
+
+}, [
+  mode,
+  customerId,
+  form,
+]);
+
+ async function onSubmit(
+  values: CustomerSchema
+) {
+
+  try {
+
+    setSaving(true);
+
+
+
+    const customerData = {
+
+      ...values,
+
+      last_name:
+        values.last_name ?? "",
+
+      email:
+        values.email ?? "",
+
+      notes:
+        values.notes ?? "",
+
+    };
+
+
+
+    if (mode === "create") {
+
+
+      await customerService.create(
+        customerData
+      );
+
+
+      toast.success(
+        "Customer created successfully."
+      );
+
+
+    } else {
+
+
+      if (!customerId) {
+
+        throw new Error(
+          "Customer ID is missing."
+        );
+
+      }
+
+
+
+      await customerService.update(
+
+        customerId,
+
+        customerData
+
+      );
+
+
+      toast.success(
+        "Customer updated successfully."
+      );
+
+
+    }
+
+
+
+    navigate("/customers");
+
+
+  } catch (error) {
+
+
+    console.error(error);
+
+
+
+    toast.error(
+
+      error instanceof Error
+
+        ? error.message
+
+        : "Failed to save customer."
+
+    );
+
+
+  } finally {
+
+
+    setSaving(false);
+
+
+  }
+
+}
 
   return (
     <Form {...form}>
