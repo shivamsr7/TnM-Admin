@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { useSubcategories } from "@/features/categories/hooks/useSubcategories";
 import BasicInfoSection from "./sections/BasicInfoSection";
@@ -25,7 +24,11 @@ import { useCategories } from "@/features/categories/hooks/useCategories";
 import { useBrands } from "@/features/brands/hooks/useBrands";
 import { useCollections } from "@/features/collections/hooks/useCollections";
 import { useTags } from "@/features/tags/hooks/useTags";
+import type {
+  MediaUploaderHandle,
+} from "@/shared/components/media/MediaUploader";
 
+import { useRef } from "react";
 interface ProductFormProps {
   mode?: "create" | "edit";
   productId?: string;
@@ -39,7 +42,8 @@ export default function ProductForm({
 
   const [images, setImages] = useState<ProductImage[]>([]);
   const [saving, setSaving] = useState(false);
-
+const mediaUploaderRef =
+  useRef<MediaUploaderHandle>(null);
 
 
   const {
@@ -198,8 +202,9 @@ async function onSubmit(values: ProductSchema) {
   ...productData,
   subcategory_id: productData.subcategory_id || null,
 };
-if (!productData.sku?.trim()) {
-  delete productData.sku;
+
+if (!payload.sku?.trim()) {
+  delete payload.sku;
 }
 
     let product;
@@ -267,7 +272,8 @@ toast.success(
     ? "Product created successfully."
     : "Product updated successfully."
 );
-
+// Tell MediaUploader these files are now permanent
+mediaUploaderRef.current?.markAsSaved();
 // Reset form
 form.reset();
 
@@ -373,9 +379,10 @@ navigate("/products");
 
       {/* Images */}
       <ImagesSection
-        images={images}
-        setImages={setImages}
-      />
+    images={images}
+    setImages={setImages}
+    uploaderRef={mediaUploaderRef}
+/>
 
       {/* SEO */}
       <SeoSection

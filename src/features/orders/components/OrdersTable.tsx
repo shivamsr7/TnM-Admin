@@ -1,6 +1,6 @@
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type Column,
@@ -43,9 +43,18 @@ export default function OrdersTable({
       title: "Customer",
       render: (_, order) => (
         <div>
-          <p className="font-medium">
-            {order.customer_name}
-          </p>
+          {order.customer_id ? (
+  <Link
+    to={`/customers/${order.customer_id}`}
+    className="font-medium hover:underline hover:text-primary"
+  >
+    {order.customer_name}
+  </Link>
+) : (
+  <p className="font-medium">
+    {order.customer_name}
+  </p>
+)}
 
           <p className="text-xs text-gray-500">
             {order.customer_phone}

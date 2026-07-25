@@ -1,4 +1,8 @@
-export type DiscountType = "percentage" | "fixed";
+export type DiscountType =
+  | "percentage"
+  | "fixed"
+  | "free_shipping"
+  | "free_gift";
 
 export interface Coupon {
   id: string;
@@ -12,6 +16,12 @@ export interface Coupon {
   discount_type: DiscountType;
 
   discount_value: number;
+
+  spin_enabled: boolean;
+
+  spin_probability: number;
+
+  reward_display_name: string | null;
 
   minimum_order_amount: number;
 

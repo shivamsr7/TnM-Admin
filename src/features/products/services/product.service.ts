@@ -72,18 +72,25 @@ export const productService = {
   return data;
 },
 
-  async create(data: ProductFormData) {
-    const { data: product, error } =
-      await supabase
-        .from(TABLE)
-        .insert(data)
-        .select()
-        .single();
+ async create(data: ProductFormData) {
+  const payload = {
+    ...data,
+    sku: data.sku?.trim()
+      ? data.sku
+      : undefined,
+  };
 
-    if (error) throw error;
+  const { data: product, error } =
+    await supabase
+      .from(TABLE)
+      .insert(payload)
+      .select()
+      .single();
 
-    return product as Product;
-  },
+  if (error) throw error;
+
+  return product as Product;
+},
 
   async createProductImages(
     productId: string,

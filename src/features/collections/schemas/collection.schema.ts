@@ -14,7 +14,7 @@ export const collectionSchema = z.object({
   description: z.string(),
 
   banner_image: z.string(),
-
+thumbnail_image: z.string(),
   is_active: z.boolean(),
 
   sort_order: z

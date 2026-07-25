@@ -12,14 +12,50 @@ export interface Column<T extends object> {
 interface DataTableProps<T extends object> {
   columns: Column<T>[];
   data: T[];
+
+  title?: string;
+  description?: string;
+  actions?: React.ReactNode;
+
+  getRowKey?: (row: T) => React.Key;
+
+  emptyIcon?: React.ReactNode;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 export default function DataTable<T extends object>({
   columns,
   data,
+  title,
+  description,
+  actions,
+  getRowKey,
+  emptyIcon,
+  emptyTitle,
+  emptyDescription,
 }: DataTableProps<T>) {
   return (
     <div className="rounded-xl border bg-white shadow-sm">
+  {(title || actions) && (
+    <div className="flex items-center justify-between border-b px-6 py-5">
+      <div>
+        {title && (
+          <h2 className="text-lg font-semibold text-slate-900">
+            {title}
+          </h2>
+        )}
+
+        {description && (
+          <p className="mt-1 text-sm text-slate-500">
+            {description}
+          </p>
+        )}
+      </div>
+
+      {actions}
+    </div>
+  )}
 
       <div className="overflow-x-auto rounded-xl">
 
@@ -45,25 +81,26 @@ export default function DataTable<T extends object>({
                   colSpan={columns.length}
                   className="py-14"
                 >
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="mb-3 text-5xl">
-                      📦
-                    </div>
+                  <div className="flex flex-col items-center justify-center py-6">
+  <div className="mb-4 text-5xl">
+    {emptyIcon ?? "📦"}
+  </div>
 
-                    <h3 className="text-lg font-semibold">
-                      Nothing here yet
-                    </h3>
+  <h3 className="text-lg font-semibold">
+    {emptyTitle ?? "Nothing here yet"}
+  </h3>
 
-                    <p className="mt-1 text-sm text-gray-500">
-                      Create your first item to get started.
-                    </p>
-                  </div>
+  <p className="mt-1 text-sm text-gray-500">
+    {emptyDescription ??
+      "Create your first item to get started."}
+  </p>
+</div>
                 </td>
               </tr>
             ) : (
               data.map((row, index) => (
                 <tr
-                  key={index}
+                  key={getRowKey ? getRowKey(row) : index}
                   className={`border-t transition-colors hover:bg-blue-50 ${
                     index % 2 === 0
                       ? "bg-white"

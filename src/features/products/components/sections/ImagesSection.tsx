@@ -1,6 +1,7 @@
 import SectionCard from "@/shared/components/admin/SectionCard";
 import MediaUploader, {
   type ProductImage,
+  type MediaUploaderHandle,
 } from "@/shared/components/media/MediaUploader";
 
 interface Props {
@@ -8,11 +9,14 @@ interface Props {
   setImages: React.Dispatch<
     React.SetStateAction<ProductImage[]>
   >;
+
+  uploaderRef: React.RefObject<MediaUploaderHandle | null>;
 }
 
 export default function ImagesSection({
   images,
   setImages,
+  uploaderRef,
 }: Props) {
   return (
     <SectionCard
@@ -21,10 +25,12 @@ export default function ImagesSection({
     >
       <div className="space-y-6">
         <MediaUploader
+          ref={uploaderRef}
           folder="products"
           value={images}
           onChange={setImages}
           maxImages={10}
+          cleanupOnUnmount
         />
 
         <div className="rounded-lg border bg-muted/30 p-4">

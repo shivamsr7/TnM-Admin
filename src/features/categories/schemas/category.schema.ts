@@ -13,9 +13,14 @@ export const categorySchema = z.object({
 
   parent_id: z.string().nullable().optional(),
 
-sort_order: z.number(),
+  image_url: z
+    .string()
+    .nullable()
+    .optional(),
 
-is_active: z.boolean(),
+  sort_order: z.number(),
+
+  is_active: z.boolean(),
 });
 
 export type CategorySchema = z.infer<

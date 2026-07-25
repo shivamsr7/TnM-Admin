@@ -29,6 +29,27 @@ import EditTagPage from "@/features/tags/pages/EditTagPage";
 import OrdersPage from "@/features/orders/pages/OrdersPage";
 import OrderDetailsPage from "@/features/orders/pages/OrderDetailsPage";
 import CouponsPage from "@/features/coupons/pages/CouponsPage";
+import BannersPage from "@/features/banners/pages/BannersPage";
+import SettingsPage from "@/features/settings/pages/SettingsPage";
+import HomepagePage from "@/features/homepage/pages/HomepagePage";
+import HomepageSectionsPage from "@/features/homepage/sections/pages/HomepageSectionsPage";
+import FeaturedCollectionsPage from "@/features/homepage/featured-collections/pages/FeaturedCollectionsPage";
+import AnnouncementsPage from "@/features/announcements/pages/AnnouncementsPage";
+import CustomersPage from "@/features/customers/pages/CustomersPage";
+import CustomerDetailsPage from "@/features/customers/pages/CustomerDetailsPage";
+import CreateCustomerPage from "@/features/customers/pages/CreateCustomerPage";
+import EditCustomerPage from "@/features/customers/pages/EditCustomerPage";
+import RewardsDashboardPage from "@/features/rewards/pages/RewardsDashboardPage"
+import RewardRulesPage from "@/features/rewards/pages/RewardRulesPage";
+import RewardTiersPage from "@/features/rewards/pages/RewardTiersPage";
+import CustomerRewardsPage from "@/features/rewards/pages/CustomerRewardsPage";
+import CustomerRewardDetailsPage from "@/features/rewards/pages/CustomerRewardDetailsPage";
+import MembersPage from "@/features/membership/pages/MembersPage";
+import MembershipDetailsPage from "@/features/membership/pages/MembershipDetailsPage";
+import NotifyRequestsPage from "@/features/notify/pages/NotifyRequestsPage";
+import ReviewsPage from "@/features/reviews/pages/ReviewsPage";
+import FAQsPage from "@/features/faqs/pages/FAQsPage";
+import PoliciesPage from "@/features/cms/pages/PoliciesPage";
 export const router = createBrowserRouter([
   // ---------------- Public Routes ----------------
 
@@ -151,6 +172,88 @@ export const router = createBrowserRouter([
   path: "coupons",
   element: <CouponsPage />,
 },
+{
+  path: "banners",
+  element: <BannersPage />,
+},
+{
+  path: "settings",
+  element: <SettingsPage />,
+},
+{
+  path: "homepage",
+  element: <HomepagePage />,
+},
+{
+  path: "homepage/sections",
+  element: <HomepageSectionsPage />,
+},
+{
+  path: "homepage/featured-collections",
+  element: <FeaturedCollectionsPage />,
+},
+{
+  path: "announcements",
+  element: <AnnouncementsPage />,
+},
+{
+  path: "Customers",
+  element: <CustomersPage />,
+},
+{
+  path: "customers/new",
+    element: <CreateCustomerPage />
+},
+{
+  path: "customers/:id",
+    element: <CustomerDetailsPage />,
+},
+{
+  path: "customers/:id/edit",
+    element: <EditCustomerPage />,
+},
+{
+  path: "rewards",
+  element: <RewardsDashboardPage />,
+},
+{
+  path: "rewards/rules",
+  element: <RewardRulesPage />,
+},
+{
+  path: "rewards/tiers",
+  element: <RewardTiersPage />,
+},
+{
+  path: "rewards/customers",
+  element: <CustomerRewardsPage />,
+},
+{
+  path: "rewards/customers/:customerId",
+  element: <CustomerRewardDetailsPage />,
+},
+{path: "/membership",
+  element: <MembersPage />,
+},
+{path:"/membership/:customerId",
+  element:<MembershipDetailsPage />},
+  {
+  path: "/notify",
+  element: <NotifyRequestsPage />,
+},
+{
+  path:"/reviews",
+  element:<ReviewsPage />
+},
+{
+  path: "/faqs",
+  element: <FAQsPage />,
+},
+{
+  path: "/policies",
+  element: <PoliciesPage />,
+},
+
         ],
       },
     ],

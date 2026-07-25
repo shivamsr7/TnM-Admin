@@ -31,6 +31,7 @@ export default function CategoryDialog({
   categories,
 }: CategoryDialogProps) {
   const createMutation = useCreateCategory();
+
   const updateMutation = useUpdateCategory();
 
   const isEditing = !!category;
@@ -63,7 +64,8 @@ export default function CategoryDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-lg">
+
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -72,12 +74,15 @@ export default function CategoryDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <CategoryForm
-          initialData={category}
-          categories={categories}
-          loading={loading}
-          onSubmit={handleSubmit}
-        />
+        <div className="max-h-[75vh] overflow-y-auto pr-2">
+          <CategoryForm
+            initialData={category}
+            categories={categories}
+            loading={loading}
+            onSubmit={handleSubmit}
+          />
+        </div>
+
       </DialogContent>
     </Dialog>
   );

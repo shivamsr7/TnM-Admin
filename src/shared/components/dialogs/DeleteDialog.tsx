@@ -21,9 +21,14 @@ interface DeleteDialogProps {
   title?: string;
   description?: string;
 
-  onConfirm: () => Promise<void>;
+  onConfirm: () => Promise<void> | void;
 
   isLoading?: boolean;
+
+  confirmText?: string;
+  cancelText?: string;
+
+  confirmVariant?: "default" | "destructive";
 }
 
 export default function DeleteDialog({
@@ -34,17 +39,22 @@ export default function DeleteDialog({
   description = "This action cannot be undone.",
   onConfirm,
   isLoading = false,
+
+  confirmText = "Delete",
+  cancelText = "Cancel",
+
+  confirmVariant = "destructive",
 }: DeleteDialogProps) {
   const [loading, setLoading] = useState(false);
 
-  const deleting = loading || isLoading;
+  const processing = loading || isLoading;
 
   const handleConfirm = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
 
-    if (deleting) return;
+    if (processing) return;
 
     try {
       setLoading(true);
@@ -79,16 +89,20 @@ export default function DeleteDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleting}>
-            Cancel
+          <AlertDialogCancel disabled={processing}>
+            {cancelText}
           </AlertDialogCancel>
 
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={deleting}
-            className="bg-red-600 hover:bg-red-700"
+            disabled={processing}
+            className={
+              confirmVariant === "destructive"
+                ? "bg-red-600 hover:bg-red-700"
+                : undefined
+            }
           >
-            {deleting ? "Deleting..." : "Delete"}
+            {processing ? `${confirmText}...` : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

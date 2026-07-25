@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
+import { rewardsService } from "@/features/rewards/services/rewards.service";
 import type {
   Order,
   OrderStatus,
@@ -114,7 +114,17 @@ await this.createActivity({
     status,
   },
 });
-  if (historyError) throw historyError;
+
+if (historyError) throw historyError;
+
+// Load latest order
+const order = await this.getById(id);
+
+// Trigger automations
+await this.handleOrderStatusChange(
+  order,
+  status
+);
 }
 async getOrderHistory(orderId: string) {
   const { data, error } = await supabase
@@ -180,6 +190,36 @@ async getOrderActivity(orderId: string) {
 
     if (error) throw error;
   }
+
+  private async handleOrderStatusChange(
+  order: Order,
+  status: OrderStatus
+) {
+  switch (status) {
+    case "delivered":
+      await rewardsService.processOrderReward(
+        order.id
+      );
+      break;
+
+    case "returned":
+      await rewardsService.reverseOrderReward(
+        order.id,
+        "returned"
+      );
+      break;
+
+    case "refunded":
+      await rewardsService.reverseOrderReward(
+        order.id,
+        "refunded"
+      );
+      break;
+
+    default:
+      break;
+  }
+}
 }
 
 export const orderService =

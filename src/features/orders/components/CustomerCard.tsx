@@ -3,7 +3,7 @@ import {
   Phone,
   User,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 import type { Order } from "../types/order.types";
 
 interface CustomerCardProps {
@@ -27,9 +27,18 @@ export default function CustomerCard({
           </div>
 
           <div>
-            <p className="text-xs text-gray-500">
-              Customer Name
-            </p>
+            {order.customer_id ? (
+  <Link
+    to={`/customers/${order.customer_id}`}
+    className="font-medium hover:underline hover:text-primary"
+  >
+    {order.customer_name}
+  </Link>
+) : (
+  <p className="font-medium">
+    {order.customer_name}
+  </p>
+)}
 
             <p className="font-medium">
               {order.customer_name}

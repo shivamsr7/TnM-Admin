@@ -10,6 +10,14 @@ import {
   TicketPercent,
   Image,
   Settings,
+  LayoutTemplate,
+  Megaphone,
+  Gift,
+  Crown,
+  Bell,
+  MessageSquare,
+  HelpCircle,
+  FileText
 } from "lucide-react";
 
 export const menuItems = [
@@ -78,4 +86,85 @@ export const menuItems = [
     path: "/settings",
     icon: Settings,
   },
+ {
+  title: "Homepage",
+  path: "/homepage",
+  icon: LayoutTemplate,
+},
+
+{
+  title: "Homepage Sections",
+  path: "/homepage/sections",
+  icon: LayoutTemplate,
+},
+
+{
+  title: "Featured Collections",
+  path: "/homepage/featured-collections",
+  icon: Layers3,
+},
+{
+  title: "Announcements",
+  path: "/announcements",
+  icon: Megaphone,
+},
+{
+  title: "Membership",
+  path: "/membership",
+  icon: Crown,
+  
+},
+{
+  title: "Reviews",
+  path: "/reviews",
+  icon: MessageSquare,
+},
+{
+  title: "Rewards",
+  path: "/rewards",
+  icon: Gift,
+
+  children: [
+    {
+      title: "Dashboard",
+      path: "/rewards",
+    },
+    {
+      title: "Reward Rules",
+      path: "/rewards/rules",
+    },
+    {
+      title: "Reward Tiers",
+      path: "/rewards/tiers",
+    },
+    {
+  title: "Customer Rewards",
+  path: "/rewards/customers",
+},
+{
+  title: "Notify Requests",
+  path: "/notify",
+  icon: Bell,
+},
+  ],
+  
+},
+{
+  title: "CMS",
+  icon: FileText,
+
+  children: [
+    {
+      title: "FAQs",
+      path: "/faqs",
+      icon: HelpCircle,
+    },
+
+    {
+      title: "Policies",
+      path: "/policies",
+      icon: FileText,
+    },
+  ],
+}
 ];

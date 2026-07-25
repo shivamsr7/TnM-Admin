@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import MediaUploader from "@/shared/components/media/MediaUploader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -49,13 +49,14 @@ export default function CategoryForm({
   const form = useForm<CategorySchema>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-      parent_id: null,
-      sort_order: 0,
-      is_active: true,
-    },
+  name: "",
+  slug: "",
+  description: "",
+  parent_id: null,
+  image_url: null,
+  sort_order: 0,
+  is_active: true,
+},
   });
 
   const { register, watch, setValue, handleSubmit } = form;
@@ -72,13 +73,14 @@ export default function CategoryForm({
     if (!initialData) return;
 
     form.reset({
-      name: initialData.name,
-      slug: initialData.slug,
-      description: initialData.description ?? "",
-      parent_id: initialData.parent_id,
-      sort_order: initialData.sort_order,
-      is_active: initialData.is_active,
-    });
+  name: initialData.name,
+  slug: initialData.slug,
+  description: initialData.description ?? "",
+  parent_id: initialData.parent_id,
+  image_url: initialData.image_url ?? null,
+  sort_order: initialData.sort_order,
+  is_active: initialData.is_active,
+});
   }, [initialData, form]);
 
   return (
@@ -111,7 +113,37 @@ export default function CategoryForm({
           rows={4}
         />
       </div>
+<div>
+  <Label>Category Image</Label>
 
+  <MediaUploader
+    folder="categories"
+    maxImages={1}
+    enableSorting={false}
+    showCoverLabel={false}
+    value={
+      watch("image_url")
+        ? [
+            {
+              url: watch("image_url")!,
+              isCover: true,
+              sortOrder: 0,
+              persisted: true,
+            },
+          ]
+        : []
+    }
+    onChange={(images) => {
+      setValue(
+        "image_url",
+        images[0]?.url ?? null,
+        {
+          shouldValidate: true,
+        }
+      );
+    }}
+  />
+</div>
       <div>
         <Label>Parent Category</Label>
 

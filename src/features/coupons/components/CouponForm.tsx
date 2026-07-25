@@ -42,7 +42,11 @@ export default function CouponForm({
 
       discount_type: "percentage",
       discount_value: 0,
+spin_enabled: false,
 
+spin_probability: 0,
+
+reward_display_name: "",
       minimum_order_amount: 0,
       maximum_discount: null,
 
@@ -67,7 +71,12 @@ export default function CouponForm({
 
       discount_type: initialData.discount_type,
       discount_value: initialData.discount_value,
+spin_enabled: initialData.spin_enabled,
 
+spin_probability: initialData.spin_probability,
+
+reward_display_name:
+  initialData.reward_display_name ?? "",
       minimum_order_amount:
         initialData.minimum_order_amount,
 
@@ -87,7 +96,60 @@ export default function CouponForm({
       is_active: initialData.is_active,
     });
   }, [initialData, form]);
+const spinEnabled = form.watch("spin_enabled");
+const discountType = form.watch("discount_type");
+  useEffect(() => {
+  if (
+    discountType === "free_shipping" ||
+    discountType === "free_gift"
+  ) {
+    form.setValue("discount_value", 0);
+  }
+}, [discountType, form]);
+useEffect(() => {
+  if (!spinEnabled) return;
 
+  const current = form.getValues("reward_display_name");
+
+  if (current?.trim()) return;
+
+  const value = form.getValues("discount_value");
+
+  switch (discountType) {
+    case "percentage":
+      form.setValue(
+        "reward_display_name",
+        `${value}% OFF`
+      );
+      break;
+
+    case "fixed":
+      form.setValue(
+        "reward_display_name",
+        `₹${value} OFF`
+      );
+      break;
+
+    case "free_shipping":
+      form.setValue(
+        "reward_display_name",
+        "Free Shipping"
+      );
+      break;
+
+    case "free_gift":
+      form.setValue(
+        "reward_display_name",
+        "Free Gift"
+      );
+      break;
+  }
+}, [
+  spinEnabled,
+  discountType,
+  form.watch("discount_value"),
+  form,
+]);
   return (
     <form
       onSubmit={form.handleSubmit((values) =>
@@ -133,32 +195,104 @@ export default function CouponForm({
           <Label>Discount Type</Label>
 
           <select
-            className="w-full rounded-md border px-3 py-2"
-            {...form.register("discount_type")}
-          >
-            <option value="percentage">
-              Percentage
-            </option>
+  className="w-full rounded-md border px-3 py-2"
+  {...form.register("discount_type")}
+>
+  <option value="percentage">
+    Percentage
+  </option>
 
-            <option value="fixed">
-              Fixed Amount
-            </option>
-          </select>
+  <option value="fixed">
+    Fixed Amount
+  </option>
+
+  <option value="free_shipping">
+    Free Shipping
+  </option>
+
+  <option value="free_gift">
+    Free Gift
+  </option>
+</select>
         </div>
 
         <div>
           <Label>Discount Value</Label>
 
           <Input
-            type="number"
-            {...form.register("discount_value", {
-              valueAsNumber: true,
-            })}
-          />
+  type="number"
+  disabled={
+    discountType === "free_shipping" ||
+    discountType === "free_gift"
+  }
+  {...form.register("discount_value", {
+    valueAsNumber: true,
+  })}
+/>
         </div>
 
       </div>
+<div className="rounded-xl border bg-muted/30 p-5 space-y-5">
+  <div>
+    <h3 className="text-lg font-semibold">
+      🎡 Spin Wheel Settings
+    </h3>
 
+    <p className="text-sm text-muted-foreground">
+      Configure this coupon for the Spin Wheel.
+    </p>
+  </div>
+
+  <div className="flex items-center justify-between rounded-lg border bg-background p-4">
+    <div>
+      <Label>Enable for Spin Wheel</Label>
+
+      <p className="text-sm text-muted-foreground">
+        Allow this coupon to appear as a Spin Wheel reward.
+      </p>
+    </div>
+
+    <Switch
+      checked={spinEnabled}
+      onCheckedChange={(checked) =>
+        form.setValue("spin_enabled", checked)
+      }
+    />
+  </div>
+
+  {spinEnabled && (
+    <>
+      <div>
+        <Label>Reward Display Name</Label>
+
+        <Input
+          placeholder="20% OFF"
+          {...form.register("reward_display_name")}
+        />
+
+        <p className="mt-1 text-xs text-muted-foreground">
+          This text will be shown on the Spin Wheel.
+        </p>
+      </div>
+
+      <div>
+        <Label>Probability Weight</Label>
+
+        <Input
+          type="number"
+          min={1}
+          {...form.register("spin_probability", {
+            valueAsNumber: true,
+          })}
+        />
+
+        <p className="mt-1 text-xs text-muted-foreground">
+          Higher numbers increase the chance of winning this reward.
+        </p>
+      </div>
+    </>
+  )}
+</div>
       <div className="grid grid-cols-2 gap-4">
 
         <div>

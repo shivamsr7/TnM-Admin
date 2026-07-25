@@ -44,13 +44,14 @@ export default function CollectionForm({
   } = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
     defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-      banner_image: "",
-      is_active: true,
-      sort_order: 0,
-    },
+  name: "",
+  slug: "",
+  description: "",
+  banner_image: "",
+  thumbnail_image: "",
+  is_active: true,
+  sort_order: 0,
+},
   });
 
   const name = watch("name");
@@ -74,6 +75,10 @@ export default function CollectionForm({
     setValue("slug", collection.slug);
     setValue("description", collection.description ?? "");
     setValue("banner_image", collection.banner_image ?? "");
+    setValue(
+  "thumbnail_image",
+  collection.thumbnail_image ?? ""
+);
     setValue("is_active", collection.is_active);
     setValue("sort_order", collection.sort_order);
   }, [collection, setValue]);
@@ -168,16 +173,39 @@ export default function CollectionForm({
       </SectionCard>
 
       <SectionCard
-        title="Banner Image"
-        description="Upload a banner image for this collection."
-      >
-        <ImageUploader
-  value={watch("banner_image")}
-  onChange={(url) =>
-    setValue("banner_image", url)
-  }
-/>
-      </SectionCard>
+  title="Collection Images"
+  description="Upload banner and thumbnail images."
+>
+  <div className="grid gap-6 md:grid-cols-2">
+
+    <div>
+      <label className="mb-2 block text-sm font-medium">
+        Banner Image
+      </label>
+
+      <ImageUploader
+        value={watch("banner_image")}
+        onChange={(url) =>
+          setValue("banner_image", url)
+        }
+      />
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm font-medium">
+        Thumbnail Image
+      </label>
+
+      <ImageUploader
+        value={watch("thumbnail_image")}
+        onChange={(url) =>
+          setValue("thumbnail_image", url)
+        }
+      />
+    </div>
+
+  </div>
+</SectionCard>
 
       <SectionCard
         title="Status"

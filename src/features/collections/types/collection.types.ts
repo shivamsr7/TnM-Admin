@@ -9,6 +9,8 @@ export interface Collection {
 
   banner_image: string | null;
 
+  thumbnail_image: string | null;
+
   is_active: boolean;
 
   sort_order: number;
@@ -26,6 +28,8 @@ export interface CollectionFormData {
   description: string;
 
   banner_image: string;
+
+  thumbnail_image: string;
 
   is_active: boolean;
 

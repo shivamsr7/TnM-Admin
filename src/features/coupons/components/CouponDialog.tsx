@@ -61,20 +61,26 @@ export default function CouponDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing
-              ? "Edit Coupon"
-              : "Create Coupon"}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden p-0">
+        <div className="flex max-h-[90vh] flex-col">
 
-        <CouponForm
-          initialData={coupon}
-          loading={loading}
-          onSubmit={handleSubmit}
-        />
+  <DialogHeader className="border-b px-6 py-4">
+    <DialogTitle>
+      {isEditing
+        ? "Edit Coupon"
+        : "Create Coupon"}
+    </DialogTitle>
+  </DialogHeader>
+
+  <div className="flex-1 overflow-y-auto px-6 py-5">
+    <CouponForm
+      initialData={coupon}
+      loading={loading}
+      onSubmit={handleSubmit}
+    />
+  </div>
+
+</div>
       </DialogContent>
     </Dialog>
   );

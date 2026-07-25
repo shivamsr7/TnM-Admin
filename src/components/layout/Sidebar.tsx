@@ -1,29 +1,167 @@
 import { NavLink } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 import { menuItems } from "@/config/menu";
 import AppLogo from "@/components/shared/AppLogo";
+
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
 }
 
+
 export default function Sidebar({
   open,
   onClose,
 }: SidebarProps) {
+
+
+  const [expanded, setExpanded] =
+    useState<string[]>([]);
+
+
+
   const navLinks = (
+
     <nav className="space-y-2 p-4">
+
       {menuItems.map((item) => {
+
+
         const Icon = item.icon;
 
+
+        const hasChildren =
+          item.children &&
+          item.children.length > 0;
+
+
+        const isExpanded =
+          expanded.includes(item.title);
+
+
+
+        if (hasChildren) {
+
+          return (
+
+            <div key={item.title}>
+
+
+              <button
+                type="button"
+                onClick={() =>
+                  setExpanded((prev) =>
+                    isExpanded
+                      ? prev.filter(
+                          (x) =>
+                            x !== item.title
+                        )
+                      : [
+                          ...prev,
+                          item.title,
+                        ]
+                  )
+                }
+                className="flex w-full items-center justify-between rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <Icon size={20} />
+
+                  <span>
+                    {item.title}
+                  </span>
+
+                </div>
+
+
+
+                {isExpanded ? (
+                  <ChevronDown size={18} />
+                ) : (
+                  <ChevronRight size={18} />
+                )}
+
+              </button>
+
+
+
+
+              {isExpanded && (
+
+                <div className="ml-8 mt-2 space-y-1">
+
+
+                  {item.children?.map((child) => (
+
+
+                    child.path && (
+
+                      <NavLink
+
+                        key={child.path}
+
+                        to={child.path}
+
+                        onClick={onClose}
+
+                        className={({ isActive }) =>
+                          `block rounded-md px-3 py-2 text-sm ${
+                            isActive
+                              ? "bg-black text-white"
+                              : "hover:bg-gray-100"
+                          }`
+                        }
+
+                      >
+
+                        {child.title}
+
+                      </NavLink>
+
+                    )
+
+
+                  ))}
+
+
+                </div>
+
+              )}
+
+
+            </div>
+
+          );
+
+        }
+
+
+
+
+
+        if (!item.path) {
+          return null;
+        }
+
+
+
         return (
+
           <NavLink
+
             key={item.title}
+
             to={item.path}
+
             end={item.path === "/"}
+
             onClick={onClose}
+
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-4 py-3 transition ${
                 isActive
@@ -31,45 +169,93 @@ export default function Sidebar({
                   : "text-gray-700 hover:bg-gray-100"
               }`
             }
+
           >
+
             <Icon size={20} />
-            <span>{item.title}</span>
+
+            <span>
+              {item.title}
+            </span>
+
+
           </NavLink>
+
         );
+
+
       })}
+
+
     </nav>
+
   );
+
+
 
   return (
+
     <>
+
       {/* Desktop */}
+
       <aside className="hidden lg:flex lg:w-64 lg:min-h-screen lg:flex-col lg:border-r lg:bg-white">
+
         <div className="border-b p-6">
+
           <AppLogo />
+
         </div>
 
+
         {navLinks}
+
+
       </aside>
+
+
+
 
       {/* Mobile / Tablet */}
+
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
-          open ? "translate-x-0" : "-translate-x-full"
+          open
+            ? "translate-x-0"
+            : "-translate-x-full"
         }`}
       >
+
         <div className="flex items-center justify-between border-b p-6">
+
           <AppLogo />
 
+
           <button
+
             onClick={onClose}
+
             className="rounded-md p-2 hover:bg-gray-100"
+
           >
+
             <X size={20} />
+
           </button>
+
+
         </div>
 
+
+
         {navLinks}
+
+
       </aside>
+
+
     </>
+
   );
+
 }

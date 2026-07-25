@@ -7,9 +7,20 @@ export const couponSchema = z.object({
 
   description: z.string(),
 
-  discount_type: z.enum(["percentage", "fixed"]),
+  discount_type: z.enum([
+  "percentage",
+  "fixed",
+  "free_shipping",
+  "free_gift",
+]),
 
   discount_value: z.number().positive(),
+
+spin_enabled: z.boolean(),
+
+spin_probability: z.number().min(0),
+
+reward_display_name: z.string().nullable(),
 
   minimum_order_amount: z.number().min(0),
 
