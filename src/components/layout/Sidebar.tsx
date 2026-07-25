@@ -1,15 +1,31 @@
-import { NavLink } from "react-router-dom";
-import { X, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import {
+  NavLink,
+} from "react-router-dom";
+
+import {
+  X,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 
 import { menuItems } from "@/config/menu";
+
 import AppLogo from "@/components/shared/AppLogo";
+
 
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
 }
+
 
 
 export default function Sidebar({
@@ -20,6 +36,86 @@ export default function Sidebar({
 
   const [expanded, setExpanded] =
     useState<string[]>([]);
+
+
+  const startX =
+    useRef<number | null>(null);
+
+
+
+  const sidebarRef =
+    useRef<HTMLDivElement>(null);
+
+
+
+  useEffect(() => {
+
+    if (open) {
+
+      document.body.style.overflow =
+        "hidden";
+
+    } else {
+
+      document.body.style.overflow =
+        "";
+
+    }
+
+
+    return () => {
+
+      document.body.style.overflow =
+        "";
+
+    };
+
+  }, [open]);
+
+
+
+
+  const handleTouchStart = (
+    e: React.TouchEvent
+  ) => {
+
+    startX.current =
+      e.touches[0].clientX;
+
+  };
+
+
+
+  const handleTouchMove = (
+    e: React.TouchEvent
+  ) => {
+
+    if (
+      startX.current === null
+    ) return;
+
+
+    const currentX =
+      e.touches[0].clientX;
+
+
+    const diff =
+      startX.current - currentX;
+
+
+
+    // swipe left
+
+    if (diff > 80) {
+
+      onClose();
+
+      startX.current = null;
+
+    }
+
+  };
+
 
 
 
@@ -34,12 +130,14 @@ export default function Sidebar({
 
 
         const hasChildren =
-          item.children &&
-          item.children.length > 0;
+          !!item.children?.length;
+
 
 
         const isExpanded =
-          expanded.includes(item.title);
+          expanded.includes(
+            item.title
+          );
 
 
 
@@ -51,7 +149,9 @@ export default function Sidebar({
 
 
               <button
+
                 type="button"
+
                 onClick={() =>
                   setExpanded((prev) =>
                     isExpanded
@@ -65,7 +165,9 @@ export default function Sidebar({
                         ]
                   )
                 }
+
                 className="flex w-full items-center justify-between rounded-lg px-4 py-3 hover:bg-gray-100"
+
               >
 
                 <div className="flex items-center gap-3">
@@ -80,58 +182,62 @@ export default function Sidebar({
 
 
 
-                {isExpanded ? (
-                  <ChevronDown size={18} />
-                ) : (
-                  <ChevronRight size={18} />
-                )}
+                {
+                  isExpanded ? (
+                    <ChevronDown size={18} />
+                  ) : (
+                    <ChevronRight size={18} />
+                  )
+                }
+
 
               </button>
 
 
 
 
-              {isExpanded && (
+              {
+                isExpanded && (
 
-                <div className="ml-8 mt-2 space-y-1">
+                  <div className="ml-8 mt-2 space-y-1">
 
+                    {
+                      item.children?.map(
+                        (child) =>
 
-                  {item.children?.map((child) => (
+                          child.path && (
 
+                            <NavLink
 
-                    child.path && (
+                              key={child.path}
 
-                      <NavLink
+                              to={child.path}
 
-                        key={child.path}
+                              onClick={onClose}
 
-                        to={child.path}
+                              className={({isActive}) =>
+                                `block rounded-md px-3 py-2 text-sm ${
+                                  isActive
+                                    ? "bg-black text-white"
+                                    : "hover:bg-gray-100"
+                                }`
+                              }
 
-                        onClick={onClose}
+                            >
 
-                        className={({ isActive }) =>
-                          `block rounded-md px-3 py-2 text-sm ${
-                            isActive
-                              ? "bg-black text-white"
-                              : "hover:bg-gray-100"
-                          }`
-                        }
+                              {child.title}
 
-                      >
+                            </NavLink>
 
-                        {child.title}
+                          )
 
-                      </NavLink>
+                      )
+                    }
 
-                    )
+                  </div>
 
-
-                  ))}
-
-
-                </div>
-
-              )}
+                )
+              }
 
 
             </div>
@@ -139,7 +245,6 @@ export default function Sidebar({
           );
 
         }
-
 
 
 
@@ -158,11 +263,13 @@ export default function Sidebar({
 
             to={item.path}
 
-            end={item.path === "/"}
+            end={
+              item.path === "/"
+            }
 
             onClick={onClose}
 
-            className={({ isActive }) =>
+            className={({isActive}) =>
               `flex items-center gap-3 rounded-lg px-4 py-3 transition ${
                 isActive
                   ? "bg-black text-white"
@@ -172,7 +279,7 @@ export default function Sidebar({
 
           >
 
-            <Icon size={20} />
+            <Icon size={20}/>
 
             <span>
               {item.title}
@@ -186,10 +293,10 @@ export default function Sidebar({
 
       })}
 
-
     </nav>
 
   );
+
 
 
 
@@ -200,6 +307,7 @@ export default function Sidebar({
       {/* Desktop */}
 
       <aside className="hidden lg:flex lg:w-64 lg:min-h-screen lg:flex-col lg:border-r lg:bg-white">
+
 
         <div className="border-b p-6">
 
@@ -216,19 +324,36 @@ export default function Sidebar({
 
 
 
-      {/* Mobile / Tablet */}
+
+      {/* Mobile */}
 
       <aside
+
+        ref={sidebarRef}
+
+        onTouchStart={
+          handleTouchStart
+        }
+
+        onTouchMove={
+          handleTouchMove
+        }
+
+
         className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-white shadow-xl transition-transform duration-300 lg:hidden ${
           open
             ? "translate-x-0"
             : "-translate-x-full"
         }`}
+
       >
+
 
         <div className="flex items-center justify-between border-b p-6">
 
+
           <AppLogo />
+
 
 
           <button
@@ -239,7 +364,7 @@ export default function Sidebar({
 
           >
 
-            <X size={20} />
+            <X size={20}/>
 
           </button>
 
@@ -252,6 +377,24 @@ export default function Sidebar({
 
 
       </aside>
+
+
+
+      {/* Overlay */}
+
+      {
+        open && (
+
+          <div
+
+            onClick={onClose}
+
+            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+
+          />
+
+        )
+      }
 
 
     </>
