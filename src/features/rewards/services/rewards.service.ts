@@ -11,8 +11,11 @@ class RewardsService {
   // Customer Rewards
   // ==========================
 
-async getCustomerRewards(): Promise<CustomerRewards[]> {
-  const { data, error } = await supabase
+async getCustomerRewards(
+  customerId?: string
+): Promise<CustomerRewards[]> {
+
+  let query = supabase
     .from("customer_rewards")
     .select(`
       *,
@@ -34,9 +37,32 @@ async getCustomerRewards(): Promise<CustomerRewards[]> {
       ascending: false,
     });
 
+
+
+  if (customerId) {
+
+    query = query.eq(
+      "customer_id",
+      customerId
+    );
+
+  }
+
+
+
+  const {
+    data,
+    error,
+  } = await query;
+
+
+
   if (error) throw error;
 
+
+
   return data ?? [];
+
 }
 async addPoints(
   customerId: string,
