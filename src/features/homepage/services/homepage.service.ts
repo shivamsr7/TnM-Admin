@@ -89,4 +89,41 @@ export const homepageService = {
 
     if (error) throw error;
   },
+  async reorderBanners(
+  banners: {
+    id: string;
+    display_order: number;
+  }[]
+) {
+
+  const updates = banners.map(
+    (banner) =>
+      supabase
+        .from("homepage_banners")
+        .update({
+          display_order:
+            banner.display_order,
+        })
+        .eq(
+          "id",
+          banner.id
+        )
+  );
+
+
+  const results =
+    await Promise.all(updates);
+
+
+  const error =
+    results.find(
+      (result) => result.error
+    )?.error;
+
+
+  if (error) {
+    throw error;
+  }
+
+}
 };
