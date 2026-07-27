@@ -188,19 +188,30 @@ async updateRewardRules(
   id: string,
   payload: Partial<RewardRule>
 ) {
-  const { data, error } = await supabase
-    .from("reward_rules")
-    .update({
-      ...payload,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .select()
-    .single();
 
-  if (error) throw error;
+const {
+data,
+error,
+}=await supabase
+.from("reward_rules")
+.update({
+  ...payload,
+  updated_at:new Date().toISOString(),
+})
+.eq("id",id)
+.select()
+.single();
 
-  return data as RewardRule;
+
+console.log("UPDATED DATA:", data);
+console.log("UPDATE ERROR:", error);
+
+
+if(error) throw error;
+
+
+return data as RewardRule;
+
 }
   // ==========================
   // Reward Tiers
