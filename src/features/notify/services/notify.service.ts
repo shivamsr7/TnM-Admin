@@ -17,29 +17,6 @@ class NotifyService {
 
   async getAll(): Promise<NotifyRequest[]> {
 
-    /*
-     * -------------------------------------------------------
-     * 1. Fetch notify requests
-     * -------------------------------------------------------
-     *
-     * IMPORTANT:
-     *
-     * Your table has:
-     *
-     * id
-     * product_id
-     * customer_id
-     * name
-     * email
-     * phone
-     * status
-     * created_at
-     *
-     * There is NO requested_at.
-     *
-     * -------------------------------------------------------
-     */
-
     const {
       data: requests,
       error: requestsError,
@@ -80,90 +57,93 @@ class NotifyService {
 
 
     /*
-     * -------------------------------------------------------
-     * 2. Collect product IDs
-     * -------------------------------------------------------
+     * =======================================================
+     * PRODUCT IDS
+     * =======================================================
      */
 
-    const productIds = Array.from(
+    const productIds =
+      Array.from(
 
-      new Set(
+        new Set(
 
-        requests
+          requests
 
-          .map(
-            (request) =>
-              request.product_id
-          )
+            .map(
+              request =>
+                request.product_id
+            )
 
-          .filter(
-            (
-              id
-            ): id is string =>
-              Boolean(id)
-          )
+            .filter(
+              (
+                id
+              ): id is string =>
+                Boolean(id)
+            )
 
-      )
+        )
 
-    );
+      );
 
 
     /*
-     * -------------------------------------------------------
-     * 3. Collect customer IDs
-     * -------------------------------------------------------
+     * =======================================================
+     * CUSTOMER IDS
+     * =======================================================
      */
 
-    const customerIds = Array.from(
+    const customerIds =
+      Array.from(
 
-      new Set(
+        new Set(
 
-        requests
+          requests
 
-          .map(
-            (request) =>
-              request.customer_id
-          )
+            .map(
+              request =>
+                request.customer_id
+            )
 
-          .filter(
-            (
-              id
-            ): id is string =>
-              Boolean(id)
-          )
+            .filter(
+              (
+                id
+              ): id is string =>
+                Boolean(id)
+            )
 
-      )
+        )
 
-    );
+      );
 
 
     /*
-     * -------------------------------------------------------
-     * 4. Fetch products separately
-     * -------------------------------------------------------
+     * =======================================================
+     * PRODUCTS
+     * =======================================================
      */
 
-    let products: Array<{
-
-      id: string;
-
-      name: string;
-
-      slug: string;
-
-      product_images?: Array<{
+    let products:
+      Array<{
 
         id: string;
 
-        image_url: string;
+        name: string;
 
-        is_primary: boolean;
+        slug: string;
 
-        sort_order: number;
+        product_images?: Array<{
 
-      }>;
+          id: string;
 
-    }> = [];
+          image_url: string;
+
+          is_primary: boolean;
+
+          sort_order: number;
+
+        }>;
+
+      }> = [];
 
 
     if (
@@ -214,20 +194,21 @@ class NotifyService {
 
 
     /*
-     * -------------------------------------------------------
-     * 5. Fetch customers separately
-     * -------------------------------------------------------
+     * =======================================================
+     * CUSTOMERS
+     * =======================================================
      */
 
-    let customers: Array<{
+    let customers:
+      Array<{
 
-      id: string;
+        id: string;
 
-      first_name: string;
+        first_name: string;
 
-      last_name: string | null;
+        last_name: string | null;
 
-    }> = [];
+      }> = [];
 
 
     if (
@@ -272,18 +253,21 @@ class NotifyService {
 
 
     /*
-     * -------------------------------------------------------
-     * 6. Create lookup maps
-     * -------------------------------------------------------
+     * =======================================================
+     * LOOKUP MAPS
+     * =======================================================
      */
 
     const productMap =
       new Map(
 
         products.map(
-          (product) => [
+          product => [
+
             product.id,
+
             product,
+
           ]
         )
 
@@ -294,9 +278,12 @@ class NotifyService {
       new Map(
 
         customers.map(
-          (customer) => [
+          customer => [
+
             customer.id,
+
             customer,
+
           ]
         )
 
@@ -304,14 +291,14 @@ class NotifyService {
 
 
     /*
-     * -------------------------------------------------------
-     * 7. Combine data
-     * -------------------------------------------------------
+     * =======================================================
+     * COMBINE
+     * =======================================================
      */
 
     const result =
       requests.map(
-        (request) => ({
+        request => ({
 
           ...request,
 
@@ -529,16 +516,6 @@ class NotifyService {
    * =========================================================
    * UPDATE STATUS
    * =========================================================
-   *
-   * Current database supports ONLY:
-   *
-   * pending
-   * notified
-   * cancelled
-   *
-   * There is no notified_at column.
-   *
-   * =========================================================
    */
 
   async updateStatus(
@@ -620,26 +597,57 @@ class NotifyService {
 
     return {
 
+      /*
+       * Total
+       */
+
       totalRequests:
         requests.length,
 
+
+      /*
+       * Pending
+       */
+
       pendingRequests:
         requests.filter(
-          (request) =>
+          request =>
             request.status ===
             "pending"
         ).length,
 
+
+      /*
+       * Notified
+       */
+
       notifiedRequests:
         requests.filter(
-          (request) =>
+          request =>
             request.status ===
             "notified"
         ).length,
 
+
+      /*
+       * Purchased
+       */
+
+      purchasedRequests:
+        requests.filter(
+          request =>
+            request.status ===
+            "purchased"
+        ).length,
+
+
+      /*
+       * Cancelled
+       */
+
       cancelledRequests:
         requests.filter(
-          (request) =>
+          request =>
             request.status ===
             "cancelled"
         ).length,
