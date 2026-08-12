@@ -65,6 +65,9 @@ import BasicInfoSection
 import SpecificationsSection
   from "./sections/SpecificationsSection";
 
+import DimensionsSection
+  from "./sections/DimensionsSection";
+
 import PricingSection
   from "./sections/PricingSection";
 
@@ -113,6 +116,13 @@ import type {
   MediaUploaderHandle,
 } from "@/shared/components/media/MediaUploader";
 
+
+/*
+ * =========================================================
+ * SCHEMA
+ * =========================================================
+ */
+
 import {
   productSchema,
   type ProductSchema,
@@ -126,8 +136,14 @@ import {
  */
 
 interface ProductFormProps {
-  mode?: "create" | "edit";
-  productId?: string;
+
+  mode?:
+    | "create"
+    | "edit";
+
+  productId?:
+    string;
+
 }
 
 
@@ -138,9 +154,13 @@ interface ProductFormProps {
  */
 
 export default function ProductForm({
+
   mode = "create",
+
   productId,
+
 }: ProductFormProps) {
+
 
   const navigate =
     useNavigate();
@@ -155,17 +175,23 @@ export default function ProductForm({
   const [
     images,
     setImages,
-  ] = useState<ProductImage[]>([]);
+  ] =
+    useState<ProductImage[]>(
+      []
+    );
 
 
   const [
     saving,
     setSaving,
-  ] = useState(false);
+  ] =
+    useState(false);
 
 
   const mediaUploaderRef =
-    useRef<MediaUploaderHandle>(null);
+    useRef<MediaUploaderHandle>(
+      null
+    );
 
 
   /*
@@ -175,9 +201,15 @@ export default function ProductForm({
    */
 
   const {
-    data: categories = [],
-    isLoading: loadingCategories,
-  } = useCategories();
+
+    data:
+      categories = [],
+
+    isLoading:
+      loadingCategories,
+
+  } =
+    useCategories();
 
 
   /*
@@ -187,9 +219,15 @@ export default function ProductForm({
    */
 
   const {
-    data: brands = [],
-    isLoading: loadingBrands,
-  } = useBrands();
+
+    data:
+      brands = [],
+
+    isLoading:
+      loadingBrands,
+
+  } =
+    useBrands();
 
 
   /*
@@ -199,9 +237,15 @@ export default function ProductForm({
    */
 
   const {
-    data: collections = [],
-    isLoading: loadingCollections,
-  } = useCollections();
+
+    data:
+      collections = [],
+
+    isLoading:
+      loadingCollections,
+
+  } =
+    useCollections();
 
 
   /*
@@ -211,9 +255,15 @@ export default function ProductForm({
    */
 
   const {
-    data: tags = [],
-    isLoading: loadingTags,
-  } = useTags();
+
+    data:
+      tags = [],
+
+    isLoading:
+      loadingTags,
+
+  } =
+    useTags();
 
 
   /*
@@ -226,74 +276,156 @@ export default function ProductForm({
     useForm<ProductSchema>({
 
       resolver:
-        zodResolver(productSchema),
+        zodResolver(
+          productSchema
+        ),
 
 
       defaultValues: {
 
-        name: "",
+        name:
+          "",
 
-        slug: "",
+        slug:
+          "",
 
-        category_id: "",
+        category_id:
+          "",
 
-        subcategory_id: "",
+        subcategory_id:
+          "",
 
-        brand_id: null,
+        brand_id:
+          null,
 
-        short_description: "",
+        short_description:
+          "",
 
-        description: "",
+        description:
+          "",
 
-        care_instructions: "",
+        care_instructions:
+          "",
 
 
         /*
-         * Product specifications
+         * Specifications
          */
 
-        specifications: [],
+        specifications:
+          [],
 
 
-        cost_price: 0,
+        /*
+         * Weight & dimensions
+         */
 
-        price: 0,
+        weight:
+          null,
 
-        compare_price: 0,
+        length:
+          null,
 
-        sku: "",
+        width:
+          null,
 
-        barcode: "",
+        height:
+          null,
 
-        stock: 0,
 
-        low_stock_threshold: 5,
+        /*
+         * Pricing
+         */
 
-        track_inventory: true,
+        cost_price:
+          0,
 
-        allow_backorders: false,
+        price:
+          0,
 
-        status: "draft",
+        compare_price:
+          0,
 
-        collection_ids: [],
 
-        tag_ids: [],
+        /*
+         * Identification
+         */
 
-        featured: false,
+        sku:
+          "",
 
-        new_arrival: false,
+        barcode:
+          "",
 
-        best_seller: false,
 
-        trending: false,
+        /*
+         * Inventory
+         */
 
-        editors_pick: false,
+        stock:
+          0,
 
-        seo_title: "",
+        low_stock_threshold:
+          5,
 
-        seo_description: "",
+        track_inventory:
+          true,
 
-        meta_keywords: "",
+        allow_backorders:
+          false,
+
+
+        /*
+         * Status
+         */
+
+        status:
+          "draft",
+
+
+        /*
+         * Relationships
+         */
+
+        collection_ids:
+          [],
+
+        tag_ids:
+          [],
+
+
+        /*
+         * Product flags
+         */
+
+        featured:
+          false,
+
+        new_arrival:
+          false,
+
+        best_seller:
+          false,
+
+        trending:
+          false,
+
+        editors_pick:
+          false,
+
+
+        /*
+         * SEO
+         */
+
+        seo_title:
+          "",
+
+        seo_description:
+          "",
+
+        meta_keywords:
+          "",
 
       },
 
@@ -320,15 +452,17 @@ export default function ProductForm({
 
   const {
 
-    data: subcategories = [],
+    data:
+      subcategories = [],
 
     isLoading:
       loadingSubcategories,
 
-  } = useSubcategories(
-    selectedCategory ||
-    undefined
-  );
+  } =
+    useSubcategories(
+      selectedCategory ||
+      undefined
+    );
 
 
   /*
@@ -390,7 +524,7 @@ export default function ProductForm({
 
   /*
    * =======================================================
-   * EDIT PRODUCT
+   * LOAD PRODUCT FOR EDIT
    * =======================================================
    */
 
@@ -422,32 +556,18 @@ export default function ProductForm({
 
         /*
          * =================================================
-         * CONVERT DATABASE JSONB
+         * CONVERT JSONB SPECIFICATIONS
          * → FORM ARRAY
          * =================================================
-         *
-         * Database:
-         *
-         * {
-         *   "base_metal": "Stainless Steel",
-         *   "plating": "18k Gold Tone"
-         * }
-         *
-         * Form:
-         *
-         * [
-         *   {
-         *     label: "Base Metal",
-         *     value: "Stainless Steel"
-         *   }
-         * ]
          */
 
         const specificationRows =
 
           product?.specifications &&
+
           typeof product.specifications ===
             "object" &&
+
           !Array.isArray(
             product.specifications
           )
@@ -488,15 +608,155 @@ export default function ProductForm({
 
         form.reset({
 
-          ...product,
+          /*
+           * Basic information
+           */
+
+          name:
+            product.name ??
+            "",
+
+          slug:
+            product.slug ??
+            "",
+
+          category_id:
+            product.category_id ??
+            "",
+
+          subcategory_id:
+            product.subcategory_id ??
+            "",
+
+          brand_id:
+            product.brand_id ??
+            null,
+
+          short_description:
+            product.short_description ??
+            "",
+
+          description:
+            product.description ??
+            "",
+
+          care_instructions:
+            product.care_instructions ??
+            "",
 
 
           /*
-           * Convert specifications
+           * Specifications
            */
 
           specifications:
             specificationRows,
+
+
+          /*
+           * Weight & dimensions
+           */
+
+          weight:
+            product.weight ??
+            null,
+
+          length:
+            product.length ??
+            null,
+
+          width:
+            product.width ??
+            null,
+
+          height:
+            product.height ??
+            null,
+
+
+          /*
+           * Pricing
+           */
+
+          cost_price:
+            product.cost_price ??
+            0,
+
+          price:
+            product.price ??
+            0,
+
+          compare_price:
+            product.compare_price ??
+            0,
+
+
+          /*
+           * Identification
+           */
+
+          sku:
+            product.sku ??
+            "",
+
+          barcode:
+            product.barcode ??
+            "",
+
+
+          /*
+           * Inventory
+           */
+
+          stock:
+            product.stock ??
+            0,
+
+          low_stock_threshold:
+            product.low_stock_threshold ??
+            5,
+
+          track_inventory:
+            product.track_inventory ??
+            true,
+
+          allow_backorders:
+            product.allow_backorders ??
+            false,
+
+
+          /*
+           * Status
+           */
+
+          status:
+            product.status ??
+            "draft",
+
+
+          /*
+           * Product flags
+           */
+
+          featured:
+            product.featured ??
+            false,
+
+          new_arrival:
+            product.new_arrival ??
+            false,
+
+          best_seller:
+            product.best_seller ??
+            false,
+
+          trending:
+            product.trending ??
+            false,
+
+          editors_pick:
+            product.editors_pick ??
+            false,
 
 
           /*
@@ -510,11 +770,14 @@ export default function ProductForm({
               ?.map(
                 (
                   item: {
-                    collection_id: string;
+                    collection_id:
+                      string;
                   }
                 ) =>
                   item.collection_id
-              ) ?? [],
+              ) ??
+
+            [],
 
 
           /*
@@ -528,11 +791,31 @@ export default function ProductForm({
               ?.map(
                 (
                   item: {
-                    tag_id: string;
+                    tag_id:
+                      string;
                   }
                 ) =>
                   item.tag_id
-              ) ?? [],
+              ) ??
+
+            [],
+
+
+          /*
+           * SEO
+           */
+
+          seo_title:
+            product.seo_title ??
+            "",
+
+          seo_description:
+            product.seo_description ??
+            "",
+
+          meta_keywords:
+            product.meta_keywords ??
+            "",
 
         });
 
@@ -545,7 +828,9 @@ export default function ProductForm({
 
         const productImages =
           await productImageService
-            .getByProduct(id);
+            .getByProduct(
+              id
+            );
 
 
         setImages(
@@ -576,11 +861,15 @@ export default function ProductForm({
 
       }
 
-      catch (error) {
+      catch (
+        error
+      ) {
 
         console.error(
+          "Failed to load product:",
           error
         );
+
 
         toast.error(
           "Failed to load product."
@@ -601,9 +890,9 @@ export default function ProductForm({
 
 
   /*
-   * =========================================================
-   * FORM SUBMIT
-   * =========================================================
+   * =======================================================
+   * SUBMIT
+   * =======================================================
    */
 
   async function onSubmit(
@@ -618,48 +907,33 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
-       * EXTRACT RELATIONSHIP DATA
-       * =====================================================
+       * =================================================
+       * SEPARATE FORM-ONLY FIELDS
+       * =================================================
        */
 
       const {
 
-        collection_ids = [],
+        collection_ids =
+          [],
 
-        tag_ids = [],
+        tag_ids =
+          [],
 
-        specifications = [],
+        specifications =
+          [],
 
         ...productData
 
-      } = values;
+      } =
+        values;
 
 
       /*
-       * =====================================================
+       * =================================================
        * CONVERT SPECIFICATIONS
-       * =====================================================
-       *
-       * Form:
-       *
-       * [
-       *   {
-       *     label: "Base Metal",
-       *     value: "Stainless Steel"
-       *   },
-       *   {
-       *     label: "Plating",
-       *     value: "18k Gold Tone"
-       *   }
-       * ]
-       *
-       * Database:
-       *
-       * {
-       *   base_metal: "Stainless Steel",
-       *   plating: "18k Gold Tone"
-       * }
+       * → JSONB
+       * =================================================
        */
 
       const specificationsObject =
@@ -669,8 +943,15 @@ export default function ProductForm({
 
             .filter(
               item =>
-                item.label.trim() &&
-                item.value.trim()
+
+                item.label
+                  .trim()
+                  .length > 0 &&
+
+                item.value
+                  .trim()
+                  .length > 0
+
             )
 
             .map(
@@ -684,7 +965,8 @@ export default function ProductForm({
                     "_"
                   ),
 
-                item.value.trim(),
+                item.value
+                  .trim(),
 
               ]
             )
@@ -693,9 +975,9 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
-       * PRODUCT PAYLOAD
-       * =====================================================
+       * =================================================
+       * FINAL PRODUCT PAYLOAD
+       * =================================================
        */
 
       const payload = {
@@ -704,7 +986,7 @@ export default function ProductForm({
 
 
         /*
-         * Empty subcategory must be NULL
+         * Empty subcategory → NULL
          */
 
         subcategory_id:
@@ -714,7 +996,7 @@ export default function ProductForm({
 
 
         /*
-         * Save specifications as JSONB
+         * Specifications → JSONB
          */
 
         specifications:
@@ -724,9 +1006,9 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
+       * =================================================
        * REMOVE EMPTY SKU
-       * =====================================================
+       * =================================================
        */
 
       if (
@@ -739,9 +1021,9 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
-       * CREATE / UPDATE PRODUCT
-       * =====================================================
+       * =================================================
+       * CREATE / UPDATE
+       * =================================================
        */
 
       let product;
@@ -760,7 +1042,9 @@ export default function ProductForm({
 
       else {
 
-        if (!productId) {
+        if (
+          !productId
+        ) {
 
           throw new Error(
             "Product ID is missing."
@@ -778,22 +1062,10 @@ export default function ProductForm({
       }
 
 
-      console.log(
-        "Saved product:",
-        product
-      );
-
-
-      console.log(
-        "Images:",
-        images
-      );
-
-
       /*
-       * =====================================================
-       * SAVE PRODUCT IMAGES
-       * =====================================================
+       * =================================================
+       * SAVE IMAGES
+       * =================================================
        */
 
       if (
@@ -838,18 +1110,14 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
+       * =================================================
        * COLLECTIONS + TAGS
-       * =====================================================
+       * =================================================
        */
 
       if (
         mode === "create"
       ) {
-
-        /*
-         * Collections
-         */
 
         if (
           collection_ids.length > 0
@@ -863,10 +1131,6 @@ export default function ProductForm({
 
         }
 
-
-        /*
-         * Tags
-         */
 
         if (
           tag_ids.length > 0
@@ -884,20 +1148,12 @@ export default function ProductForm({
 
       else {
 
-        /*
-         * Replace collections
-         */
-
         await productService
           .replaceProductCollections(
             product.id,
             collection_ids
           );
 
-
-        /*
-         * Replace tags
-         */
 
         await productService
           .replaceProductTags(
@@ -909,9 +1165,9 @@ export default function ProductForm({
 
 
       /*
-       * =====================================================
+       * =================================================
        * SUCCESS
-       * =====================================================
+       * =================================================
        */
 
       toast.success(
@@ -925,33 +1181,18 @@ export default function ProductForm({
       );
 
 
-      /*
-       * Tell MediaUploader
-       * files are permanent
-       */
-
       mediaUploaderRef
         .current
         ?.markAsSaved();
 
 
-      /*
-       * Reset form
-       */
-
       form.reset();
 
 
-      /*
-       * Clear images
-       */
+      setImages(
+        []
+      );
 
-      setImages([]);
-
-
-      /*
-       * Go back to products
-       */
 
       navigate(
         "/products"
@@ -959,7 +1200,9 @@ export default function ProductForm({
 
     }
 
-    catch (error) {
+    catch (
+      error
+    ) {
 
       console.error(
         "Product save failed:",
@@ -991,9 +1234,9 @@ export default function ProductForm({
 
 
   /*
-   * =========================================================
+   * =======================================================
    * LOADING SCREEN
-   * =========================================================
+   * =======================================================
    */
 
   if (
@@ -1021,9 +1264,9 @@ export default function ProductForm({
 
 
   /*
-   * =========================================================
+   * =======================================================
    * RENDER
-   * =========================================================
+   * =======================================================
    */
 
   return (
@@ -1042,9 +1285,9 @@ export default function ProductForm({
 
     >
 
-      {/* =====================================================
+      {/* ===================================================
           HEADER
-      ====================================================== */}
+      ==================================================== */}
 
       <div
 
@@ -1158,39 +1401,51 @@ export default function ProductForm({
       </div>
 
 
-      {/* =====================================================
+      {/* ===================================================
           BASIC INFORMATION
-      ====================================================== */}
+      ==================================================== */}
 
       <BasicInfoSection
         form={form}
       />
 
 
-      {/* =====================================================
+      {/* ===================================================
           PRODUCT SPECIFICATIONS
-      ====================================================== */}
+      ==================================================== */}
 
       <SpecificationsSection
         form={form}
       />
 
 
-      {/* =====================================================
+      {/* ===================================================
+          WEIGHT & DIMENSIONS
+      ==================================================== */}
+
+      <DimensionsSection
+        form={form}
+      />
+
+
+      {/* ===================================================
           PRICING + INVENTORY
-      ====================================================== */}
+      ==================================================== */}
 
       <div
+
         className="
           grid
           gap-6
           xl:grid-cols-2
         "
+
       >
 
         <PricingSection
           form={form}
         />
+
 
         <InventorySection
           form={form}
@@ -1199,21 +1454,25 @@ export default function ProductForm({
       </div>
 
 
-      {/* =====================================================
+      {/* ===================================================
           ORGANIZATION + STATUS
-      ====================================================== */}
+      ==================================================== */}
 
       <div
+
         className="
           grid
           gap-6
           xl:grid-cols-2
         "
+
       >
 
         <OrganizationSection
 
-          form={form}
+          form={
+            form
+          }
 
           categories={
             categories
@@ -1245,9 +1504,9 @@ export default function ProductForm({
       </div>
 
 
-      {/* =====================================================
+      {/* ===================================================
           IMAGES
-      ====================================================== */}
+      ==================================================== */}
 
       <ImagesSection
 
@@ -1266,18 +1525,18 @@ export default function ProductForm({
       />
 
 
-      {/* =====================================================
+      {/* ===================================================
           SEO
-      ====================================================== */}
+      ==================================================== */}
 
       <SeoSection
         form={form}
       />
 
 
-      {/* =====================================================
+      {/* ===================================================
           BOTTOM ACTIONS
-      ====================================================== */}
+      ==================================================== */}
 
       <div
 

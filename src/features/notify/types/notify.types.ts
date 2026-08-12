@@ -1,6 +1,7 @@
 export type NotifyStatus =
   | "pending"
   | "notified"
+  | "purchased"
   | "cancelled";
 
 
@@ -66,6 +67,8 @@ export interface NotifyStats {
   pendingRequests: number;
 
   notifiedRequests: number;
+
+  purchasedRequests: number;
 
   cancelledRequests: number;
 

@@ -84,7 +84,7 @@ export const productSchema = z.object({
    * PRODUCT SPECIFICATIONS
    * =======================================================
    *
-   * This is the FORM structure.
+   * These are flexible product-specific attributes.
    *
    * Example:
    *
@@ -98,14 +98,49 @@ export const productSchema = z.object({
    *     value: "18k Gold Tone"
    *   }
    * ]
-   *
-   * ProductForm converts this to JSONB before saving.
    */
 
   specifications:
     z.array(
       productSpecificationSchema
     ),
+
+
+  /*
+   * =======================================================
+   * WEIGHT & DIMENSIONS
+   * =======================================================
+   *
+   * These are separate database columns.
+   *
+   * weight → kg
+   * length → cm
+   * width  → cm
+   * height → cm
+   */
+
+  weight:
+    z.number()
+      .nullable()
+      .optional(),
+
+
+  length:
+    z.number()
+      .nullable()
+      .optional(),
+
+
+  width:
+    z.number()
+      .nullable()
+      .optional(),
+
+
+  height:
+    z.number()
+      .nullable()
+      .optional(),
 
 
   /*
@@ -219,7 +254,7 @@ export const productSchema = z.object({
    * RELATIONSHIP FIELDS
    * =======================================================
    *
-   * These are form-only fields.
+   * Form-only fields.
    */
 
   collection_ids:
