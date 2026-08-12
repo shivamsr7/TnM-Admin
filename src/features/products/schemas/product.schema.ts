@@ -1,67 +1,263 @@
 import { z } from "zod";
 
-export const productSchema = z.object({
-  name: z.string().min(2, "Product name is required"),
 
-  slug: z.string().min(2),
+/*
+ * =========================================================
+ * PRODUCT SPECIFICATION SCHEMA
+ * =========================================================
+ */
 
-  category_id: z.string().min(1, "Category is required"),
+const productSpecificationSchema = z.object({
 
-  subcategory_id: z.string().optional(),
+  label:
+    z.string().trim(),
 
-  brand_id: z.string().nullable().optional(),
+  value:
+    z.string().trim(),
 
-  short_description: z.string().optional(),
-
-  description: z.string().optional(),
-
-  care_instructions: z.string().optional(),
-
-  cost_price: z.number().nullable().optional(),
-
-  price: z.number().min(1, "Price is required"),
-
-  compare_price: z.number().nullable().optional(),
-
-  sku: z.string().optional(),
-
-  barcode: z.string().optional(),
-
-stock: z.number(),
-
-low_stock_threshold: z.number(),
-
-track_inventory: z.boolean(),
-
-allow_backorders: z.boolean(),
-
-status: z.enum([
-  "draft",
-  "active",
-  "hidden",
-  "archived",
-  "out_of_stock",
-]),
-
-trending: z.boolean(),
-
-editors_pick: z.boolean(),
-
-collection_ids: z.array(z.string()),
-
-tag_ids: z.array(z.string()),
-
-featured: z.boolean(),
-
-new_arrival: z.boolean(),
-
-best_seller: z.boolean(),
-
-seo_title: z.string().optional(),
-
-seo_description: z.string().optional(),
-
-meta_keywords: z.string().optional(),
 });
 
-export type ProductSchema = z.infer<typeof productSchema>;
+
+/*
+ * =========================================================
+ * PRODUCT SCHEMA
+ * =========================================================
+ */
+
+export const productSchema = z.object({
+
+  /*
+   * =======================================================
+   * BASIC INFORMATION
+   * =======================================================
+   */
+
+  name:
+    z.string()
+      .min(
+        2,
+        "Product name is required"
+      ),
+
+
+  slug:
+    z.string()
+      .min(2),
+
+
+  category_id:
+    z.string()
+      .min(
+        1,
+        "Category is required"
+      ),
+
+
+  subcategory_id:
+    z.string()
+      .optional(),
+
+
+  brand_id:
+    z.string()
+      .nullable()
+      .optional(),
+
+
+  short_description:
+    z.string()
+      .optional(),
+
+
+  description:
+    z.string()
+      .optional(),
+
+
+  care_instructions:
+    z.string()
+      .optional(),
+
+
+  /*
+   * =======================================================
+   * PRODUCT SPECIFICATIONS
+   * =======================================================
+   *
+   * This is the FORM structure.
+   *
+   * Example:
+   *
+   * [
+   *   {
+   *     label: "Base Metal",
+   *     value: "Stainless Steel"
+   *   },
+   *   {
+   *     label: "Plating",
+   *     value: "18k Gold Tone"
+   *   }
+   * ]
+   *
+   * ProductForm converts this to JSONB before saving.
+   */
+
+  specifications:
+    z.array(
+      productSpecificationSchema
+    ),
+
+
+  /*
+   * =======================================================
+   * PRICING
+   * =======================================================
+   */
+
+  cost_price:
+    z.number()
+      .nullable()
+      .optional(),
+
+
+  price:
+    z.number()
+      .min(
+        1,
+        "Price is required"
+      ),
+
+
+  compare_price:
+    z.number()
+      .nullable()
+      .optional(),
+
+
+  /*
+   * =======================================================
+   * IDENTIFICATION
+   * =======================================================
+   */
+
+  sku:
+    z.string()
+      .optional(),
+
+
+  barcode:
+    z.string()
+      .optional(),
+
+
+  /*
+   * =======================================================
+   * INVENTORY
+   * =======================================================
+   */
+
+  stock:
+    z.number(),
+
+
+  low_stock_threshold:
+    z.number(),
+
+
+  track_inventory:
+    z.boolean(),
+
+
+  allow_backorders:
+    z.boolean(),
+
+
+  /*
+   * =======================================================
+   * STATUS
+   * =======================================================
+   */
+
+  status:
+    z.enum([
+      "draft",
+      "active",
+      "hidden",
+      "archived",
+      "out_of_stock",
+    ]),
+
+
+  /*
+   * =======================================================
+   * PRODUCT FLAGS
+   * =======================================================
+   */
+
+  trending:
+    z.boolean(),
+
+
+  editors_pick:
+    z.boolean(),
+
+
+  featured:
+    z.boolean(),
+
+
+  new_arrival:
+    z.boolean(),
+
+
+  best_seller:
+    z.boolean(),
+
+
+  /*
+   * =======================================================
+   * RELATIONSHIP FIELDS
+   * =======================================================
+   *
+   * These are form-only fields.
+   */
+
+  collection_ids:
+    z.array(
+      z.string()
+    ),
+
+
+  tag_ids:
+    z.array(
+      z.string()
+    ),
+
+
+  /*
+   * =======================================================
+   * SEO
+   * =======================================================
+   */
+
+  seo_title:
+    z.string()
+      .optional(),
+
+
+  seo_description:
+    z.string()
+      .optional(),
+
+
+  meta_keywords:
+    z.string()
+      .optional(),
+
+});
+
+
+export type ProductSchema =
+  z.infer<
+    typeof productSchema
+  >;

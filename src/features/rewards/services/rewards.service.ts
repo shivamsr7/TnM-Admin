@@ -381,16 +381,16 @@ async processOrderReward(orderId: string) {
   if (points <= 0) return;
 
   // Award rewards (atomic database transaction)
-  const { error: rpcError } = await supabase.rpc(
-    "award_order_rewards",
-    {
-      p_customer_id: order.customer_id,
-      p_order_id: order.id,
-      p_order_number: order.order_number,
-      p_order_amount: order.total_amount,
-      p_points: points,
-    }
-  );
+ const { error: rpcError } = await supabase.rpc(
+  "process_order_reward",
+  {
+    p_customer_id: order.customer_id,
+    p_order_id: order.id,
+    p_points: points,
+    p_description:
+      `Reward points earned for Order #${order.order_number}`,
+  }
+);
 
   if (rpcError) throw rpcError;
 
