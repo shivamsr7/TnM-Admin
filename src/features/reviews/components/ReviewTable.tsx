@@ -1,4 +1,4 @@
-import { Eye } from "lucide-react";
+import { Eye, CheckCircle2, Circle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import DataTable from "@/components/shared/DataTable";
@@ -54,41 +54,58 @@ export default function ReviewTable({
   const deleteReview =
     useDeleteReview();
 
+
+  /*
+   * =========================================================
+   * FILTER REVIEWS
+   * =========================================================
+   */
+
   const filteredReviews = useMemo(() => {
     return reviews.filter((review) => {
+
       const query = search
         .trim()
         .toLowerCase();
+
 
       const matchesSearch =
         review.product?.name
           ?.toLowerCase()
           .includes(query) ||
+
         review.customer?.first_name
           ?.toLowerCase()
           .includes(query) ||
+
         review.customer?.last_name
           ?.toLowerCase()
           .includes(query) ||
+
         review.review
           .toLowerCase()
           .includes(query);
 
+
       const matchesStatus =
         statusFilter === "all" ||
         review.status === statusFilter;
+
 
       const matchesRating =
         ratingFilter === "all" ||
         review.rating ===
           Number(ratingFilter);
 
+
       return (
         matchesSearch &&
         matchesStatus &&
         matchesRating
       );
+
     });
+
   }, [
     reviews,
     search,
@@ -96,36 +113,74 @@ export default function ReviewTable({
     ratingFilter,
   ]);
 
+
+  /*
+   * =========================================================
+   * OPEN REVIEW DIALOG
+   * =========================================================
+   */
+
   const openDialog = (
     review: Review
   ) => {
+
     setSelectedReview(review);
+
     setDialogOpen(true);
+
   };
 
+
+  /*
+   * =========================================================
+   * TABLE COLUMNS
+   * =========================================================
+   */
+
   const columns: Column<Review>[] = [
+
+    /*
+     * -------------------------------------------------------
+     * PRODUCT
+     * -------------------------------------------------------
+     */
+
     {
       key: "product",
       title: "Product",
 
       render: (_, row) => (
+
         <div className="flex items-center gap-3">
+
           <img
             src={
-              row.product?.product_images?.find(
-                (img) =>
-                  img.is_primary
-              )?.image_url ??
+              row.product
+                ?.product_images
+                ?.find(
+                  (img) =>
+                    img.is_primary
+                )
+                ?.image_url ??
               row.product
                 ?.product_images?.[0]
                 ?.image_url ??
               "/placeholder.png"
             }
-            alt={row.product?.name}
-            className="h-12 w-12 rounded-lg border object-cover"
+            alt={
+              row.product?.name
+            }
+            className="
+              h-12
+              w-12
+              rounded-lg
+              border
+              object-cover
+            "
           />
 
           <div>
+
             <p className="font-medium">
               {row.product?.name}
             </p>
@@ -133,76 +188,215 @@ export default function ReviewTable({
             <p className="text-xs text-muted-foreground">
               {row.product?.slug}
             </p>
+
           </div>
+
         </div>
+
       ),
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * CUSTOMER
+     * -------------------------------------------------------
+     */
 
     {
       key: "customer",
       title: "Customer",
 
       render: (_, row) => (
+
         <div>
+
           <p className="font-medium">
+
             {row.customer
-              ? `${row.customer.first_name} ${row.customer.last_name ?? ""}`
+              ? `${row.customer.first_name} ${
+                  row.customer.last_name ?? ""
+                }`
               : "-"}
+
           </p>
+
         </div>
+
       ),
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * RATING
+     * -------------------------------------------------------
+     */
 
     {
       key: "rating",
       title: "Rating",
 
       render: (value) => (
+
         <ReviewStars
-          rating={Number(value)}
+          rating={
+            Number(value)
+          }
         />
+
       ),
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * VERIFIED
+     * -------------------------------------------------------
+     */
+
+    {
+      key: "is_verified",
+      title: "Verified",
+
+      render: (value) => {
+
+        const verified =
+          Boolean(value);
+
+        return (
+
+          <div
+            className={`
+              inline-flex
+              items-center
+              gap-1.5
+              rounded-full
+              px-2.5
+              py-1
+              text-xs
+              font-medium
+              whitespace-nowrap
+
+              ${
+                verified
+                  ? `
+                    bg-emerald-50
+                    text-emerald-700
+                  `
+                  : `
+                    bg-neutral-100
+                    text-neutral-500
+                  `
+              }
+            `}
+          >
+
+            {verified ? (
+
+              <CheckCircle2
+                className="
+                  h-3.5
+                  w-3.5
+                "
+              />
+
+            ) : (
+
+              <Circle
+                className="
+                  h-3.5
+                  w-3.5
+                "
+              />
+
+            )}
+
+            {verified
+              ? "Verified Purchase"
+              : "Not Verified"}
+
+          </div>
+
+        );
+
+      },
+    },
+
+
+    /*
+     * -------------------------------------------------------
+     * REVIEW
+     * -------------------------------------------------------
+     */
 
     {
       key: "review",
       title: "Review",
 
       render: (value) => (
+
         <p className="max-w-xs truncate">
           {String(value)}
         </p>
+
       ),
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * STATUS
+     * -------------------------------------------------------
+     */
 
     {
       key: "status",
       title: "Status",
 
       render: (value) => (
+
         <ReviewStatusBadge
           status={
             value as Review["status"]
           }
         />
+
       ),
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * DATE
+     * -------------------------------------------------------
+     */
 
     {
       key: "created_at",
       title: "Date",
 
       render: (value) =>
+
         new Date(
           value as string
         ).toLocaleDateString(),
+
     },
+
+
+    /*
+     * -------------------------------------------------------
+     * ACTIONS
+     * -------------------------------------------------------
+     */
 
     {
       key: "id",
       title: "Actions",
 
       render: (_, row) => (
+
         <Button
           size="icon"
           variant="ghost"
@@ -210,38 +404,93 @@ export default function ReviewTable({
             openDialog(row)
           }
         >
-          <Eye className="h-4 w-4" />
+
+          <Eye
+            className="
+              h-4
+              w-4
+            "
+          />
+
         </Button>
+
       ),
     },
+
   ];
 
+
+  /*
+   * =========================================================
+   * RENDER
+   * =========================================================
+   */
+
   return (
+
     <>
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
+      {/* =====================================================
+          FILTERS
+      ====================================================== */}
+
+      <div
+        className="
+          mb-4
+          flex
+          flex-col
+          gap-3
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
+      >
+
         <Input
-          placeholder="Search product, customer or review..."
+          placeholder="
+            Search product, customer or review...
+          "
           value={search}
           onChange={(e) =>
             setSearch(
               e.target.value
             )
           }
-          className="md:max-w-sm"
+          className="
+            md:max-w-sm
+          "
         />
 
-        <div className="flex gap-3">
+
+        <div
+          className="
+            flex
+            gap-3
+          "
+        >
+
+          {/* ===============================================
+              STATUS FILTER
+          ================================================ */}
+
           <Select
             value={statusFilter}
             onValueChange={
               setStatusFilter
             }
           >
-            <SelectTrigger className="w-40">
+
+            <SelectTrigger
+              className="w-40"
+            >
+
               <SelectValue />
+
             </SelectTrigger>
 
+
             <SelectContent>
+
               <SelectItem value="all">
                 All Status
               </SelectItem>
@@ -257,8 +506,15 @@ export default function ReviewTable({
               <SelectItem value="rejected">
                 Rejected
               </SelectItem>
+
             </SelectContent>
+
           </Select>
+
+
+          {/* ===============================================
+              RATING FILTER
+          ================================================ */}
 
           <Select
             value={ratingFilter}
@@ -266,11 +522,18 @@ export default function ReviewTable({
               setRatingFilter
             }
           >
-            <SelectTrigger className="w-32">
+
+            <SelectTrigger
+              className="w-32"
+            >
+
               <SelectValue />
+
             </SelectTrigger>
 
+
             <SelectContent>
+
               <SelectItem value="all">
                 All Ratings
               </SelectItem>
@@ -294,20 +557,38 @@ export default function ReviewTable({
               <SelectItem value="1">
                 1 ★
               </SelectItem>
+
             </SelectContent>
+
           </Select>
+
         </div>
+
       </div>
+
+
+      {/* =====================================================
+          TABLE
+      ====================================================== */}
 
       <DataTable
         title="Reviews"
         description="Manage customer reviews."
         columns={columns}
         data={filteredReviews}
-        getRowKey={(row) => row.id}
+        getRowKey={(row) =>
+          row.id
+        }
         emptyTitle="No Reviews"
-        emptyDescription="Customer reviews will appear here."
+        emptyDescription="
+          Customer reviews will appear here.
+        "
       />
+
+
+      {/* =====================================================
+          REVIEW DIALOG
+      ====================================================== */}
 
       <ReviewDialog
         open={dialogOpen}
@@ -335,6 +616,8 @@ export default function ReviewTable({
           deleteReview.mutate(id)
         }
       />
+
     </>
+
   );
 }
