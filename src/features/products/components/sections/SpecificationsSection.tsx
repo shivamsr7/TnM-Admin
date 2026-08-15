@@ -29,13 +29,11 @@ interface Props {
 
 const SPECIFICATION_OPTIONS = [
 
+  "Product Type",
+
   "Material",
 
-  "Plating",
-
-  "Stone",
-
-  "Stone Color",
+  "Plating/Finish",
 
   "Color",
 
@@ -43,27 +41,17 @@ const SPECIFICATION_OPTIONS = [
 
   "Ring Size",
 
-  "Length",
-
-  "Width",
-
-  "Height",
-
-  "Weight",
+  "Design/Pattern",
 
   "Closure",
 
-  "Occasion",
+  "Occasion/Style",
 
-  "Style",
+  "Anti Tarnish",
 
-  "Pattern",
+  "Adjustable",
 
-  "Finish",
-
-  "Country of Origin",
-
-  "Care Instructions",
+  "What's Included"
 
 ] as const;
 
