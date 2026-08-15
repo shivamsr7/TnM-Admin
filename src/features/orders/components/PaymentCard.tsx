@@ -51,21 +51,7 @@ export default function PaymentCard({
     showRefundDialog,
     setShowRefundDialog,
   ] = useState(false);
-
-
-
-
-
-  const [
-    refundTransactionId,
-    setRefundTransactionId,
-  ] = useState("");
-
-
-
-
-
-  const [
+const [
     refundNotes,
     setRefundNotes,
   ] = useState("");
@@ -117,27 +103,6 @@ export default function PaymentCard({
   const handleMarkRefundProcessed =
     async () => {
 
-      const transactionId =
-        refundTransactionId.trim();
-
-
-
-
-
-      if (!transactionId) {
-
-        toast.error(
-          "Please enter the refund transaction ID"
-        );
-
-        return;
-
-      }
-
-
-
-
-
       try {
 
         await processRefund.mutateAsync({
@@ -145,36 +110,19 @@ export default function PaymentCard({
           id:
             order.id,
 
-          refundTransactionId:
-            transactionId,
-
           refundNotes:
             refundNotes.trim() ||
             undefined,
 
         });
 
-
-
-
-
         toast.success(
-          "Refund marked as processed"
+          "Refund processed successfully through Razorpay"
         );
-
-
-
-
-
-        setRefundTransactionId("");
 
         setRefundNotes("");
 
         setShowRefundDialog(false);
-
-
-
-
 
       } catch (error) {
 
@@ -182,10 +130,6 @@ export default function PaymentCard({
           "Failed to process refund:",
           error
         );
-
-
-
-
 
         toast.error(
 
@@ -200,8 +144,6 @@ export default function PaymentCard({
       }
 
     };
-
-
 
 
 
@@ -575,7 +517,7 @@ export default function PaymentCard({
 
                   <p className="text-xs text-gray-500">
 
-                    Refund Transaction ID
+                    Razorpay Refund ID
 
                   </p>
 
@@ -692,7 +634,7 @@ export default function PaymentCard({
                       className="mr-2"
                     />
 
-                    Mark Refund Processed
+                    Process Refund
 
                   </Button>
 
@@ -767,7 +709,7 @@ export default function PaymentCard({
 
                   <h3 className="text-lg font-semibold">
 
-                    Mark Refund Processed
+                    Process Refund
 
                   </h3>
 
@@ -777,7 +719,7 @@ export default function PaymentCard({
 
                   <p className="mt-1 text-sm text-gray-500">
 
-                    Confirm that the refund has actually been processed.
+                    This will actually refund the customer through Razorpay.
 
                   </p>
 
@@ -822,42 +764,33 @@ export default function PaymentCard({
 
 
 
-              <div>
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
 
-                <label className="text-sm font-medium text-gray-700">
+                <p className="text-xs text-blue-700">
 
-                  Refund Transaction / Reference ID
+                  Refund Amount
 
-                </label>
+                </p>
 
+                <p className="mt-1 text-2xl font-bold text-blue-900">
 
+                  ₹
+                  {Number(
+                    order.refund_amount ?? 0
+                  ).toLocaleString(
+                    "en-IN"
+                  )}
 
+                </p>
 
+                <p className="mt-2 text-xs leading-5 text-blue-700">
 
-                <input
+                  The refund will be processed automatically through Razorpay.
+                  You do not need to enter a refund transaction ID.
 
-                  type="text"
-
-                  value={
-                    refundTransactionId
-                  }
-
-                  onChange={(event) =>
-                    setRefundTransactionId(
-                      event.target.value
-                    )
-                  }
-
-                  placeholder="Enter refund reference ID"
-
-                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
-
-                />
+                </p>
 
               </div>
-
-
-
 
 
               <div>
@@ -910,7 +843,7 @@ export default function PaymentCard({
 
                 <p className="text-xs leading-5 text-yellow-800">
 
-                  Only mark this as processed after the money has actually been refunded to the customer.
+                  Click only if you want to issue the actual refund now. Razorpay will process the refund and generate the refund ID automatically.
 
                 </p>
 
@@ -956,21 +889,15 @@ export default function PaymentCard({
                   handleMarkRefundProcessed
                 }
 
-                disabled={
-
-                  processRefund.isPending ||
-
-                  !refundTransactionId.trim()
-
-                }
+                disabled={processRefund.isPending}
 
               >
 
                 {processRefund.isPending
 
-                  ? "Saving..."
+                  ? "Processing Refund..."
 
-                  : "Confirm Refund"}
+                  : "Process Refund"}
 
               </Button>
 

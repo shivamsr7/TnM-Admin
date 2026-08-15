@@ -225,45 +225,20 @@ export function useProcessRefund() {
   const queryClient =
     useQueryClient();
 
-
-
-
-
   return useMutation({
 
     mutationFn: ({
-
       id,
-
-      refundTransactionId,
-
       refundNotes,
-
     }: {
-
       id: string;
-
-      refundTransactionId:
-        string;
-
-      refundNotes?:
-        string;
-
+      refundNotes?: string;
     }) =>
 
       orderService.processRefund(
-
         id,
-
-        refundTransactionId,
-
         refundNotes
-
       ),
-
-
-
-
 
     onSuccess: (
       _,
@@ -271,37 +246,20 @@ export function useProcessRefund() {
     ) => {
 
       queryClient.invalidateQueries({
-
         queryKey:
           ["orders"],
-
       });
 
-
-
-
-
       queryClient.invalidateQueries({
-
         queryKey:
           ["orders", variables.id],
-
       });
 
-
-
-
-
       queryClient.invalidateQueries({
-
         queryKey: [
-
           "order-activity",
-
           variables.id,
-
         ],
-
       });
 
     },
@@ -309,8 +267,6 @@ export function useProcessRefund() {
   });
 
 }
-
-
 
 
 

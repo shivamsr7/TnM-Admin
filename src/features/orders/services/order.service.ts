@@ -659,207 +659,255 @@ class OrderService {
 
 
   async processRefund(
-
     id: string,
-
-    refundTransactionId: string,
-
     refundNotes?: string
-
   ) {
-
-    const transactionId =
-      refundTransactionId.trim();
-
-
-
-
-
-    if (!transactionId) {
-
-      throw new Error(
-        "Refund transaction ID is required."
-      );
-
-    }
-
-
-
-
 
     const order =
       await this.getById(id);
-
-
-
-
 
     if (
       order.payment_method !==
       "prepaid"
     ) {
-
       throw new Error(
         "Refund processing is currently available only for prepaid orders."
       );
-
     }
-
-
-
-
 
     if (
       order.order_status !==
       "cancelled"
     ) {
-
       throw new Error(
         "Only cancelled orders can be refunded."
       );
-
     }
-
-
-
-
 
     if (
       order.refund_status ===
       "processed"
     ) {
-
       throw new Error(
         "This refund has already been processed."
       );
-
     }
-
-
-
-
 
     if (
       order.refund_status !==
       "pending"
     ) {
-
       throw new Error(
         "This order does not have a pending refund."
       );
-
     }
 
+    if (
+      !order.payment_transaction_id?.trim()
+    ) {
+      throw new Error(
+        "Razorpay payment ID is missing for this order."
+      );
+    }
 
+    const refundAmount =
+      Number(
+        order.refund_amount ?? 0
+      );
 
+    if (
+      !Number.isFinite(refundAmount) ||
+      refundAmount <= 0
+    ) {
+      throw new Error(
+        "Refund amount must be greater than ₹0."
+      );
+    }
 
+    const idempotencyKey =
+      `tnm_refund_${order.id}`;
+
+    console.log(
+      "💳 Starting Razorpay refund:",
+      {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        razorpayPaymentId:
+          order.payment_transaction_id,
+        refundAmount,
+        idempotencyKey,
+      }
+    );
+
+    let refundResponse: {
+      success?: boolean;
+      refund?: {
+        id?: string;
+        amount?: number;
+        payment_id?: string;
+        status?: string;
+      };
+      error?: string;
+    };
+
+    try {
+      const {
+        data,
+        error
+      } =
+        await supabase.functions.invoke(
+          "refund-razorpay-payment",
+          {
+            body: {
+              paymentId:
+                order.payment_transaction_id,
+              amount:
+                refundAmount,
+              idempotencyKey,
+            },
+          }
+        );
+
+      if (error) {
+        throw new Error(
+          error.message ||
+          "Failed to call Razorpay refund service."
+        );
+      }
+
+      refundResponse =
+        data;
+
+    } catch (error) {
+      console.error(
+        "❌ Razorpay refund request failed:",
+        error
+      );
+
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Failed to process Razorpay refund."
+      );
+    }
+
+    if (
+      !refundResponse?.success ||
+      !refundResponse.refund?.id
+    ) {
+      throw new Error(
+        refundResponse?.error ||
+        "Razorpay did not return a valid refund ID."
+      );
+    }
+
+    const transactionId =
+      refundResponse.refund.id;
 
     const processedAt =
       new Date().toISOString();
 
-
-
-
+    console.log(
+      "✅ Razorpay refund successful:",
+      {
+        refundId:
+          transactionId,
+        status:
+          refundResponse.refund.status,
+        amount:
+          refundResponse.refund.amount,
+      }
+    );
 
     const {
-      error
-    } = await supabase
+      error: updateError
+    } =
+      await supabase
+        .from("orders")
+        .update({
+          refund_status:
+            "processed",
+          refund_transaction_id:
+            transactionId,
+          refund_processed_at:
+            processedAt,
+          refund_notes:
+            refundNotes?.trim() ||
+            null,
+          advance_payment_status:
+            "refunded",
+          updated_at:
+            processedAt,
+        })
+        .eq(
+          "id",
+          id
+        );
 
-      .from("orders")
-
-      .update({
-
-        refund_status:
-          "processed",
-
-        refund_transaction_id:
-          transactionId,
-
-        refund_processed_at:
-          processedAt,
-
-        refund_notes:
-          refundNotes?.trim() ||
-          null,
-
-        advance_payment_status:
-          "refunded",
-
-        updated_at:
-          processedAt,
-
-      })
-
-      .eq(
-        "id",
-        id
+    if (updateError) {
+      console.error(
+        "❌ Razorpay refund succeeded but order update failed:",
+        updateError
       );
 
-
-
-
-
-    if (error)
-
-      throw error;
-
-
-
-
+      throw new Error(
+        `Refund succeeded in Razorpay (${transactionId}), but the order could not be updated. Please do not issue another refund manually. Refund ID: ${transactionId}`
+      );
+    }
 
     await this.createActivity({
-
       order_id:
         id,
-
       event_type:
         "refund_processed",
-
       title:
         "Refund Processed",
-
       description:
-        `Refund of ₹${Number(
-          order.refund_amount ??
-          0
-        ).toLocaleString(
+        `Refund of ₹${refundAmount.toLocaleString(
           "en-IN",
           {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }
-        )} processed.`,
-
+        )} processed through Razorpay.`,
       metadata: {
-
         refund_status:
           "processed",
-
         refund_amount:
-          Number(
-            order.refund_amount ??
-            0
-          ),
-
+          refundAmount,
         refund_transaction_id:
           transactionId,
-
         refund_processed_at:
           processedAt,
-
+        razorpay_payment_id:
+          order.payment_transaction_id,
+        razorpay_refund_status:
+          refundResponse.refund.status ??
+          null,
       },
-
     });
 
-
-
     await this.sendRefundProcessedEmail(
-      order,
+      {
+        ...order,
+        refund_status:
+          "processed",
+        refund_transaction_id:
+          transactionId,
+        refund_processed_at:
+          processedAt,
+        refund_notes:
+          refundNotes?.trim() ||
+          null,
+        advance_payment_status:
+          "refunded",
+      },
       transactionId,
       processedAt
     );
 
   }
+
 
 
   private async sendRefundProcessedEmail(
