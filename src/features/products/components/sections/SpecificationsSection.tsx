@@ -21,6 +21,53 @@ interface Props {
 }
 
 
+/*
+ * =========================================================
+ * SPECIFICATION OPTIONS
+ * =========================================================
+ */
+
+const SPECIFICATION_OPTIONS = [
+
+  "Material",
+
+  "Plating",
+
+  "Stone",
+
+  "Stone Color",
+
+  "Color",
+
+  "Size",
+
+  "Ring Size",
+
+  "Length",
+
+  "Width",
+
+  "Height",
+
+  "Weight",
+
+  "Closure",
+
+  "Occasion",
+
+  "Style",
+
+  "Pattern",
+
+  "Finish",
+
+  "Country of Origin",
+
+  "Care Instructions",
+
+] as const;
+
+
 export default function SpecificationsSection({
   form,
 }: Props) {
@@ -117,7 +164,7 @@ export default function SpecificationsSection({
 
                 >
 
-                  {/* Label */}
+                  {/* Specification */}
 
                   <div className="space-y-2">
 
@@ -127,17 +174,59 @@ export default function SpecificationsSection({
                       Specification
                     </Label>
 
-                    <Input
 
-                      placeholder="
-                        e.g. Base Metal
-                      "
+                    <select
 
                       {...register(
                         `specifications.${index}.label`
                       )}
 
-                    />
+                      className="
+                        flex
+                        h-10
+                        w-full
+                        rounded-md
+                        border
+                        border-input
+                        bg-background
+                        px-3
+                        py-2
+                        text-sm
+                        ring-offset-background
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-ring
+                        focus:ring-offset-2
+                      "
+
+                    >
+
+                      <option value="">
+                        Select specification
+                      </option>
+
+
+                      {
+                        SPECIFICATION_OPTIONS.map(
+                          option => (
+
+                            <option
+
+                              key={option}
+
+                              value={option}
+
+                            >
+
+                              {option}
+
+                            </option>
+
+                          )
+                        )
+                      }
+
+                    </select>
 
                   </div>
 
@@ -151,6 +240,7 @@ export default function SpecificationsSection({
                     >
                       Value
                     </Label>
+
 
                     <Input
 
@@ -246,8 +336,8 @@ export default function SpecificationsSection({
               >
 
                 Add details such as material,
-                plating, closure type, stone,
-                movement, etc.
+                plating, stone, size, weight,
+                closure, occasion, etc.
 
               </p>
 
@@ -267,8 +357,11 @@ export default function SpecificationsSection({
 
           onClick={() =>
             append({
+
               label: "",
+
               value: "",
+
             })
           }
 

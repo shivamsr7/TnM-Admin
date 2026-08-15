@@ -66,7 +66,9 @@ class OrderService {
 
 
   async getOrderItems(
+
     orderId: string
+
   ) {
 
     const {
@@ -108,8 +110,11 @@ class OrderService {
 
 
   async updateOrder(
+
     id: string,
+
     updates: Partial<Order>
+
   ) {
 
     const {
@@ -151,7 +156,9 @@ class OrderService {
 
 
   async getById(
+
     id: string
+
   ): Promise<Order> {
 
     const {
@@ -313,21 +320,111 @@ class OrderService {
 
   ) {
 
+    let cancellationRefundAmount =
+      0;
+
+
+
+
+
+    let cancellationRefundStatus:
+      "not_required"
+      | "pending" =
+      "not_required";
+
+
+
+
+
+    if (
+      status ===
+      "cancelled"
+    ) {
+
+      const existingOrder =
+        await this.getById(id);
+
+
+
+
+
+      cancellationRefundAmount =
+        Number(
+          existingOrder.advance_amount ??
+          0
+        );
+
+
+
+
+
+      if (
+        cancellationRefundAmount >
+        0
+      ) {
+
+        cancellationRefundStatus =
+          "pending";
+
+      }
+
+    }
+
+
+
+
+
+    const updateData:
+      Record<
+        string,
+        unknown
+      > = {
+
+      order_status:
+        status,
+
+      updated_at:
+        new Date().toISOString(),
+
+    };
+
+
+
+
+
+    if (
+      status ===
+      "cancelled"
+    ) {
+
+      updateData.refund_status =
+        cancellationRefundStatus;
+
+      updateData.refund_amount =
+        cancellationRefundAmount;
+
+      updateData.refund_transaction_id =
+        null;
+
+      updateData.refund_processed_at =
+        null;
+
+      updateData.refund_notes =
+        notes ?? null;
+
+    }
+
+
+
+
+
     const {
       error: updateError
     } = await supabase
 
       .from("orders")
 
-      .update({
-
-        order_status:
-          status,
-
-        updated_at:
-          new Date().toISOString(),
-
-      })
+      .update(updateData)
 
       .eq(
         "id",
@@ -415,14 +512,65 @@ class OrderService {
 
           ? "Order Delivered"
 
+          : status === "cancelled"
+
+          ? "Order Cancelled"
+
+          : status === "returned"
+
+          ? "Order Returned"
+
+          : status === "refunded"
+
+          ? "Order Refunded"
+
           : "Order Updated",
 
       description:
-        `Order marked as ${status}`,
+
+        status ===
+        "cancelled"
+
+          ? (
+
+              cancellationRefundAmount >
+              0
+
+                ? `Order cancelled. Refund pending for ₹${cancellationRefundAmount.toLocaleString(
+                    "en-IN",
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}.`
+
+                : "Order cancelled. No refund is required."
+
+            )
+
+          : `Order marked as ${status}`,
 
       metadata: {
 
         status,
+
+        ...(status ===
+        "cancelled"
+
+          ? {
+
+              cancellation_reason:
+                notes ?? null,
+
+              refund_status:
+                cancellationRefundStatus,
+
+              refund_amount:
+                cancellationRefundAmount,
+
+            }
+
+          : {}),
 
       },
 
@@ -439,7 +587,7 @@ class OrderService {
 
 
 
-    // Existing in-app notification
+    // In-app notification
 
     await this.createStatusNotification(
 
@@ -453,9 +601,9 @@ class OrderService {
 
 
 
-    // Email notification
+    // Status emails
 
-    // Only Packed, Shipped and Delivered
+    // Packed / Shipped / Delivered
 
     await this.sendStatusEmail(
 
@@ -464,6 +612,27 @@ class OrderService {
       status
 
     );
+
+
+
+
+
+    // Cancellation email
+
+    if (
+      status ===
+      "cancelled"
+    ) {
+
+      await this.sendCancellationEmail(
+
+        order,
+
+        notes
+
+      );
+
+    }
 
 
 
@@ -484,6 +653,275 @@ class OrderService {
 
 
 
+
+
+
+
+
+  async processRefund(
+
+    id: string,
+
+    refundTransactionId: string,
+
+    refundNotes?: string
+
+  ) {
+
+    const transactionId =
+      refundTransactionId.trim();
+
+
+
+
+
+    if (!transactionId) {
+
+      throw new Error(
+        "Refund transaction ID is required."
+      );
+
+    }
+
+
+
+
+
+    const order =
+      await this.getById(id);
+
+
+
+
+
+    if (
+      order.payment_method !==
+      "prepaid"
+    ) {
+
+      throw new Error(
+        "Refund processing is currently available only for prepaid orders."
+      );
+
+    }
+
+
+
+
+
+    if (
+      order.order_status !==
+      "cancelled"
+    ) {
+
+      throw new Error(
+        "Only cancelled orders can be refunded."
+      );
+
+    }
+
+
+
+
+
+    if (
+      order.refund_status ===
+      "processed"
+    ) {
+
+      throw new Error(
+        "This refund has already been processed."
+      );
+
+    }
+
+
+
+
+
+    if (
+      order.refund_status !==
+      "pending"
+    ) {
+
+      throw new Error(
+        "This order does not have a pending refund."
+      );
+
+    }
+
+
+
+
+
+    const processedAt =
+      new Date().toISOString();
+
+
+
+
+
+    const {
+      error
+    } = await supabase
+
+      .from("orders")
+
+      .update({
+
+        refund_status:
+          "processed",
+
+        refund_transaction_id:
+          transactionId,
+
+        refund_processed_at:
+          processedAt,
+
+        refund_notes:
+          refundNotes?.trim() ||
+          null,
+
+        advance_payment_status:
+          "refunded",
+
+        updated_at:
+          processedAt,
+
+      })
+
+      .eq(
+        "id",
+        id
+      );
+
+
+
+
+
+    if (error)
+
+      throw error;
+
+
+
+
+
+    await this.createActivity({
+
+      order_id:
+        id,
+
+      event_type:
+        "refund_processed",
+
+      title:
+        "Refund Processed",
+
+      description:
+        `Refund of ₹${Number(
+          order.refund_amount ??
+          0
+        ).toLocaleString(
+          "en-IN",
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }
+        )} processed.`,
+
+      metadata: {
+
+        refund_status:
+          "processed",
+
+        refund_amount:
+          Number(
+            order.refund_amount ??
+            0
+          ),
+
+        refund_transaction_id:
+          transactionId,
+
+        refund_processed_at:
+          processedAt,
+
+      },
+
+    });
+
+
+
+    await this.sendRefundProcessedEmail(
+      order,
+      transactionId,
+      processedAt
+    );
+
+  }
+
+
+  private async sendRefundProcessedEmail(
+    order: Order,
+    refundTransactionId: string,
+    refundProcessedAt: string
+  ) {
+    if (!order.customer_email) {
+      console.error("❌ Refund email skipped: customer_email is missing");
+      return;
+    }
+
+    const items = await this.getOrderItems(order.id);
+
+    console.log("📧 Sending refund processed email:", {
+      to: order.customer_email,
+      orderNumber: order.order_number,
+      refundAmount: order.refund_amount,
+      refundTransactionId,
+    });
+
+    try {
+      const result = await notificationService.sendRefundProcessedEmail({
+        to: order.customer_email,
+        customerName: order.customer_name,
+        orderNumber: order.order_number,
+        orderDate: order.created_at,
+        items: items.map(item => ({
+          productName: item.product_name,
+          productImage: item.product_image ?? null,
+          price: item.price,
+          quantity: item.quantity,
+          total: item.total,
+        })),
+        subtotal: order.subtotal,
+        discount: order.discount,
+        shippingCharge: order.shipping_charge,
+        tax: order.tax,
+        totalAmount: order.total_amount,
+        paymentMethod: order.payment_method,
+        advanceAmount: order.advance_amount,
+        paymentTransactionId: order.payment_transaction_id,
+        refundAmount: Number(order.refund_amount ?? 0),
+        refundTransactionId,
+        refundProcessedAt,
+        shipping: {
+          fullName: order.shipping_full_name ?? order.customer_name,
+          phone: order.shipping_phone ?? order.customer_phone,
+          address: order.shipping_address ?? "",
+          city: order.shipping_city ?? "",
+          state: order.shipping_state ?? "",
+          pincode: order.shipping_pincode ?? "",
+          landmark: order.shipping_landmark ?? null,
+          country: order.shipping_country ?? "India",
+        },
+      });
+
+      console.log("✅ Refund processed email request completed:", result);
+    } catch (error) {
+      console.error("❌ Refund processed email failed:", error);
+    }
+  }
 
 
 
@@ -681,6 +1119,31 @@ class OrderService {
 
         },
 
+        cancelled: {
+
+          title:
+            "Order Cancelled",
+
+          message:
+
+            order.refund_status ===
+            "pending"
+
+              ? `Your order #${order.order_number} has been cancelled. Your refund of ₹${Number(
+                  order.refund_amount ??
+                  0
+                ).toLocaleString(
+                  "en-IN",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }
+                )} is pending.`
+
+              : `Your order #${order.order_number} has been cancelled. No refund is required.`,
+
+        },
+
       };
 
 
@@ -737,20 +1200,26 @@ class OrderService {
   ) {
 
     console.log(
+
       "📧 sendStatusEmail called:",
+
       {
-        orderId: order.id,
+
+        orderId:
+          order.id,
+
         status,
+
         customerEmail:
           order.customer_email,
+
       }
+
     );
 
 
 
 
-
-    // Only these statuses send email
 
     if (
 
@@ -762,10 +1231,6 @@ class OrderService {
 
     ) {
 
-      console.log(
-        "📧 Email skipped: status is not email-enabled"
-      );
-
       return;
 
     }
@@ -774,13 +1239,12 @@ class OrderService {
 
 
 
-    // Customer email is required
-
     if (!order.customer_email) {
 
       console.error(
-        "❌ Email skipped: customer_email is missing",
-        order.id
+
+        "❌ Email skipped: customer_email is missing"
+
       );
 
       return;
@@ -793,7 +1257,9 @@ class OrderService {
 
     const items =
       await this.getOrderItems(
+
         order.id
+
       );
 
 
@@ -801,16 +1267,24 @@ class OrderService {
 
 
     console.log(
+
       "📧 Sending status email:",
+
       {
+
         status,
+
         to:
           order.customer_email,
+
         orderNumber:
           order.order_number,
+
         itemCount:
           items.length,
+
       }
+
     );
 
 
@@ -820,7 +1294,9 @@ class OrderService {
     try {
 
       const result =
+
         await notificationService
+
           .sendOrderStatusEmail({
 
             to:
@@ -906,51 +1382,35 @@ class OrderService {
             shipping: {
 
               fullName:
-
                 order.shipping_full_name ??
-
                 order.customer_name,
 
               phone:
-
                 order.shipping_phone ??
-
                 order.customer_phone,
 
               address:
-
                 order.shipping_address ??
-
                 "",
 
               city:
-
                 order.shipping_city ??
-
                 "",
 
               state:
-
                 order.shipping_state ??
-
                 "",
 
               pincode:
-
                 order.shipping_pincode ??
-
                 "",
 
               landmark:
-
                 order.shipping_landmark ??
-
                 null,
 
               country:
-
                 order.shipping_country ??
-
                 "India",
 
             },
@@ -972,8 +1432,11 @@ class OrderService {
 
 
       console.log(
+
         "✅ Status email request completed:",
+
         result
+
       );
 
 
@@ -983,19 +1446,262 @@ class OrderService {
     } catch (error) {
 
       console.error(
+
         "❌ Status email failed:",
+
         error
+
+      );
+
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+  private async sendCancellationEmail(
+
+    order: Order,
+
+    cancellationReason?: string
+
+  ) {
+
+    if (!order.customer_email) {
+
+      console.error(
+
+        "❌ Cancellation email skipped: customer_email is missing"
+
+      );
+
+      return;
+
+    }
+
+
+
+
+
+    const items =
+      await this.getOrderItems(
+
+        order.id
+
       );
 
 
 
 
 
-      // Don't roll back the order status
+    console.log(
 
-      // because email failure should not
+      "📧 Sending cancellation email:",
 
-      // undo the admin's status update.
+      {
+
+        to:
+          order.customer_email,
+
+        orderNumber:
+          order.order_number,
+
+        refundStatus:
+          order.refund_status,
+
+        refundAmount:
+          order.refund_amount,
+
+      }
+
+    );
+
+
+
+
+
+    try {
+
+      const result =
+
+        await notificationService
+
+          .sendOrderCancellationEmail({
+
+            to:
+              order.customer_email,
+
+            customerName:
+              order.customer_name,
+
+            orderNumber:
+              order.order_number,
+
+            orderDate:
+              order.created_at,
+
+            cancellationReason:
+              cancellationReason ??
+              order.refund_notes ??
+              null,
+
+
+
+
+
+            items:
+
+              items.map(
+
+                item => ({
+
+                  productName:
+                    item.product_name,
+
+                  productImage:
+                    item.product_image ??
+                    null,
+
+                  price:
+                    item.price,
+
+                  quantity:
+                    item.quantity,
+
+                  total:
+                    item.total,
+
+                })
+
+              ),
+
+
+
+
+
+            subtotal:
+              order.subtotal,
+
+            discount:
+              order.discount,
+
+            shippingCharge:
+              order.shipping_charge,
+
+            tax:
+              order.tax,
+
+            totalAmount:
+              order.total_amount,
+
+
+
+
+
+            paymentMethod:
+              order.payment_method,
+
+            advanceAmount:
+              order.advance_amount,
+
+            remainingAmount:
+              order.remaining_amount,
+
+            paymentTransactionId:
+              order.payment_transaction_id,
+
+
+
+
+
+            refundStatus:
+              order.refund_status,
+
+            refundAmount:
+              Number(
+                order.refund_amount ??
+                0
+              ),
+
+            refundTransactionId:
+              order.refund_transaction_id,
+
+            refundProcessedAt:
+              order.refund_processed_at,
+
+
+
+
+
+            shipping: {
+
+              fullName:
+                order.shipping_full_name ??
+                order.customer_name,
+
+              phone:
+                order.shipping_phone ??
+                order.customer_phone,
+
+              address:
+                order.shipping_address ??
+                "",
+
+              city:
+                order.shipping_city ??
+                "",
+
+              state:
+                order.shipping_state ??
+                "",
+
+              pincode:
+                order.shipping_pincode ??
+                "",
+
+              landmark:
+                order.shipping_landmark ??
+                null,
+
+              country:
+                order.shipping_country ??
+                "India",
+
+            },
+
+          });
+
+
+
+
+
+      console.log(
+
+        "✅ Cancellation email request completed:",
+
+        result
+
+      );
+
+
+
+
+
+    } catch (error) {
+
+      console.error(
+
+        "❌ Cancellation email failed:",
+
+        error
+
+      );
 
     }
 

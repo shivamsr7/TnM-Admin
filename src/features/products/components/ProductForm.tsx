@@ -234,7 +234,7 @@ export default function ProductForm({
    * =======================================================
    * COLLECTIONS
    * =======================================================
-   */
+ */
 
   const {
 
@@ -455,9 +455,6 @@ export default function ProductForm({
     data:
       subcategories = [],
 
-    isLoading:
-      loadingSubcategories,
-
   } =
     useSubcategories(
       selectedCategory ||
@@ -488,6 +485,13 @@ export default function ProductForm({
    * =======================================================
    * LOADING
    * =======================================================
+   *
+   * IMPORTANT:
+   * loadingSubcategories is intentionally NOT included here.
+   *
+   * When category changes, the subcategory query loads in the
+   * background. The complete ProductForm should remain visible.
+   * =======================================================
    */
 
   const isLoading =
@@ -501,9 +505,7 @@ export default function ProductForm({
 
         loadingCollections ||
 
-        loadingTags ||
-
-        loadingSubcategories
+        loadingTags
 
       );
 
@@ -516,8 +518,6 @@ export default function ProductForm({
       loadingCollections,
 
       loadingTags,
-
-      loadingSubcategories,
 
     ]);
 

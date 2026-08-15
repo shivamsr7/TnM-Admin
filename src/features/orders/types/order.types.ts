@@ -22,6 +22,12 @@ export type CodPaymentStatus =
   | "pending"
   | "collected";
 
+export type RefundStatus =
+  | "not_required"
+  | "pending"
+  | "processed"
+  | "failed";
+
 export interface Order {
   id: string;
 
@@ -51,26 +57,71 @@ export interface Order {
 
   payment_method: PaymentMethod;
 
-  advance_payment_status: AdvancePaymentStatus;
+  advance_payment_status:
+    AdvancePaymentStatus;
 
-  cod_payment_status: CodPaymentStatus;
+  cod_payment_status:
+    CodPaymentStatus;
+
+  refund_status:
+    RefundStatus;
+
+  refund_amount: number;
+
+  refund_transaction_id:
+    string | null;
+
+  refund_processed_at:
+    string | null;
+
+  refund_notes:
+    string | null;
 
   order_status: OrderStatus;
 
   notes: string | null;
 
-shipping_full_name: string | null;
-shipping_phone: string | null;
-shipping_address: string | null;
-shipping_city: string | null;
-shipping_state: string | null;
-shipping_pincode: string | null;
-shipping_landmark: string | null;
-shipping_country: string | null;
-address_type: string | null;
+  shipping_full_name:
+    string | null;
 
-courier_name: string | null;
-tracking_number: string | null;
+  shipping_phone:
+    string | null;
+
+  shipping_address:
+    string | null;
+
+  shipping_city:
+    string | null;
+
+  shipping_state:
+    string | null;
+
+  shipping_pincode:
+    string | null;
+
+  shipping_landmark:
+    string | null;
+
+  shipping_country:
+    string | null;
+
+  address_type:
+    string | null;
+
+  courier_name:
+    string | null;
+
+  tracking_number:
+    string | null;
+
+  payment_transaction_id:
+    string | null;
+
+  coupon_code:
+    string | null;
+
+  coupon_id:
+    string | null;
 
   created_at: string;
 
@@ -93,6 +144,4 @@ export interface OrderItem {
   quantity: number;
 
   total: number;
-
-  
 }

@@ -4,157 +4,519 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import { orderService } from "../services/order.service";
+import {
+  orderService
+} from "../services/order.service";
 
 import type {
   Order,
   OrderStatus,
 } from "../types/order.types";
+
+
+
+
+
 export function useOrders() {
+
   return useQuery({
-    queryKey: ["orders"],
-    queryFn: () => orderService.getAll(),
+
+    queryKey:
+      ["orders"],
+
+    queryFn:
+      () =>
+        orderService.getAll(),
+
   });
+
 }
 
-export function useOrder(id: string) {
+
+
+
+
+export function useOrder(
+  id: string
+) {
+
   return useQuery({
-    queryKey: ["orders", id],
-    queryFn: () => orderService.getById(id),
-    enabled: !!id,
+
+    queryKey:
+      ["orders", id],
+
+    queryFn:
+      () =>
+        orderService.getById(id),
+
+    enabled:
+      !!id,
+
   });
+
 }
-export function useOrderHistory(orderId: string) {
+
+
+
+
+
+export function useOrderHistory(
+  orderId: string
+) {
+
   return useQuery({
-    queryKey: ["order-history", orderId],
 
-    queryFn: () =>
-      orderService.getOrderHistory(orderId),
+    queryKey:
+      ["order-history", orderId],
 
-    enabled: !!orderId,
+    queryFn:
+      () =>
+        orderService.getOrderHistory(
+          orderId
+        ),
+
+    enabled:
+      !!orderId,
+
   });
+
 }
-export function useOrderActivity(orderId: string) {
+
+
+
+
+
+export function useOrderActivity(
+  orderId: string
+) {
+
   return useQuery({
-    queryKey: ["order-activity", orderId],
 
-    queryFn: () =>
-      orderService.getOrderActivity(orderId),
+    queryKey:
+      ["order-activity", orderId],
 
-    enabled: !!orderId,
+    queryFn:
+      () =>
+        orderService.getOrderActivity(
+          orderId
+        ),
+
+    enabled:
+      !!orderId,
+
   });
+
 }
+
+
+
+
+
 export function useUpdateOrderStatus() {
-  const queryClient = useQueryClient();
+
+  const queryClient =
+    useQueryClient();
+
+
+
+
 
   return useMutation({
+
     mutationFn: ({
+
       id,
+
       status,
+
       notes,
+
     }: {
+
       id: string;
+
       status: OrderStatus;
+
       notes?: string;
+
     }) =>
+
       orderService.updateStatus(
+
         id,
+
         status,
+
         notes
+
       ),
 
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["orders"],
-      });
+
+
+
+
+    onSuccess: (
+      _,
+      variables
+    ) => {
 
       queryClient.invalidateQueries({
-        queryKey: ["orders", variables.id],
+
+        queryKey:
+          ["orders"],
+
       });
 
+
+
+
+
       queryClient.invalidateQueries({
-        queryKey: ["order-history", variables.id],
+
+        queryKey:
+          ["orders", variables.id],
+
       });
+
+
+
+
+
       queryClient.invalidateQueries({
-  queryKey: ["order-activity", variables.id],
-});
+
+        queryKey: [
+
+          "order-history",
+
+          variables.id,
+
+        ],
+
+      });
+
+
+
+
+
+      queryClient.invalidateQueries({
+
+        queryKey: [
+
+          "order-activity",
+
+          variables.id,
+
+        ],
+
+      });
+
     },
+
   });
+
 }
+
+
+
+
+
+export function useProcessRefund() {
+
+  const queryClient =
+    useQueryClient();
+
+
+
+
+
+  return useMutation({
+
+    mutationFn: ({
+
+      id,
+
+      refundTransactionId,
+
+      refundNotes,
+
+    }: {
+
+      id: string;
+
+      refundTransactionId:
+        string;
+
+      refundNotes?:
+        string;
+
+    }) =>
+
+      orderService.processRefund(
+
+        id,
+
+        refundTransactionId,
+
+        refundNotes
+
+      ),
+
+
+
+
+
+    onSuccess: (
+      _,
+      variables
+    ) => {
+
+      queryClient.invalidateQueries({
+
+        queryKey:
+          ["orders"],
+
+      });
+
+
+
+
+
+      queryClient.invalidateQueries({
+
+        queryKey:
+          ["orders", variables.id],
+
+      });
+
+
+
+
+
+      queryClient.invalidateQueries({
+
+        queryKey: [
+
+          "order-activity",
+
+          variables.id,
+
+        ],
+
+      });
+
+    },
+
+  });
+
+}
+
+
+
+
 
 export function useDeleteOrder() {
-  const queryClient = useQueryClient();
+
+  const queryClient =
+    useQueryClient();
+
+
+
+
 
   return useMutation({
-    mutationFn: (id: string) =>
-      orderService.delete(id),
+
+    mutationFn:
+      (id: string) =>
+        orderService.delete(id),
 
     onSuccess: () => {
+
       queryClient.invalidateQueries({
-        queryKey: ["orders"],
+
+        queryKey:
+          ["orders"],
+
       });
+
     },
+
   });
+
 }
-export function useOrderItems(orderId: string) {
+
+
+
+
+
+export function useOrderItems(
+  orderId: string
+) {
+
   return useQuery({
-    queryKey: ["order-items", orderId],
-    queryFn: () =>
-      orderService.getOrderItems(orderId),
-    enabled: !!orderId,
+
+    queryKey:
+      ["order-items", orderId],
+
+    queryFn:
+      () =>
+        orderService.getOrderItems(
+          orderId
+        ),
+
+    enabled:
+      !!orderId,
+
   });
+
 }
+
+
+
+
+
 export function useUpdateOrder() {
-  const queryClient = useQueryClient();
+
+  const queryClient =
+    useQueryClient();
+
+
+
+
 
   return useMutation({
+
     mutationFn: ({
+
       id,
+
       updates,
-    }: {
-      id: string;
-      updates: Partial<Order>;
-    }) =>
-      orderService.updateOrder(id, updates),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["orders"],
-      });
-    },
-  });
-}
-export function useUpdateTracking() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      id,
-      courier_name,
-      tracking_number,
     }: {
+
       id: string;
-      courier_name: string;
-      tracking_number: string;
+
+      updates:
+        Partial<Order>;
+
     }) =>
-      orderService.updateTracking(
+
+      orderService.updateOrder(
+
         id,
-        courier_name,
-        tracking_number
+
+        updates
+
       ),
 
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["orders"],
-      });
+
+
+
+
+    onSuccess: () => {
 
       queryClient.invalidateQueries({
-        queryKey: ["orders", variables.id],
+
+        queryKey:
+          ["orders"],
+
       });
 
-      queryClient.invalidateQueries({
-        queryKey: ["order-activity", variables.id],
-      });
     },
+
   });
+
+}
+
+
+
+
+
+export function useUpdateTracking() {
+
+  const queryClient =
+    useQueryClient();
+
+
+
+
+
+  return useMutation({
+
+    mutationFn: ({
+
+      id,
+
+      courier_name,
+
+      tracking_number,
+
+    }: {
+
+      id: string;
+
+      courier_name:
+        string;
+
+      tracking_number:
+        string;
+
+    }) =>
+
+      orderService.updateTracking(
+
+        id,
+
+        courier_name,
+
+        tracking_number
+
+      ),
+
+
+
+
+
+    onSuccess: (
+      _,
+      variables
+    ) => {
+
+      queryClient.invalidateQueries({
+
+        queryKey:
+          ["orders"],
+
+      });
+
+
+
+
+
+      queryClient.invalidateQueries({
+
+        queryKey:
+          ["orders", variables.id],
+
+      });
+
+
+
+
+
+      queryClient.invalidateQueries({
+
+        queryKey: [
+
+          "order-activity",
+
+          variables.id,
+
+        ],
+
+      });
+
+    },
+
+  });
+
 }
