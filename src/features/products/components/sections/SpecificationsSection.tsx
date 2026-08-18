@@ -51,7 +51,21 @@ const SPECIFICATION_OPTIONS = [
 
   "Adjustable",
 
-  "What's Included"
+  "What's Included",
+
+  "Dial Shape",
+
+  "Dial Color",
+
+  "Detailing",
+
+  "Movement Type",
+
+  "Wear Type",
+
+  "Best For",
+
+  "Daily Wear"
 
 ] as const;
 
