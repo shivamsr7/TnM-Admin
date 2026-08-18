@@ -34,6 +34,7 @@ export interface StoreSettings {
 
   // Shipping
   freeShippingThreshold: number | null;
+  freeGiftThreshold: number | null;
   shippingCharge: number | null;
   codEnabled: boolean;
 deliveryTime: string;

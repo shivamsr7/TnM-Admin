@@ -34,6 +34,7 @@ export const storeSettingsSchema = z.object({
 
   // Shipping
   freeShippingThreshold: z.number().nullable(),
+  freeGiftThreshold: z.number().nullable(),
   shippingCharge: z.number().nullable(),
   codEnabled: z.boolean(),
 deliveryTime: z.string().default(""),

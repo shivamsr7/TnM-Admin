@@ -55,6 +55,22 @@ export default function ShippingCard() {
           />
         </div>
 
+        {/* Free Gift */}
+        <div className="space-y-2">
+          <Label htmlFor="freeGiftThreshold">
+            Free Gift Above (₹)
+          </Label>
+
+          <Input
+            id="freeGiftThreshold"
+            type="number"
+            placeholder="1000"
+            {...form.register("freeGiftThreshold", {
+              valueAsNumber: true,
+            })}
+          />
+        </div>
+
         {/* Delivery Time */}
         <div className="space-y-2 md:col-span-2">
   <Label htmlFor="deliveryTime">

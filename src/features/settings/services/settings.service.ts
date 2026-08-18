@@ -42,6 +42,7 @@ class SettingsService {
       linkedin: data.linkedin,
 
       freeShippingThreshold: data.free_shipping_threshold,
+      freeGiftThreshold: data.free_gift_threshold,
       shippingCharge: data.shipping_charge,
       codEnabled: data.cod_enabled,
 deliveryTime: data.delivery_time,
@@ -131,6 +132,7 @@ twitterCard: data.twitter_card,
 
 // Shipping
 free_shipping_threshold: values.freeShippingThreshold,
+free_gift_threshold: values.freeGiftThreshold,
 shipping_charge: values.shippingCharge,
 
 delivery_time: values.deliveryTime,

@@ -38,6 +38,7 @@ export function mapStoreSettingsToFormValues(
 
     // Shipping
     freeShippingThreshold: settings.freeShippingThreshold,
+    freeGiftThreshold: settings.freeGiftThreshold,
     shippingCharge: settings.shippingCharge,
     codEnabled: settings.codEnabled,
 
