@@ -10,7 +10,24 @@ import {
 
 import type {
   CouponFormData,
+  CouponTargetType,
+  CouponTargetMode,
 } from "../types/coupon.types";
+
+export interface CouponRulesPayload {
+  targets: Array<{
+    target_type: CouponTargetType;
+    target_id: string;
+    target_mode: CouponTargetMode;
+  }>;
+  customerIds: string[];
+  membershipTierIds: string[];
+}
+
+export interface CouponSubmitPayload {
+  data: CouponFormData;
+  rules: CouponRulesPayload;
+}
 
 export function useCoupons() {
   return useQuery({
@@ -33,8 +50,12 @@ export function useCreateCoupon() {
 
   return useMutation({
     mutationFn: (
-      data: CouponFormData
-    ) => couponService.create(data),
+      payload: CouponSubmitPayload
+    ) =>
+      couponService.createWithRules(
+        payload.data,
+        payload.rules
+      ),
 
     onSuccess: () => {
       qc.invalidateQueries({
@@ -51,11 +72,17 @@ export function useUpdateCoupon() {
     mutationFn: ({
       id,
       data,
+      rules,
     }: {
       id: string;
       data: CouponFormData;
+      rules: CouponRulesPayload;
     }) =>
-      couponService.update(id, data),
+      couponService.updateWithRules(
+        id,
+        data,
+        rules
+      ),
 
     onSuccess: () => {
       qc.invalidateQueries({

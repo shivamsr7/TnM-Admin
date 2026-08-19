@@ -3,6 +3,7 @@ import { Calendar, Copy } from "lucide-react";
 import DataTable from "@/components/shared/DataTable";
 import ActionMenu from "@/shared/components/admin/ActionMenu";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { Switch } from "@/components/ui/switch";
 
 import type { Coupon } from "../types/coupon.types";
 
@@ -10,9 +11,25 @@ interface CouponTableProps {
   data: Coupon[];
   onEdit: (coupon: Coupon) => void;
   onDelete: (coupon: Coupon) => void;
+  onToggleCartBanner?: (
+    coupon: Coupon,
+    enabled: boolean
+  ) => void | Promise<void>;
 }
 
 function formatDiscount(coupon: Coupon) {
+  if (
+    coupon.discount_type === "free_shipping"
+  ) {
+    return "Free Shipping";
+  }
+
+  if (
+    coupon.discount_type === "free_gift"
+  ) {
+    return "Free Gift";
+  }
+
   return coupon.discount_type === "percentage"
     ? `${coupon.discount_value}%`
     : `₹${coupon.discount_value}`;
@@ -29,17 +46,21 @@ function formatUsage(coupon: Coupon) {
 function formatExpiry(date: string | null) {
   if (!date) return "Never";
 
-  return new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return new Date(date).toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
 }
 
 export default function CouponTable({
   data,
   onEdit,
   onDelete,
+  onToggleCartBanner,
 }: CouponTableProps) {
   return (
     <DataTable<Coupon>
@@ -57,7 +78,9 @@ export default function CouponTable({
               <button
                 type="button"
                 onClick={() =>
-                  navigator.clipboard.writeText(coupon.code)
+                  navigator.clipboard.writeText(
+                    coupon.code
+                  )
                 }
                 className="text-slate-500 hover:text-slate-800"
                 title="Copy Coupon"
@@ -87,10 +110,42 @@ export default function CouponTable({
         },
 
         {
+          key: "show_in_cart",
+          title: "Cart",
+          render: (_value, coupon) => (
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Switch
+                checked={coupon.show_in_cart === true}
+                disabled={!onToggleCartBanner}
+                onCheckedChange={(checked) =>
+                  onToggleCartBanner?.(
+                    coupon,
+                    checked
+                  )
+                }
+                aria-label={`Show ${coupon.code} in cart`}
+              />
+
+              <span
+                className={
+                  coupon.show_in_cart
+                    ? "text-xs font-medium text-emerald-600"
+                    : "text-xs text-slate-500"
+                }
+              >
+                {coupon.show_in_cart
+                  ? "Shown"
+                  : "Hidden"}
+              </span>
+            </div>
+          ),
+        },
+
+        {
           key: "discount_value",
           title: "Discount",
           render: (_value, coupon) => (
-            <span className="font-semibold">
+            <span className="font-semibold whitespace-nowrap">
               {formatDiscount(coupon)}
             </span>
           ),
@@ -109,7 +164,9 @@ export default function CouponTable({
           key: "used_count",
           title: "Usage",
           render: (_value, coupon) => (
-            <span>{formatUsage(coupon)}</span>
+            <span>
+              {formatUsage(coupon)}
+            </span>
           ),
         },
 
@@ -117,7 +174,7 @@ export default function CouponTable({
           key: "expires_at",
           title: "Expiry",
           render: (_value, coupon) => (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 whitespace-nowrap">
               <Calendar className="h-4 w-4 text-slate-500" />
               {formatExpiry(coupon.expires_at)}
             </div>
@@ -143,8 +200,12 @@ export default function CouponTable({
           title: "Actions",
           render: (_value, coupon) => (
             <ActionMenu
-              onEdit={() => onEdit(coupon)}
-              onDelete={() => onDelete(coupon)}
+              onEdit={() =>
+                onEdit(coupon)
+              }
+              onDelete={() =>
+                onDelete(coupon)
+              }
               extraActions={[
                 {
                   label: "Copy Code",

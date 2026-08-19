@@ -5,7 +5,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import CouponForm from "./CouponForm";
+import CouponForm, {
+  type CouponFormSubmitData,
+} from "./CouponForm";
 
 import {
   useCreateCoupon,
@@ -14,7 +16,6 @@ import {
 
 import type {
   Coupon,
-  CouponFormData,
 } from "../types/coupon.types";
 
 interface CouponDialogProps {
@@ -38,16 +39,27 @@ export default function CouponDialog({
     updateMutation.isPending;
 
   const handleSubmit = async (
-    data: CouponFormData
+    payload: CouponFormSubmitData
   ) => {
     try {
+      const rules = {
+        targets: payload.targets,
+        customerIds: payload.customerIds,
+        membershipTierIds:
+          payload.membershipTierIds,
+      };
+
       if (isEditing && coupon) {
         await updateMutation.mutateAsync({
           id: coupon.id,
-          data,
+          data: payload.data,
+          rules,
         });
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync({
+          data: payload.data,
+          rules,
+        });
       }
 
       onOpenChange(false);

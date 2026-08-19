@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
+
+import {
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +13,10 @@ import CouponFilters from "../components/CouponFilters";
 import EmptyState from "@/shared/components/admin/EmptyState";
 
 import { useCoupons } from "../hooks/useCoupons";
+import {
+  couponService,
+} from "../services/coupon.service";
+
 import CouponTable from "../components/CouponTable";
 import CouponStats from "../components/CouponStats";
 import CouponDialog from "../components/CouponDialog";
@@ -16,111 +25,217 @@ import DeleteCouponDialog from "../components/DeleteCouponDialog";
 import type { Coupon } from "../types/coupon.types";
 
 export default function CouponsPage() {
-  const { data: coupons = [], isLoading } = useCoupons();
+  const {
+    data: coupons = [],
+    isLoading,
+  } = useCoupons();
 
-  const [search, setSearch] = useState("");
+  const queryClient =
+    useQueryClient();
 
-  const [selectedCoupon, setSelectedCoupon] =
-    useState<Coupon | null>(null);
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [openDialog, setOpenDialog] =
-    useState(false);
+  const [
+    selectedCoupon,
+    setSelectedCoupon,
+  ] = useState<Coupon | null>(null);
 
-  const [deleteDialog, setDeleteDialog] =
-    useState(false);
-const [status, setStatus] = useState("all");
+  const [
+    openDialog,
+    setOpenDialog,
+  ] = useState(false);
 
-const [discountType, setDiscountType] =
-  useState("all");
+  const [
+    deleteDialog,
+    setDeleteDialog,
+  ] = useState(false);
 
-const [sortBy, setSortBy] =
-  useState("newest");
-  <CouponFilters
-  search={search}
-  onSearchChange={setSearch}
-  status={status}
-  onStatusChange={setStatus}
-  discountType={discountType}
-  onDiscountTypeChange={setDiscountType}
-  sortBy={sortBy}
-  onSortByChange={setSortBy}
-/>
-const filteredCoupons = useMemo(() => {
-  let items = [...coupons];
+  const [
+    status,
+    setStatus,
+  ] = useState("all");
 
-  if (search.trim()) {
-    const keyword = search.toLowerCase();
+  const [
+    discountType,
+    setDiscountType,
+  ] = useState("all");
 
-    items = items.filter(
-      (coupon) =>
-        coupon.code.toLowerCase().includes(keyword) ||
-        coupon.title.toLowerCase().includes(keyword)
-    );
-  }
+  const [
+    sortBy,
+    setSortBy,
+  ] = useState("newest");
 
-  if (status === "active") {
-    items = items.filter((c) => c.is_active);
-  }
+  const [
+    cartBannerUpdatingId,
+    setCartBannerUpdatingId,
+  ] = useState<string | null>(null);
 
-  if (status === "inactive") {
-    items = items.filter((c) => !c.is_active);
-  }
+  const filteredCoupons =
+    useMemo(() => {
+      let items = [...coupons];
 
-  if (status === "expired") {
-    items = items.filter(
-      (c) =>
-        c.expires_at &&
-        new Date(c.expires_at) < new Date()
-    );
-  }
+      if (search.trim()) {
+        const keyword =
+          search.toLowerCase();
 
-  if (discountType !== "all") {
-    items = items.filter(
-      (c) =>
-        c.discount_type === discountType
-    );
-  }
+        items =
+          items.filter(
+            (coupon) =>
+              coupon.code
+                .toLowerCase()
+                .includes(keyword) ||
+              coupon.title
+                .toLowerCase()
+                .includes(keyword)
+          );
+      }
 
-  switch (sortBy) {
-    case "oldest":
-      items.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() -
-          new Date(b.created_at).getTime()
+      if (status === "active") {
+        items =
+          items.filter(
+            (c) => c.is_active
+          );
+      }
+
+      if (status === "inactive") {
+        items =
+          items.filter(
+            (c) => !c.is_active
+          );
+      }
+
+      if (status === "expired") {
+        items =
+          items.filter(
+            (c) =>
+              c.expires_at &&
+              new Date(
+                c.expires_at
+              ) < new Date()
+          );
+      }
+
+      if (
+        discountType !==
+        "all"
+      ) {
+        items =
+          items.filter(
+            (c) =>
+              c.discount_type ===
+              discountType
+          );
+      }
+
+      switch (sortBy) {
+        case "oldest":
+          items.sort(
+            (a, b) =>
+              new Date(
+                a.created_at
+              ).getTime() -
+              new Date(
+                b.created_at
+              ).getTime()
+          );
+          break;
+
+        case "expiry":
+          items.sort(
+            (a, b) =>
+              new Date(
+                a.expires_at ?? 0
+              ).getTime() -
+              new Date(
+                b.expires_at ?? 0
+              ).getTime()
+          );
+          break;
+
+        case "usage":
+          items.sort(
+            (a, b) =>
+              b.used_count -
+              a.used_count
+          );
+          break;
+
+        default:
+          items.sort(
+            (a, b) =>
+              new Date(
+                b.created_at
+              ).getTime() -
+              new Date(
+                a.created_at
+              ).getTime()
+          );
+      }
+
+      return items;
+    }, [
+      coupons,
+      search,
+      status,
+      discountType,
+      sortBy,
+    ]);
+
+  const handleToggleCartBanner =
+    async (
+      coupon: Coupon,
+      enabled: boolean
+    ) => {
+      if (
+        cartBannerUpdatingId
+      ) {
+        return;
+      }
+
+      setCartBannerUpdatingId(
+        coupon.id
       );
-      break;
 
-    case "expiry":
-      items.sort(
-        (a, b) =>
-          new Date(a.expires_at ?? 0).getTime() -
-          new Date(b.expires_at ?? 0).getTime()
-      );
-      break;
+      try {
+        await couponService.setCartBanner(
+          coupon.id,
+          enabled
+        );
 
-    case "usage":
-      items.sort(
-        (a, b) =>
-          b.used_count - a.used_count
-      );
-      break;
+        await queryClient.invalidateQueries(
+          {
+            queryKey: [
+              "coupons",
+            ],
+          }
+        );
 
-    default:
-      items.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() -
-          new Date(a.created_at).getTime()
-      );
-  }
+        toast.success(
+          enabled
+            ? `${coupon.code} is now shown in the cart.`
+            : `${coupon.code} was removed from the cart banner.`
+        );
+      } catch (error) {
+        console.error(
+          "Failed to update cart banner:",
+          error
+        );
 
-  return items;
-}, [
-  coupons,
-  search,
-  status,
-  discountType,
-  sortBy,
-]);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to update cart banner."
+        );
+      } finally {
+        setCartBannerUpdatingId(
+          null
+        );
+      }
+    };
+
   return (
     <div className="space-y-6">
 
@@ -130,8 +245,12 @@ const filteredCoupons = useMemo(() => {
         action={
           <Button
             onClick={() => {
-              setSelectedCoupon(null);
-              setOpenDialog(true);
+              setSelectedCoupon(
+                null
+              );
+              setOpenDialog(
+                true
+              );
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -140,48 +259,87 @@ const filteredCoupons = useMemo(() => {
         }
       />
 
-      <CouponStats coupons={coupons} />
+      <CouponStats
+        coupons={coupons}
+      />
 
       <CouponFilters
-  search={search}
-  onSearchChange={setSearch}
-  status={status}
-  onStatusChange={setStatus}
-  discountType={discountType}
-  onDiscountTypeChange={setDiscountType}
-  sortBy={sortBy}
-  onSortByChange={setSortBy}
-/>
+        search={search}
+        onSearchChange={
+          setSearch
+        }
+        status={status}
+        onStatusChange={
+          setStatus
+        }
+        discountType={
+          discountType
+        }
+        onDiscountTypeChange={
+          setDiscountType
+        }
+        sortBy={sortBy}
+        onSortByChange={
+          setSortBy
+        }
+      />
 
-      {filteredCoupons.length === 0 && !isLoading ? (
+      {filteredCoupons.length ===
+        0 &&
+      !isLoading ? (
         <EmptyState
           title="No Coupons"
           description="Create your first coupon."
         />
       ) : (
         <CouponTable
-          data={filteredCoupons}
-          onEdit={(coupon) => {
-            setSelectedCoupon(coupon);
-            setOpenDialog(true);
+          data={
+            filteredCoupons
+          }
+          onEdit={(
+            coupon
+          ) => {
+            setSelectedCoupon(
+              coupon
+            );
+            setOpenDialog(
+              true
+            );
           }}
-          onDelete={(coupon) => {
-            setSelectedCoupon(coupon);
-            setDeleteDialog(true);
+          onDelete={(
+            coupon
+          ) => {
+            setSelectedCoupon(
+              coupon
+            );
+            setDeleteDialog(
+              true
+            );
           }}
+          onToggleCartBanner={
+            handleToggleCartBanner
+          }
         />
       )}
 
       <CouponDialog
         open={openDialog}
-        onOpenChange={setOpenDialog}
-        coupon={selectedCoupon}
+        onOpenChange={
+          setOpenDialog
+        }
+        coupon={
+          selectedCoupon
+        }
       />
 
       <DeleteCouponDialog
         open={deleteDialog}
-        onOpenChange={setDeleteDialog}
-        coupon={selectedCoupon}
+        onOpenChange={
+          setDeleteDialog
+        }
+        coupon={
+          selectedCoupon
+        }
       />
 
     </div>
