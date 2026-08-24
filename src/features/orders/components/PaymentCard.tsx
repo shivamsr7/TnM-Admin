@@ -2,6 +2,7 @@ import {
   CreditCard,
   Wallet,
   RotateCcw,
+  Gift,
 } from "lucide-react";
 
 import {
@@ -86,6 +87,74 @@ const [
   const showRefund =
     isPrepaid &&
     isCancelled;
+
+
+
+
+
+  /*
+   * Gift Wrap
+   *
+   * Prefer the server-stored Gift Wrap amount.
+   * For older orders created before Gift Wrap was included
+   * in the orders row, prepaid orders may have the Gift Wrap
+   * amount included in the amount actually paid but missing
+   * from gift_wrap_amount. In that legacy case, recover only
+   * the difference between the amount paid and the base order
+   * total.
+   */
+  const baseOrderTotal =
+    Math.max(
+      0,
+      Number(order.subtotal ?? 0) -
+        Number(order.discount ?? 0) +
+        Number(order.shipping_charge ?? 0) +
+        Number(order.tax ?? 0)
+    );
+
+  const storedGiftWrapAmount =
+    order.gift_wrap
+      ? Number(
+          order.gift_wrap_amount ?? 0
+        )
+      : 0;
+
+  const legacyGiftWrapAmount =
+    isPrepaid
+      ? Math.max(
+          0,
+          Number(order.advance_amount ?? 0) -
+            Number(order.total_amount ?? 0)
+        )
+      : 0;
+
+  const giftWrapAmount =
+    storedGiftWrapAmount > 0
+      ? storedGiftWrapAmount
+      : legacyGiftWrapAmount;
+
+  /*
+   * The Admin must show the actual customer-facing total.
+   *
+   * For prepaid orders, the amount paid is the authoritative
+   * captured amount. This also fixes older orders whose
+   * orders.total_amount was saved before Gift Wrap was added.
+   *
+   * For COD/partial COD, use the order total plus any explicit
+   * Gift Wrap amount because advance_amount is not the full total.
+   */
+  const calculatedTotal =
+    isPrepaid
+      ? Math.max(
+          Number(order.total_amount ?? 0) +
+            giftWrapAmount,
+          Number(order.advance_amount ?? 0),
+          baseOrderTotal + giftWrapAmount
+        )
+      : Math.max(
+          Number(order.total_amount ?? 0),
+          baseOrderTotal + giftWrapAmount
+        );
 
 
 
@@ -227,8 +296,12 @@ const [
               <p className="mt-1 text-xl font-bold">
 
                 ₹
-                {order.total_amount.toLocaleString(
-                  "en-IN"
+                {calculatedTotal.toLocaleString(
+                  "en-IN",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }
                 )}
 
               </p>
@@ -254,8 +327,14 @@ const [
               <p className="mt-1 text-xl font-bold text-green-600">
 
                 ₹
-                {order.advance_amount.toLocaleString(
-                  "en-IN"
+                {Number(
+                  order.advance_amount ?? 0
+                ).toLocaleString(
+                  "en-IN",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }
                 )}
 
               </p>
@@ -263,6 +342,99 @@ const [
             </div>
 
           </div>
+
+
+
+
+
+          {/* Gift Wrap */}
+
+          {giftWrapAmount > 0 && (
+
+            <div className="rounded-xl border border-[#C8A44D]/30 bg-[#C8A44D]/[0.08] p-4">
+
+              <div className="flex items-start gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C8A44D]/15">
+
+                  <Gift className="h-5 w-5 text-[#A27B16]" />
+
+                </div>
+
+
+
+
+
+                <div className="min-w-0 flex-1">
+
+                  <div className="flex items-start justify-between gap-4">
+
+                    <div>
+
+                      <p className="font-semibold text-gray-900">
+
+                        Gift Wrap Added
+
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+
+                        Customer requested gift wrapping
+
+                      </p>
+
+                    </div>
+
+
+
+
+
+                    <p className="shrink-0 text-lg font-bold text-[#A27B16]">
+
+                      ₹
+                      {giftWrapAmount.toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )}
+
+                    </p>
+
+                  </div>
+
+
+
+
+
+                  {order.gift_message?.trim() && (
+
+                    <div className="mt-4 rounded-lg border border-[#C8A44D]/20 bg-white/80 p-3">
+
+                      <p className="text-xs font-medium text-gray-500">
+
+                        Gift Message
+
+                      </p>
+
+                      <p className="mt-1 text-sm leading-5 text-gray-700">
+
+                        “{order.gift_message.trim()}”
+
+                      </p>
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          )}
 
 
 

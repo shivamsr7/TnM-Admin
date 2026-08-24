@@ -45,6 +45,12 @@ export interface Order {
 
   discount: number;
 
+  gift_wrap: boolean;
+
+  gift_wrap_amount: number;
+
+  gift_message: string | null;
+
   shipping_charge: number;
 
   tax: number;

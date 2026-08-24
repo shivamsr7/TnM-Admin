@@ -9,14 +9,21 @@ import {
   Monitor,
   FileText,
   FerrisWheel,
+  Gift,
 } from "lucide-react";
 
-import type { SettingsSection } from "../pages/SettingsPage";
+import type {
+  SettingsSection,
+} from "../pages/SettingsPage";
+
 
 interface SettingsSidebarProps {
   active: SettingsSection;
-  onChange: (section: SettingsSection) => void;
+  onChange: (
+    section: SettingsSection
+  ) => void;
 }
+
 
 const sections: {
   id: SettingsSection;
@@ -54,10 +61,15 @@ const sections: {
     icon: CreditCard,
   },
   {
-  id: "spinWheel",
-  title: "Spin Wheel",
-  icon: FerrisWheel,
-},
+    id: "spinWheel",
+    title: "Spin Wheel",
+    icon: FerrisWheel,
+  },
+  {
+    id: "giftWrap",
+    title: "Gift Wrap",
+    icon: Gift,
+  },
   {
     id: "seo",
     title: "SEO",
@@ -75,42 +87,114 @@ const sections: {
   },
 ];
 
+
 export default function SettingsSidebar({
   active,
   onChange,
 }: SettingsSidebarProps) {
+
   return (
-    <aside className="sticky top-6 h-fit rounded-2xl border bg-white p-4 shadow-sm">
-      <h2 className="mb-4 px-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+
+    <aside
+      className="
+        sticky
+        top-6
+        h-fit
+        rounded-2xl
+        border
+        bg-white
+        p-4
+        shadow-sm
+      "
+    >
+
+      <h2
+        className="
+          mb-4
+          px-2
+          text-sm
+          font-semibold
+          uppercase
+          tracking-wide
+          text-gray-500
+        "
+      >
         Settings
       </h2>
 
+
       <div className="space-y-1">
-        {sections.map((section) => {
-          const Icon = section.icon;
 
-          const isActive = active === section.id;
+        {sections.map(
+          (
+            section
+          ) => {
 
-          return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => onChange(section.id)}
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-200 ${
-                isActive
-                  ? "bg-black text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <Icon size={18} />
+            const Icon =
+              section.icon;
 
-              <span className="text-sm font-medium">
-                {section.title}
-              </span>
-            </button>
-          );
-        })}
+            const isActive =
+              active ===
+              section.id;
+
+
+            return (
+
+              <button
+                key={
+                  section.id
+                }
+                type="button"
+                onClick={() =>
+                  onChange(
+                    section.id
+                  )
+                }
+                className={`
+                  flex
+                  w-full
+                  items-center
+                  gap-3
+                  rounded-xl
+                  px-4
+                  py-3
+                  text-left
+                  transition-all
+                  duration-200
+
+                  ${
+                    isActive
+                      ? "bg-black text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+              >
+
+                <Icon
+                  size={18}
+                />
+
+
+                <span
+                  className="
+                    text-sm
+                    font-medium
+                  "
+                >
+                  {section.title}
+                </span>
+
+              </button>
+
+            );
+
+          }
+        )}
+
       </div>
+
     </aside>
+
   );
+
 }

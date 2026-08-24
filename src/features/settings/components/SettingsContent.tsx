@@ -1,4 +1,6 @@
-import type { SettingsSection } from "../pages/SettingsPage";
+import type {
+  SettingsSection,
+} from "../pages/SettingsPage";
 
 import GeneralSection from "../sections/GeneralSection";
 import BrandingSection from "../sections/BrandingSection";
@@ -10,14 +12,22 @@ import SeoSection from "../sections/SeoSection";
 import HomepageSection from "../sections/HomepageSection";
 import LegalSection from "../sections/LegalSection";
 import SpinWheelSection from "../sections/SpinWheelSection";
+import GiftWrapSection from "../sections/GiftWrapSection";
+
+
 interface SettingsContentProps {
   active: SettingsSection;
 }
 
+
 export default function SettingsContent({
   active,
 }: SettingsContentProps) {
-  switch (active) {
+
+  switch (
+    active
+  ) {
+
     case "general":
       return <GeneralSection />;
 
@@ -41,12 +51,19 @@ export default function SettingsContent({
 
     case "homepage":
       return <HomepageSection />;
-case "spinWheel":
-  return <SpinWheelSection />;
+
+    case "spinWheel":
+      return <SpinWheelSection />;
+
+    case "giftWrap":
+      return <GiftWrapSection />;
+
     case "legal":
       return <LegalSection />;
 
     default:
       return <GeneralSection />;
+
   }
+
 }
