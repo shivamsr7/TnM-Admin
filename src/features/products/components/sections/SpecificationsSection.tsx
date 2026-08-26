@@ -77,7 +77,15 @@ const SPECIFICATION_OPTIONS = [
 
   "Feature",
 
-  "Design"
+  "Design",
+
+  "Stone Shape",
+
+  "Stone Color",
+
+  "Pendant Style",
+
+  "Chain Type"
 
 ] as const;
 
