@@ -65,7 +65,19 @@ const SPECIFICATION_OPTIONS = [
 
   "Best For",
 
-  "Daily Wear"
+  "Daily Wear",
+
+  "Occasions",
+
+  "Style",
+
+  "Charm Shape",
+
+  "Charms",
+
+  "Feature",
+
+  "Design"
 
 ] as const;
 
