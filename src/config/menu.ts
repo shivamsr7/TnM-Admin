@@ -17,7 +17,8 @@ import {
   Bell,
   MessageSquare,
   HelpCircle,
-  FileText
+  FileText,
+  MessageCircle
 } from "lucide-react";
 
 export const menuItems = [
@@ -90,6 +91,12 @@ export const menuItems = [
   title: "Homepage",
   path: "/homepage",
   icon: LayoutTemplate,
+},
+
+{
+  title: "Instagram Reviews",
+  path: "/instagram-reviews",
+  icon: MessageCircle,
 },
 
 {

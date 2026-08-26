@@ -50,6 +50,8 @@ import NotifyRequestsPage from "@/features/notify/pages/NotifyRequestsPage";
 import ReviewsPage from "@/features/reviews/pages/ReviewsPage";
 import FAQsPage from "@/features/faqs/pages/FAQsPage";
 import PoliciesPage from "@/features/cms/pages/PoliciesPage";
+import InstagramReviewsPage
+  from "@/features/instagramReviews/pages/InstagramReviewsPage";
 export const router = createBrowserRouter([
   // ---------------- Public Routes ----------------
 
@@ -179,6 +181,10 @@ export const router = createBrowserRouter([
 {
   path: "settings",
   element: <SettingsPage />,
+},
+{
+  path: "instagram-reviews",
+  element: <InstagramReviewsPage />,
 },
 {
   path: "homepage",
