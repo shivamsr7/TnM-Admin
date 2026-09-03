@@ -188,23 +188,6 @@ export default function ProductForm({
     useState(false);
 
 
-  /*
-   * =========================================================
-   * RING SIZE AVAILABILITY
-   * =========================================================
-   */
-
-  const RING_SIZES = Array.from(
-  { length: 25 },
-  (_, index) => String(index + 6)
-);
-
-  const [
-    ringSizes,
-    setRingSizes,
-  ] = useState<string[]>([]);
-
-
   const mediaUploaderRef =
     useRef<MediaUploaderHandle>(
       null
@@ -461,19 +444,6 @@ export default function ProductForm({
     );
 
 
-  const selectedCategoryName =
-    categories.find(
-      (category: any) =>
-        category.id === selectedCategory
-    )?.name ?? "";
-
-
-  const isRingProduct =
-    selectedCategoryName
-      .trim()
-      .toLowerCase() === "rings";
-
-
   /*
    * =======================================================
    * SUBCATEGORIES
@@ -508,17 +478,6 @@ export default function ProductForm({
   }, [
     selectedCategory,
     form,
-  ]);
-
-
-  useEffect(() => {
-
-    if (!isRingProduct) {
-      setRingSizes([]);
-    }
-
-  }, [
-    isRingProduct,
   ]);
 
 
@@ -602,26 +561,6 @@ export default function ProductForm({
          * =================================================
          */
 
-        const existingRingSizes =
-          product?.specifications &&
-          typeof product.specifications === "object" &&
-          !Array.isArray(product.specifications) &&
-          Array.isArray(
-            (product.specifications as any).ring_sizes
-          )
-            ? (product.specifications as any).ring_sizes
-                .map((size: any) => String(size))
-                .filter((size: string) =>
-                  RING_SIZES.includes(size)
-                )
-            : [];
-
-
-        setRingSizes(
-          existingRingSizes
-        );
-
-
         const specificationRows =
 
           product?.specifications &&
@@ -635,33 +574,28 @@ export default function ProductForm({
 
             ? Object.entries(
                 product.specifications
-              )
-                .filter(
-                  ([key]) =>
-                    key !== "ring_sizes"
-                )
-                .map(
-                  ([key, value]) => ({
+              ).map(
+                ([key, value]) => ({
 
-                    label:
-                      key
-                        .replace(
-                          /_/g,
-                          " "
-                        )
-                        .replace(
-                          /\b\w/g,
-                          char =>
-                            char.toUpperCase()
-                        ),
-
-                    value:
-                      String(
-                        value ?? ""
+                  label:
+                    key
+                      .replace(
+                        /_/g,
+                        " "
+                      )
+                      .replace(
+                        /\b\w/g,
+                        char =>
+                          char.toUpperCase()
                       ),
 
-                  })
-                )
+                  value:
+                    String(
+                      value ?? ""
+                    ),
+
+                })
+              )
 
             : [];
 
@@ -1002,11 +936,8 @@ export default function ProductForm({
        * =================================================
        */
 
-      const specificationsObject: Record<
-  string,
-  string | string[]
-> =
-  Object.fromEntries(
+      const specificationsObject =
+        Object.fromEntries(
 
           specifications
 
@@ -1041,19 +972,6 @@ export default function ProductForm({
             )
 
         );
-
-
-      /*
-       * Ring sizes are stored alongside the existing
-       * specifications JSONB, but only for Ring products.
-       */
-
-      if (isRingProduct) {
-
-        specificationsObject.ring_sizes =
-          ringSizes;
-
-      }
 
 
       /*
@@ -1269,9 +1187,6 @@ export default function ProductForm({
 
 
       form.reset();
-
-
-      setRingSizes([]);
 
 
       setImages(
@@ -1502,139 +1417,6 @@ export default function ProductForm({
       <SpecificationsSection
         form={form}
       />
-
-
-      {/* ===================================================
-          RING SIZE AVAILABILITY
-      ==================================================== */}
-
-      {
-        isRingProduct && (
-
-          <section
-            className="
-              rounded-xl
-              border
-              bg-white
-              p-6
-              shadow-sm
-            "
-          >
-
-            <div>
-              <h2
-                className="
-                  text-lg
-                  font-semibold
-                  text-foreground
-                "
-              >
-                Available Ring Sizes
-              </h2>
-
-              <p
-                className="
-                  mt-1
-                  text-sm
-                  text-muted-foreground
-                "
-              >
-                Select the ring sizes available for this product.
-              </p>
-            </div>
-
-
-            <div
-              className="
-                mt-5
-                grid
-                grid-cols-4
-                gap-3
-                sm:grid-cols-6
-                md:grid-cols-8
-              "
-            >
-
-              {
-                RING_SIZES.map(
-                  (size) => {
-
-                    const selected =
-                      ringSizes.includes(size);
-
-                    return (
-
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => {
-
-                          setRingSizes(
-                            (current) =>
-                              current.includes(size)
-                                ? current.filter(
-                                    (item) =>
-                                      item !== size
-                                  )
-                                : [
-                                    ...current,
-                                    size,
-                                  ].sort(
-                                    (a, b) =>
-                                      Number(a) -
-                                      Number(b)
-                                  )
-                          );
-
-                        }}
-                        className={`
-                          flex
-                          h-11
-                          items-center
-                          justify-center
-                          rounded-lg
-                          border
-                          text-sm
-                          font-medium
-                          transition
-
-                          ${
-                            selected
-                              ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                              : "border-input bg-background text-foreground hover:bg-muted"
-                          }
-                        `}
-                      >
-                        {size}
-                      </button>
-
-                    );
-
-                  }
-                )
-              }
-
-            </div>
-
-
-            <p
-              className="
-                mt-4
-                text-xs
-                text-muted-foreground
-              "
-            >
-              {
-                ringSizes.length > 0
-                  ? `${ringSizes.length} size${ringSizes.length === 1 ? "" : "s"} selected`
-                  : "No ring sizes selected"
-              }
-            </p>
-
-          </section>
-
-        )
-      }
 
 
       {/* ===================================================
