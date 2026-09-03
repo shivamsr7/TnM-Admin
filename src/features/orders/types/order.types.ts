@@ -149,5 +149,7 @@ export interface OrderItem {
 
   quantity: number;
 
+  ring_size?: string | null;
+
   total: number;
 }

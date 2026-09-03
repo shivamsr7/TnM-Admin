@@ -69,6 +69,15 @@ export default function OrderItemsTable({
                         {item.product_name}
                       </p>
 
+                      {item.ring_size && (
+                        <p className="mt-1 text-xs text-gray-500">
+                          Ring Size:{" "}
+                          <span className="font-medium text-gray-700">
+                            {item.ring_size}
+                          </span>
+                        </p>
+                      )}
+
                       <p className="text-xs text-gray-500">
                         Product ID:{" "}
                         {item.product_id ?? "-"}
