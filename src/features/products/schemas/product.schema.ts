@@ -171,6 +171,34 @@ export const productSchema = z.object({
 
   /*
    * =======================================================
+   * SPECIAL PRODUCT DISCOUNT
+   * =======================================================
+   */
+
+  special_discount_enabled:
+    z.boolean(),
+
+  special_discount_type:
+    z.enum([
+      "percentage",
+      "fixed",
+    ]),
+
+  special_discount_value:
+    z.number()
+      .min(
+        0,
+        "Discount cannot be negative"
+      ),
+
+  special_discount_ends_at:
+    z.string()
+      .nullable()
+      .optional(),
+
+
+  /*
+   * =======================================================
    * IDENTIFICATION
    * =======================================================
    */

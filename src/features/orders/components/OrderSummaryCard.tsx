@@ -12,14 +12,67 @@ export default function OrderSummaryCard({
       ? Number(order.gift_wrap_amount ?? 0)
       : 0;
 
-  const calculatedTotal = Math.max(
-    0,
-    Number(order.subtotal ?? 0) -
-      Number(order.discount ?? 0) +
-      Number(order.shipping_charge ?? 0) +
-      Number(order.tax ?? 0) +
-      giftWrapAmount
-  );
+  const isPrepaid =
+    order.payment_method === "prepaid";
+
+  /*
+   * For prepaid orders, the captured amount is the actual
+   * customer-facing total. Some older Buy Now orders may have
+   * been saved with the regular product price in subtotal and
+   * without the special-offer discount in order.discount.
+   *
+   * Recover that missing discount from the captured amount so
+   * the summary matches what the customer actually paid.
+   */
+  const baseSubtotal =
+    Number(order.subtotal ?? 0);
+
+  const storedDiscount =
+    Number(order.discount ?? 0);
+
+  const shippingAmount =
+    Number(order.shipping_charge ?? 0);
+
+  const taxAmount =
+    Number(order.tax ?? 0);
+
+  const paidAmount =
+    Number(order.advance_amount ?? 0);
+
+  const inferredPrepaidDiscount =
+    isPrepaid
+      ? Math.max(
+          0,
+          baseSubtotal +
+            shippingAmount +
+            taxAmount +
+            giftWrapAmount -
+            paidAmount
+        )
+      : 0;
+
+  const displayedDiscount =
+    isPrepaid
+      ? Math.max(
+          storedDiscount,
+          inferredPrepaidDiscount
+        )
+      : storedDiscount;
+
+  const calculatedTotal =
+    isPrepaid
+      ? Math.max(
+          0,
+          paidAmount
+        )
+      : Math.max(
+          0,
+          baseSubtotal -
+            displayedDiscount +
+            shippingAmount +
+            taxAmount +
+            giftWrapAmount
+        );
 
   const formatAmount = (amount: number) =>
     Number(amount ?? 0).toLocaleString("en-IN", {
@@ -50,7 +103,7 @@ export default function OrderSummaryCard({
           </span>
 
           <span className="font-medium text-green-600">
-            - ₹{formatAmount(order.discount)}
+            - ₹{formatAmount(displayedDiscount)}
           </span>
         </div>
 

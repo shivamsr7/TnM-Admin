@@ -575,8 +575,8 @@ export default function CouponForm({
 
           supabase
             .from("reward_tiers")
-            .select("id, name")
-            .order("min_spend", {
+            .select("id, tier_name")
+            .order("minimum_spend", {
               ascending: true,
             }),
         ]);
@@ -646,7 +646,7 @@ export default function CouponForm({
               (tier: any) => ({
                 id: tier.id,
                 label:
-                  tier.name ||
+                  tier.tier_name ||
                   "Membership Tier",
               })
             )

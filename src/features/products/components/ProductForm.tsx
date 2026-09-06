@@ -365,6 +365,23 @@ export default function ProductForm({
 
 
         /*
+         * Special Product Discount
+         */
+
+        special_discount_enabled:
+          false,
+
+        special_discount_type:
+          "percentage",
+
+        special_discount_value:
+          0,
+
+        special_discount_ends_at:
+          null,
+
+
+        /*
          * Identification
          */
 
@@ -755,6 +772,27 @@ export default function ProductForm({
           compare_price:
             product.compare_price ??
             0,
+
+
+          /*
+           * Special Product Discount
+           */
+
+          special_discount_enabled:
+            product.special_discount_enabled ??
+            false,
+
+          special_discount_type:
+            product.special_discount_type ??
+            "percentage",
+
+          special_discount_value:
+            product.special_discount_value ??
+            0,
+
+          special_discount_ends_at:
+            product.special_discount_ends_at ??
+            null,
 
 
           /*

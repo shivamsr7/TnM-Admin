@@ -136,20 +136,20 @@ const [
   /*
    * The Admin must show the actual customer-facing total.
    *
-   * For prepaid orders, the amount paid is the authoritative
-   * captured amount. This also fixes older orders whose
-   * orders.total_amount was saved before Gift Wrap was added.
+   * For a fully prepaid order, the captured payment amount is
+   * the authoritative customer-facing total. This is important
+   * for Buy Now orders where the secure checkout quote can carry
+   * a special customer price that may differ from the regular
+   * product price stored on the order row.
    *
-   * For COD/partial COD, use the order total plus any explicit
-   * Gift Wrap amount because advance_amount is not the full total.
+   * For COD/partial COD, advance_amount is only the amount paid
+   * upfront, so keep using the server-stored order total there.
    */
   const calculatedTotal =
     isPrepaid
       ? Math.max(
-          Number(order.total_amount ?? 0) +
-            giftWrapAmount,
-          Number(order.advance_amount ?? 0),
-          baseOrderTotal + giftWrapAmount
+          0,
+          Number(order.advance_amount ?? 0)
         )
       : Math.max(
           Number(order.total_amount ?? 0),
