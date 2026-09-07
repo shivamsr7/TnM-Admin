@@ -186,6 +186,15 @@ interface RefundProcessedEmailPayload {
   shipping: { fullName: string; phone: string; address: string; city: string; state: string; pincode: string; landmark: string | null; country: string | null; };
 }
 
+interface WalletCreditEmailPayload {
+  to: string;
+  customerName: string;
+  amount: number;
+  newBalance: number;
+  reason: string | null;
+  expiresAt: string | null;
+}
+
 class NotificationService {
 
 
@@ -5126,6 +5135,296 @@ async sendRefundProcessedEmail(
     const taxRow = tax > 0 ? `<tr><td style="padding:7px 0;color:#77736c">Tax</td><td align="right" style="padding:7px 0">${money(tax)}</td></tr>` : "";
     const transactionRow = paymentTransactionId ? `<tr><td style="padding:7px 0;color:#77736c">Payment Transaction ID</td><td align="right" style="padding:7px 0;font-size:12px;font-weight:600;word-break:break-all">${esc(paymentTransactionId)}</td></tr>` : "";
     return this.sendEmail({ to, subject:`T&M Jewels — Your Refund Has Been Processed #${orderNumber}`, html:`<!DOCTYPE html><html><body style="margin:0;background:#f5f3ef;font-family:Arial,Helvetica,sans-serif;color:#222"><table role="presentation" width="100%"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" style="max-width:640px;background:#fff;border:1px solid #e9e3d8"><tr><td align="center" style="padding:30px 20px 24px;border-bottom:1px solid #eeeae2"><img src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png" width="190" style="display:block;max-width:80%;height:auto;margin:auto"><div style="margin-top:10px;font-size:11px;letter-spacing:1.5px;color:#999287;text-transform:uppercase">Create your own style. Create your own trend.</div></td></tr><tr><td align="center" style="padding:36px 24px 22px"><div style="margin:auto;width:58px;height:58px;line-height:58px;border-radius:50%;background:#f3f7ef;color:#4d8a4b;font-size:28px;font-weight:bold">✓</div><h1 style="margin:18px 0 8px;font-family:Georgia,serif;font-size:29px;color:#8b6424">Refund Successfully Processed</h1><p style="margin:0;font-size:14px;line-height:23px;color:#6e6a63">Dear ${esc(customerName)},<br>Your refund has been successfully processed.</p></td></tr><tr><td style="padding:4px 24px 20px"><table width="100%" style="background:#faf8f3;border:1px solid #e8dfd0"><tr><td width="50%" style="padding:17px;border-right:1px solid #e5ddcf"><small style="color:#9c968c">ORDER NUMBER</small><div style="margin-top:5px;font-weight:600">#${esc(orderNumber)}</div></td><td style="padding:17px"><small style="color:#9c968c">REFUND DATE</small><div style="margin-top:5px;font-weight:600">${date(refundProcessedAt)}</div></td></tr></table></td></tr><tr><td style="padding:0 24px"><div style="padding:20px;background:#f3f7ef;border:1px solid #dce9d6;text-align:center"><div style="font-size:11px;color:#77736c;text-transform:uppercase">REFUND AMOUNT</div><div style="margin-top:7px;font-family:Georgia,serif;font-size:30px;color:#4f7b45">${money(refundAmount)}</div><div style="margin-top:8px;font-size:13px;color:#66625c">The refund has been processed successfully.</div></div></td></tr><tr><td style="padding:24px 24px 0"><div style="padding:18px;background:#faf8f3;border:1px solid #e8dfd0"><h2 style="font-family:Georgia,serif;color:#49371d">Refund Details</h2><table width="100%"><tr><td style="padding:7px 0;color:#77736c">Refund Reference</td><td align="right" style="font-size:12px;font-weight:600;word-break:break-all">${esc(refundTransactionId)}</td></tr><tr><td style="padding:7px 0;color:#77736c">Refund Processed On</td><td align="right" style="font-weight:600">${date(refundProcessedAt)}</td></tr><tr><td style="padding:7px 0;color:#77736c">Payment Method</td><td align="right" style="font-weight:600">${paymentMethod === "prepaid" ? "Prepaid" : "Partial COD"}</td></tr>${transactionRow}</table></div></td></tr><tr><td style="padding:24px 24px 0"><div style="padding:13px 16px;background:#f7f1e5;color:#59431f;font-family:Georgia,serif;font-size:20px;font-weight:600">Original Order</div><table width="100%"><tr><td style="padding:12px 0;color:#999287">Product</td><td align="right" style="padding:12px 0;color:#999287">Amount</td></tr>${rows}</table></td></tr><tr><td style="padding:22px 24px 0"><table width="100%" style="border-top:1px solid #eeeae2;border-bottom:1px solid #eeeae2"><tr><td style="padding:7px 0;color:#77736c">Subtotal</td><td align="right">${money(subtotal)}</td></tr>${discountRow}${taxRow}<tr><td style="padding:7px 0;color:#77736c">Shipping</td><td align="right">${shippingCharge === 0 ? "FREE" : money(shippingCharge)}</td></tr><tr><td style="padding:16px 0;border-top:1px solid #eeeae2;font-size:16px;font-weight:700">Original Order Total</td><td align="right" style="padding:16px 0;border-top:1px solid #eeeae2;font-size:18px;font-weight:700;color:#8b6424">${money(totalAmount)}</td></tr></table></td></tr><tr><td style="padding:24px 24px 0"><div style="padding:16px;background:#faf8f3;border:1px solid #e8dfd0"><h2 style="font-family:Georgia,serif;color:#49371d">Shipping Address</h2><div style="font-size:13px;line-height:22px;color:#55514b"><strong>${esc(shipping.fullName)}</strong><br>${esc(shipping.address)}<br>${esc(shipping.city)}, ${esc(shipping.state)} — ${esc(shipping.pincode)}<br>${shipping.landmark ? `Landmark: ${esc(shipping.landmark)}<br>` : ""}${shipping.country ? `${esc(shipping.country)}<br>` : ""}Phone: ${esc(shipping.phone)}</div></div></td></tr><tr><td align="center" style="padding:32px 24px"><div style="height:1px;background:#eeeae2;margin-bottom:22px"></div><img src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png" width="125" style="display:block;width:125px;height:auto;margin:auto"><div style="margin-top:12px;font-size:12px;color:#999287">Need help with your order?<br>Contact us at <strong>shop.tnm.official@gmail.com</strong></div><div style="margin-top:14px;font-size:11px;color:#aaa49a">© T&amp;M Jewels. All rights reserved.</div></td></tr></table></td></tr></table></body></html>` });  }
+
+  async sendWalletCreditEmail({
+    to,
+    customerName,
+    amount,
+    newBalance,
+    reason,
+    expiresAt,
+  }: WalletCreditEmailPayload) {
+    const formatMoney = (value: number) =>
+      `₹${value.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const now = new Date();
+    const expiryDate = expiresAt ? new Date(expiresAt) : null;
+    const validExpiry =
+      expiryDate && !Number.isNaN(expiryDate.getTime())
+        ? expiryDate
+        : null;
+
+    let urgencyTitle = "Your wallet credit is ready to use";
+    let urgencyMessage =
+      "Your T&M Jewels wallet has been topped up. Use your wallet balance on your next jewellery purchase.";
+    let urgencyBadge = "WALLET CREDIT ADDED";
+
+    if (validExpiry) {
+      const diffMs = validExpiry.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMs <= 0) {
+        urgencyTitle = "Use your wallet balance now";
+        urgencyMessage =
+          "This wallet credit has reached its expiry time.";
+        urgencyBadge = "EXPIRED";
+      } else if (diffDays <= 1) {
+        urgencyTitle = "Expires tomorrow — don't miss it";
+        urgencyMessage =
+          "Your wallet credit expires tomorrow. This is the perfect time to pick something you've been eyeing.";
+        urgencyBadge = "EXPIRES TOMORROW";
+      } else if (diffDays === 2) {
+        urgencyTitle = "Only 2 days left to use it";
+        urgencyMessage =
+          "Your wallet credit expires in 2 days. Pick your favourite piece before your credit expires.";
+        urgencyBadge = "ONLY 2 DAYS LEFT";
+      } else if (diffDays <= 7) {
+        urgencyTitle = `Only ${diffDays} days left to use it`;
+        urgencyMessage =
+          "Your wallet credit won't be available forever. Treat yourself to something beautiful before it expires.";
+        urgencyBadge = `EXPIRES IN ${diffDays} DAYS`;
+      } else {
+        urgencyTitle = "Your wallet credit is waiting";
+        urgencyMessage =
+          "Your wallet credit has an expiry date, so don't leave it unused for too long.";
+        urgencyBadge = "LIMITED-TIME WALLET CREDIT";
+      }
+    }
+
+    const formattedExpiry = validExpiry
+      ? validExpiry.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : null;
+
+    const expiryRow = validExpiry
+      ? `
+        <tr>
+          <td style="padding:9px 0;font-size:13px;color:#77736c;">
+            Expires On
+          </td>
+          <td align="right" style="padding:9px 0;font-size:13px;font-weight:700;color:#a04d45;">
+            ${formattedExpiry}
+          </td>
+        </tr>
+      `
+      : `
+        <tr>
+          <td style="padding:9px 0;font-size:13px;color:#77736c;">
+            Expiry
+          </td>
+          <td align="right" style="padding:9px 0;font-size:13px;font-weight:600;color:#4f7b45;">
+            No expiry
+          </td>
+        </tr>
+      `;
+
+    const reasonRow = reason
+      ? `
+        <tr>
+          <td style="padding:9px 0;font-size:13px;color:#77736c;">
+            Added For
+          </td>
+          <td align="right" style="padding:9px 0;font-size:13px;font-weight:600;color:#222222;">
+            ${escapeHtml(reason)}
+          </td>
+        </tr>
+      `
+      : "";
+
+    const shopUrl = "https://tnmonline.in";
+
+    return this.sendEmail({
+      to,
+      subject: validExpiry
+        ? `✨ ${formatMoney(amount)} added to your T&M Wallet — ${urgencyBadge}!`
+        : `✨ ${formatMoney(amount)} has been added to your T&M Wallet`,
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>T&amp;M Jewels — Wallet Credit</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f3ef;color:#222222;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f3ef;">
+  <tr>
+    <td align="center" style="padding:28px 12px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+        style="width:100%;max-width:640px;background:#ffffff;border:1px solid #e9e3d8;">
+
+        <tr>
+          <td align="center" style="padding:30px 20px 24px;border-bottom:1px solid #eeeae2;">
+            <img
+              src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png"
+              alt="T&amp;M Jewels"
+              width="190"
+              style="display:block;width:190px;max-width:80%;height:auto;margin:0 auto;"
+            />
+            <div style="margin-top:10px;font-size:11px;line-height:18px;letter-spacing:1.5px;color:#999287;text-transform:uppercase;">
+              Create your own style. Create your own trend.
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:36px 24px 18px;">
+            <div style="width:58px;height:58px;line-height:58px;border-radius:50%;background:#f7f1e5;color:#8b6424;font-size:25px;font-weight:bold;">
+              ₹
+            </div>
+
+            <h1 style="margin:18px 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:29px;line-height:37px;font-weight:600;color:#8b6424;">
+              Wallet Credit Added
+            </h1>
+
+            <p style="margin:0;font-size:14px;line-height:23px;color:#6e6a63;">
+              Dear ${escapeHtml(customerName)},<br>
+              We've added <strong style="color:#49371d;">${formatMoney(amount)}</strong> to your T&amp;M Jewels Wallet.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:6px 24px 20px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+              style="background:#f3f7ef;border:1px solid #dce9d6;">
+              <tr>
+                <td align="center" style="padding:24px 16px;">
+                  <div style="font-size:10px;line-height:16px;color:#77736c;text-transform:uppercase;letter-spacing:1.3px;">
+                    Amount Added
+                  </div>
+                  <div style="margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-size:34px;line-height:42px;font-weight:600;color:#4f7b45;">
+                    ${formatMoney(amount)}
+                  </div>
+                  <div style="margin-top:8px;font-size:13px;color:#6a655e;">
+                    Your new wallet balance is <strong>${formatMoney(newBalance)}</strong>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        ${
+          validExpiry
+            ? `
+        <tr>
+          <td style="padding:0 24px 20px;">
+            <div style="padding:18px;background:#fff7ed;border:1px solid #f0dcc2;">
+              <div style="font-size:10px;line-height:16px;color:#9a6b35;text-transform:uppercase;letter-spacing:1.3px;font-weight:700;">
+                ${urgencyBadge}
+              </div>
+              <div style="margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:29px;font-weight:600;color:#7b4f23;">
+                ${urgencyTitle}
+              </div>
+              <div style="margin-top:8px;font-size:13px;line-height:21px;color:#665e55;">
+                ${urgencyMessage}
+              </div>
+            </div>
+          </td>
+        </tr>
+        `
+            : ""
+        }
+
+        <tr>
+          <td style="padding:0 24px 20px;">
+            <div style="padding:18px;background:#faf8f3;border:1px solid #e8dfd0;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:600;color:#49371d;">
+                Wallet Details
+              </div>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:10px;">
+                <tr>
+                  <td style="padding:9px 0;font-size:13px;color:#77736c;">Amount Added</td>
+                  <td align="right" style="padding:9px 0;font-size:13px;font-weight:700;color:#4f7b45;">
+                    ${formatMoney(amount)}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:9px 0;font-size:13px;color:#77736c;">Wallet Balance</td>
+                  <td align="right" style="padding:9px 0;font-size:13px;font-weight:700;color:#222222;">
+                    ${formatMoney(newBalance)}
+                  </td>
+                </tr>
+
+                ${reasonRow}
+                ${expiryRow}
+              </table>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:4px 24px 30px;">
+            <div style="font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:29px;font-weight:600;color:#49371d;">
+              Something beautiful could be waiting for you.
+            </div>
+
+            <div style="margin-top:8px;font-size:13px;line-height:21px;color:#77736c;">
+              Use your wallet balance on your next T&amp;M Jewels order and make your next look a little more special.
+            </div>
+
+            <a
+              href="${shopUrl}"
+              style="display:inline-block;margin-top:18px;padding:13px 28px;background:#8b6424;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.3px;"
+            >
+              SHOP NOW
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:32px 24px;">
+            <div style="height:1px;background:#eeeae2;margin-bottom:22px;"></div>
+
+            <img
+              src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png"
+              alt="T&amp;M Jewels"
+              width="125"
+              style="display:block;width:125px;height:auto;margin:0 auto;"
+            />
+
+            <div style="margin-top:12px;font-size:12px;line-height:20px;color:#999287;">
+              Need help with your wallet?
+              <br>
+              Contact us at <strong>shop.tnm.official@gmail.com</strong>
+            </div>
+
+            <div style="margin-top:14px;font-size:11px;line-height:18px;color:#aaa49a;">
+              © T&amp;M Jewels. All rights reserved.
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+      `,
+    });
+  }
+
 }
 
 

@@ -83,6 +83,12 @@ export interface Order {
   refund_notes:
     string | null;
 
+    wallet_refund_amount: number;
+wallet_refund_transaction_id: string | null;
+
+razorpay_refund_amount: number;
+razorpay_refund_transaction_id: string | null;
+
   order_status: OrderStatus;
 
   notes: string | null;

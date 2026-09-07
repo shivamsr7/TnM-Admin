@@ -186,7 +186,7 @@ const [
         });
 
         toast.success(
-          "Refund processed successfully through Razorpay"
+          "Refund processed successfully"
         );
 
         setRefundNotes("");
@@ -627,7 +627,7 @@ const [
 
                   <p className="text-xs text-blue-600">
 
-                    Refund Amount
+                    Total Refund
 
                   </p>
 
@@ -641,7 +641,11 @@ const [
                     {Number(
                       order.refund_amount ?? 0
                     ).toLocaleString(
-                      "en-IN"
+                      "en-IN",
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
                     )}
 
                   </p>
@@ -683,13 +687,177 @@ const [
 
 
 
-              {order.refund_transaction_id && (
+              {/* Refund Split */}
+
+              {Number(order.wallet_refund_amount ?? 0) > 0 && (
+
+                <div className="mt-4 rounded-lg border border-blue-200 bg-white p-4">
+
+                  <p className="text-sm font-semibold text-gray-900">
+
+                    Refund Breakdown
+
+                  </p>
+
+
+
+
+
+                  <div className="mt-3 space-y-3 text-sm">
+
+                    <div className="flex items-center justify-between">
+
+                      <span className="flex items-center gap-2 text-gray-600">
+
+                        <Wallet className="h-4 w-4 text-blue-600" />
+
+                        Wallet Refund
+
+                      </span>
+
+
+
+
+
+                      <span className="font-semibold text-gray-900">
+
+                        ₹
+                        {Number(
+                          order.wallet_refund_amount ?? 0
+                        ).toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}
+
+                      </span>
+
+                    </div>
+
+
+
+
+
+                    {Number(order.razorpay_refund_amount ?? 0) > 0 && (
+
+                      <div className="flex items-center justify-between">
+
+                        <span className="flex items-center gap-2 text-gray-600">
+
+                          <CreditCard className="h-4 w-4 text-blue-600" />
+
+                          Razorpay Refund
+
+                        </span>
+
+
+
+
+
+                        <span className="font-semibold text-gray-900">
+
+                          ₹
+                          {Number(
+                            order.razorpay_refund_amount ?? 0
+                          ).toLocaleString(
+                            "en-IN",
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+
+                        </span>
+
+                      </div>
+
+                    )}
+
+                  </div>
+
+                </div>
+
+              )}
+
+
+
+
+
+              {order.wallet_refund_transaction_id && (
 
                 <div className="mt-4 rounded-md border border-blue-200 bg-white p-3">
 
                   <p className="text-xs text-gray-500">
 
+                    Wallet Refund Transaction
+
+                  </p>
+
+
+
+
+
+                  <p className="mt-1 break-all text-sm font-medium text-gray-800">
+
+                    {order.wallet_refund_transaction_id}
+
+                  </p>
+
+                </div>
+
+              )}
+
+
+
+
+
+
+
+
+
+              {order.razorpay_refund_transaction_id && (
+
+                <div className="mt-3 rounded-md border border-blue-200 bg-white p-3">
+
+                  <p className="text-xs text-gray-500">
+
                     Razorpay Refund ID
+
+                  </p>
+
+
+
+
+
+                  <p className="mt-1 break-all text-sm font-medium text-gray-800">
+
+                    {order.razorpay_refund_transaction_id}
+
+                  </p>
+
+                </div>
+
+              )}
+
+
+
+
+
+
+
+
+
+              {!order.razorpay_refund_transaction_id &&
+                order.refund_transaction_id &&
+                !order.wallet_refund_transaction_id && (
+
+                <div className="mt-4 rounded-md border border-blue-200 bg-white p-3">
+
+                  <p className="text-xs text-gray-500">
+
+                    Refund Transaction ID
 
                   </p>
 
@@ -891,7 +1059,7 @@ const [
 
                   <p className="mt-1 text-sm text-gray-500">
 
-                    This will actually refund the customer through Razorpay.
+                    This will issue the actual refund using the original payment methods.
 
                   </p>
 
@@ -911,7 +1079,7 @@ const [
 
                 <p className="text-xs text-gray-500">
 
-                  Refund Amount
+                  Total Refund
 
                 </p>
 
@@ -925,7 +1093,11 @@ const [
                   {Number(
                     order.refund_amount ?? 0
                   ).toLocaleString(
-                    "en-IN"
+                    "en-IN",
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
                   )}
 
                 </p>
@@ -938,27 +1110,142 @@ const [
 
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
 
-                <p className="text-xs text-blue-700">
+                <p className="text-sm font-semibold text-blue-900">
 
-                  Refund Amount
+                  Refund Breakdown
 
                 </p>
 
-                <p className="mt-1 text-2xl font-bold text-blue-900">
 
-                  ₹
-                  {Number(
-                    order.refund_amount ?? 0
-                  ).toLocaleString(
-                    "en-IN"
+
+
+
+                <div className="mt-3 space-y-3">
+
+                  {Number(order.wallet_refund_amount ?? 0) > 0 && (
+
+                    <div className="flex items-center justify-between">
+
+                      <span className="flex items-center gap-2 text-sm text-blue-700">
+
+                        <Wallet className="h-4 w-4" />
+
+                        Wallet
+
+                      </span>
+
+
+
+
+
+                      <span className="font-semibold text-blue-900">
+
+                        ₹
+                        {Number(
+                          order.wallet_refund_amount ?? 0
+                        ).toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}
+
+                      </span>
+
+                    </div>
+
                   )}
 
-                </p>
 
-                <p className="mt-2 text-xs leading-5 text-blue-700">
 
-                  The refund will be processed automatically through Razorpay.
-                  You do not need to enter a refund transaction ID.
+
+
+
+
+
+
+                  {Number(order.razorpay_refund_amount ?? 0) > 0 && (
+
+                    <div className="flex items-center justify-between">
+
+                      <span className="flex items-center gap-2 text-sm text-blue-700">
+
+                        <CreditCard className="h-4 w-4" />
+
+                        Razorpay
+
+                      </span>
+
+
+
+
+
+                      <span className="font-semibold text-blue-900">
+
+                        ₹
+                        {Number(
+                          order.razorpay_refund_amount ?? 0
+                        ).toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}
+
+                      </span>
+
+                    </div>
+
+                  )}
+
+
+
+
+
+
+
+
+
+                  <div className="border-t border-blue-200 pt-3 flex items-center justify-between">
+
+                    <span className="font-semibold text-blue-900">
+
+                      Total
+
+                    </span>
+
+
+
+
+
+                    <span className="text-lg font-bold text-blue-900">
+
+                      ₹
+                      {Number(
+                        order.refund_amount ?? 0
+                      ).toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+
+
+
+                <p className="mt-4 text-xs leading-5 text-blue-700">
+
+                  The wallet portion will be credited back to the customer's T&M Wallet. The remaining amount will be refunded through Razorpay automatically.
 
                 </p>
 
@@ -1015,7 +1302,7 @@ const [
 
                 <p className="text-xs leading-5 text-yellow-800">
 
-                  Click only if you want to issue the actual refund now. Razorpay will process the refund and generate the refund ID automatically.
+                  Click only if you want to issue the actual refund now. The wallet and Razorpay portions will be processed automatically.
 
                 </p>
 

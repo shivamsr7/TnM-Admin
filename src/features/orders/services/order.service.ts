@@ -348,15 +348,50 @@ class OrderService {
 
 
 
-      cancellationRefundAmount =
-        Number(
-          existingOrder.advance_amount ??
-          0
-        );
 
 
-
-
+      /*
+       * For prepaid orders, total_amount is the authoritative
+       * customer-facing amount that was paid for the order.
+       *
+       * IMPORTANT:
+       * advance_amount cannot be used here because the actual
+       * order data shows that it can contain the combined
+       * Wallet + Razorpay amount.
+       *
+       * Example:
+       *   total_amount   = ₹2297
+       *   advance_amount = ₹2297
+       *   wallet debit   = ₹25
+       *
+       * The correct refund is therefore ₹2297, not ₹2322.
+       *
+       * processRefund() later splits this total into:
+       *   Wallet   = original wallet debit
+       *   Razorpay = total refund - wallet portion
+       */
+      if (
+        existingOrder.payment_method ===
+        "prepaid"
+      ) {
+        cancellationRefundAmount =
+          Math.max(
+            0,
+            Number(
+              existingOrder.total_amount ??
+              0
+            )
+          );
+      } else {
+        /*
+         * Preserve the existing COD behaviour.
+         */
+        cancellationRefundAmount =
+          Number(
+            existingOrder.advance_amount ??
+            0
+          );
+      }
 
       if (
         cancellationRefundAmount >
@@ -702,14 +737,6 @@ class OrderService {
       );
     }
 
-    if (
-      !order.payment_transaction_id?.trim()
-    ) {
-      throw new Error(
-        "Razorpay payment ID is missing for this order."
-      );
-    }
-
     const refundAmount =
       Number(
         order.refund_amount ?? 0
@@ -724,100 +751,290 @@ class OrderService {
       );
     }
 
-    const idempotencyKey =
-      `tnm_refund_${order.id}`;
+    /*
+     * =========================================================
+     * STEP 1
+     * Refund the wallet portion first.
+     *
+     * IMPORTANT:
+     * Do not query wallet_transactions from the browser here.
+     * Admin-side RLS can hide the original wallet debit.
+     *
+     * refund_wallet_for_order() runs as SECURITY DEFINER and
+     * determines the authoritative wallet refund amount inside
+     * PostgreSQL.
+     *
+     * It is also idempotent: if the wallet refund already
+     * exists, the existing refund transaction is returned.
+     * =========================================================
+     */
+    let walletRefundTransactionId:
+      string | null =
+        null;
 
-    console.log(
-      "💳 Starting Razorpay refund:",
+    let walletRefundAmount =
+      0;
+
+    const {
+      data: walletRefundResult,
+      error: walletRefundError,
+    } = await supabase.rpc(
+      "refund_wallet_for_order",
       {
-        orderId: order.id,
-        orderNumber: order.order_number,
-        razorpayPaymentId:
-          order.payment_transaction_id,
-        refundAmount,
-        idempotencyKey,
+        p_order_id:
+          order.id,
       }
     );
 
-    let refundResponse: {
-      success?: boolean;
-      refund?: {
-        id?: string;
-        amount?: number;
-        payment_id?: string;
-        status?: string;
-      };
-      error?: string;
-    };
-
-    try {
-      const {
-        data,
-        error
-      } =
-        await supabase.functions.invoke(
-          "refund-razorpay-payment",
-          {
-            body: {
-              paymentId:
-                order.payment_transaction_id,
-              amount:
-                refundAmount,
-              idempotencyKey,
-            },
-          }
-        );
-
-      if (error) {
-        throw new Error(
-          error.message ||
-          "Failed to call Razorpay refund service."
-        );
-      }
-
-      refundResponse =
-        data;
-
-    } catch (error) {
+    if (walletRefundError) {
       console.error(
-        "❌ Razorpay refund request failed:",
-        error
+        "❌ Wallet refund failed:",
+        walletRefundError
       );
 
       throw new Error(
-        error instanceof Error
-          ? error.message
-          : "Failed to process Razorpay refund."
+        walletRefundError.message ||
+        "Failed to process the wallet refund."
       );
     }
 
     if (
-      !refundResponse?.success ||
-      !refundResponse.refund?.id
+      !walletRefundResult ||
+      walletRefundResult.length === 0
     ) {
       throw new Error(
-        refundResponse?.error ||
-        "Razorpay did not return a valid refund ID."
+        "Wallet refund service returned no result."
       );
     }
 
-    const transactionId =
-      refundResponse.refund.id;
+    const walletRefundRow =
+      walletRefundResult[0];
 
-    const processedAt =
-      new Date().toISOString();
+    walletRefundAmount =
+      Number(
+        walletRefundRow
+          .wallet_refund_amount_paise ??
+        0
+      ) / 100;
+
+    walletRefundTransactionId =
+      walletRefundRow
+        .wallet_transaction_id ??
+      null;
 
     console.log(
-      "✅ Razorpay refund successful:",
+      "💰 Wallet refund result:",
       {
-        refundId:
-          transactionId,
-        status:
-          refundResponse.refund.status,
-        amount:
-          refundResponse.refund.amount,
+        orderId:
+          order.id,
+
+        orderNumber:
+          order.order_number,
+
+        totalRefund:
+          refundAmount,
+
+        walletRefund:
+          walletRefundAmount,
+
+        walletTransactionId:
+          walletRefundTransactionId,
+
+        alreadyProcessed:
+          walletRefundRow
+            .already_processed ??
+          false,
       }
     );
+
+    /*
+     * =========================================================
+     * STEP 2
+     * Calculate the Razorpay remainder.
+     *
+     * Example:
+     *   Total refund   = ₹2297
+     *   Wallet refund  = ₹25
+     *   Razorpay       = ₹2272
+     * =========================================================
+     */
+    const razorpayRefundAmount =
+      Math.max(
+        0,
+        refundAmount -
+        walletRefundAmount
+      );
+
+    console.log(
+      "💰 Refund split:",
+      {
+        orderId:
+          order.id,
+
+        orderNumber:
+          order.order_number,
+
+        totalRefund:
+          refundAmount,
+
+        walletRefund:
+          walletRefundAmount,
+
+        razorpayRefund:
+          razorpayRefundAmount,
+
+        paymentId:
+          order.payment_transaction_id,
+      }
+    );
+
+    /*
+     * =========================================================
+     * STEP 3
+     * Refund the remaining Razorpay portion.
+     *
+     * Wallet-only orders skip this completely.
+     * =========================================================
+     */
+    let razorpayRefundId:
+      string | null =
+        null;
+
+    if (
+      razorpayRefundAmount > 0
+    ) {
+
+      if (
+        !order.payment_transaction_id?.trim()
+      ) {
+        throw new Error(
+          "Razorpay payment ID is missing for the refundable Razorpay portion."
+        );
+      }
+
+      const idempotencyKey =
+        `tnm_refund_${order.id}`;
+
+      console.log(
+        "💳 Starting Razorpay refund:",
+        {
+          orderId:
+            order.id,
+
+          orderNumber:
+            order.order_number,
+
+          razorpayPaymentId:
+            order.payment_transaction_id,
+
+          razorpayRefundAmount,
+
+          idempotencyKey,
+        }
+      );
+
+      let refundResponse: {
+        success?: boolean;
+
+        refund?: {
+          id?: string;
+
+          amount?: number;
+
+          payment_id?: string;
+
+          status?: string;
+        };
+
+        error?: string;
+      };
+
+      try {
+
+        const {
+          data,
+          error
+        } =
+          await supabase.functions.invoke(
+            "refund-razorpay-payment",
+            {
+              body: {
+                paymentId:
+                  order.payment_transaction_id,
+
+                amount:
+                  razorpayRefundAmount,
+
+                idempotencyKey,
+              },
+            }
+          );
+
+        if (error) {
+          throw new Error(
+            error.message ||
+            "Failed to call Razorpay refund service."
+          );
+        }
+
+        refundResponse =
+          data;
+
+      } catch (error) {
+
+        console.error(
+          "❌ Razorpay refund request failed:",
+          error
+        );
+
+        /*
+         * The wallet portion may already have been refunded.
+         * Do not reverse it here. A retry is safe because the
+         * wallet RPC is idempotent.
+         */
+        throw new Error(
+          error instanceof Error
+            ? error.message
+            : "Failed to process Razorpay refund."
+        );
+      }
+
+      if (
+        !refundResponse?.success ||
+        !refundResponse.refund?.id
+      ) {
+        throw new Error(
+          refundResponse?.error ||
+          "Razorpay did not return a valid refund ID."
+        );
+      }
+
+      razorpayRefundId =
+        refundResponse.refund.id;
+
+      console.log(
+        "✅ Razorpay refund successful:",
+        {
+          refundId:
+            razorpayRefundId,
+
+          status:
+            refundResponse.refund.status,
+
+          amount:
+            refundResponse.refund.amount,
+        }
+      );
+    }
+
+    /*
+     * =========================================================
+     * STEP 4
+     * Store both refund results.
+     * =========================================================
+     */
+    const processedAt =
+      new Date().toISOString();
 
     const {
       error: updateError
@@ -827,15 +1044,38 @@ class OrderService {
         .update({
           refund_status:
             "processed",
+
+          /*
+           * Keep the existing field backward compatible:
+           * Razorpay refund ID when one exists, otherwise the
+           * wallet refund transaction ID.
+           */
           refund_transaction_id:
-            transactionId,
+            razorpayRefundId ??
+            walletRefundTransactionId,
+
           refund_processed_at:
             processedAt,
+
           refund_notes:
             refundNotes?.trim() ||
             null,
+
+          wallet_refund_amount:
+            walletRefundAmount,
+
+          wallet_refund_transaction_id:
+            walletRefundTransactionId,
+
+          razorpay_refund_amount:
+            razorpayRefundAmount,
+
+          razorpay_refund_transaction_id:
+            razorpayRefundId,
+
           advance_payment_status:
             "refunded",
+
           updated_at:
             processedAt,
         })
@@ -846,22 +1086,31 @@ class OrderService {
 
     if (updateError) {
       console.error(
-        "❌ Razorpay refund succeeded but order update failed:",
+        "❌ Refund succeeded but order update failed:",
         updateError
       );
 
       throw new Error(
-        `Refund succeeded in Razorpay (${transactionId}), but the order could not be updated. Please do not issue another refund manually. Refund ID: ${transactionId}`
+        "Refund was successfully issued, but the order could not be updated. Do not manually refund again."
       );
     }
 
+    /*
+     * =========================================================
+     * STEP 5
+     * Activity log
+     * =========================================================
+     */
     await this.createActivity({
       order_id:
         id,
+
       event_type:
         "refund_processed",
+
       title:
         "Refund Processed",
+
       description:
         `Refund of ₹${refundAmount.toLocaleString(
           "en-IN",
@@ -869,43 +1118,70 @@ class OrderService {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }
-        )} processed through Razorpay.`,
+        )} processed.`,
+
       metadata: {
         refund_status:
           "processed",
+
         refund_amount:
           refundAmount,
-        refund_transaction_id:
-          transactionId,
+
+        wallet_refund_amount:
+          walletRefundAmount,
+
+        wallet_refund_transaction_id:
+          walletRefundTransactionId,
+
+        razorpay_refund_amount:
+          razorpayRefundAmount,
+
+        razorpay_refund_transaction_id:
+          razorpayRefundId,
+
         refund_processed_at:
           processedAt,
+
         razorpay_payment_id:
-          order.payment_transaction_id,
-        razorpay_refund_status:
-          refundResponse.refund.status ??
+          order.payment_transaction_id ??
           null,
       },
     });
 
+    /*
+     * =========================================================
+     * STEP 6
+     * Refund email
+     * =========================================================
+     */
     await this.sendRefundProcessedEmail(
       {
         ...order,
         refund_status:
           "processed",
+
         refund_transaction_id:
-          transactionId,
+          razorpayRefundId ??
+          walletRefundTransactionId,
+
         refund_processed_at:
           processedAt,
+
         refund_notes:
           refundNotes?.trim() ||
           null,
+
+        refund_amount:
+          refundAmount,
+
         advance_payment_status:
           "refunded",
       },
-      transactionId,
+      razorpayRefundId ??
+        walletRefundTransactionId ??
+        "",
       processedAt
     );
-
   }
 
 

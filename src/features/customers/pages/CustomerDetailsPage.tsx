@@ -14,6 +14,7 @@ import CustomerNotesCard from "../components/details/CustomerNotesCard";
 import CustomerOrdersTable from "../components/details/CustomerOrdersTable";
 import CustomerRewardsSection
 from "@/features/rewards/components/CustomerRewardsSection";
+import AdminCustomerWallet from "@/features/wallet/components/AdminCustomerWallet";
 import {
   useCustomerOrders
 } from "../hooks/useCustomerOrders";
@@ -139,7 +140,11 @@ const {
           notes={customer.notes}
         />
       </div>
+{/* T&M Wallet */}
 
+<AdminCustomerWallet
+  customerId={customer.id}
+/>
       {/* Orders */}
 
       <CustomerRewardsSection
