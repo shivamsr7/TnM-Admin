@@ -93,24 +93,25 @@ export const productService = {
 },
 
   async createProductImages(
-    productId: string,
-    images: ProductImage[]
-  ) {
-    if (!images.length) return;
+  productId: string,
+  images: ProductImage[]
+) {
+  if (!images.length) return;
 
-    const payload = images.map((image) => ({
-      product_id: productId,
-      image_url: image.url,
-      sort_order: image.sortOrder,
-      is_primary: image.isCover,
-    }));
+  const payload = images.map((image) => ({
+    product_id: productId,
+    image_url: image.url,
+    storage_path: image.path ?? "",
+    sort_order: image.sortOrder,
+    is_primary: image.isCover,
+  }));
 
-    const { error } = await supabase
-      .from("product_images")
-      .insert(payload);
+  const { error } = await supabase
+    .from("product_images")
+    .insert(payload);
 
-    if (error) throw error;
-  },
+  if (error) throw error;
+},
 
   async createProductCollections(
     productId: string,

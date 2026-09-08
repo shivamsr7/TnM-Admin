@@ -10,6 +10,7 @@ export interface Subcategory {
   description: string | null;
 
   image_url: string | null;
+  image_path: string | null;
 
   sort_order: number;
 

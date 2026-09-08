@@ -18,6 +18,11 @@ export const categorySchema = z.object({
     .nullable()
     .optional(),
 
+  image_path: z
+    .string()
+    .nullable()
+    .optional(),
+
   sort_order: z.number(),
 
   is_active: z.boolean(),

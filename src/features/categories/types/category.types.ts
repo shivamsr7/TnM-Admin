@@ -6,6 +6,7 @@ export interface Category {
   description?: string;
 
   image_url?: string | null;
+  image_path?: string | null;
 
   sort_order: number;
   is_active: boolean;
@@ -21,6 +22,7 @@ export interface CategoryFormData {
   parent_id?: string | null;
 
   image_url?: string | null;
+  image_path?: string | null;
 
   sort_order?: number;
   is_active?: boolean;

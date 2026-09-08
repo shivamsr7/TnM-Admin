@@ -5,6 +5,8 @@ import type {
   InstagramCustomerReviewFormData,
 } from "../types/instagramCustomerReview.types";
 
+import { storageService } from "@/shared/services/storage.service";
+
 const TABLE = "instagram_customer_reviews";
 
 export const instagramCustomerReviewService = {
@@ -16,7 +18,6 @@ export const instagramCustomerReviewService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-
     return data ?? [];
   },
 
@@ -30,7 +31,6 @@ export const instagramCustomerReviewService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-
     return data ?? [];
   },
 
@@ -42,7 +42,6 @@ export const instagramCustomerReviewService = {
       .single();
 
     if (error) throw error;
-
     return data;
   },
 
@@ -56,7 +55,6 @@ export const instagramCustomerReviewService = {
       .single();
 
     if (error) throw error;
-
     return data;
   },
 
@@ -72,7 +70,6 @@ export const instagramCustomerReviewService = {
       .single();
 
     if (error) throw error;
-
     return data;
   },
 
@@ -93,9 +90,7 @@ export const instagramCustomerReviewService = {
     if (deleteError) throw deleteError;
 
     if (review?.screenshot_path) {
-      await supabase.storage
-        .from("media")
-        .remove([review.screenshot_path]);
+      await storageService.remove(review.screenshot_path);
     }
   },
 };

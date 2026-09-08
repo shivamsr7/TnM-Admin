@@ -17,7 +17,6 @@ import MediaUploader from "@/shared/components/media/MediaUploader";
 import type { Category } from "../types/category.types";
 import type { Subcategory } from "../types/subcategory.types";
 
-
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,13 +29,13 @@ interface Props {
     name: string;
     description: string;
     image_url: string | null;
+    image_path: string | null;
     sort_order: number;
     is_active: boolean;
   }) => void;
 
   isSaving?: boolean;
 }
-
 
 export default function SubcategoryFormDialog({
   open,
@@ -46,101 +45,52 @@ export default function SubcategoryFormDialog({
   onSave,
   isSaving = false,
 }: Props) {
-
-
   const [name, setName] = useState("");
-
-  const [description, setDescription] =
-    useState("");
-
+  const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] =
     useState<string | null>(null);
-
-  const [sortOrder, setSortOrder] =
-    useState(0);
-
-  const [isActive, setIsActive] =
-    useState(true);
-
-
+  const [imagePath, setImagePath] =
+    useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState(0);
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
-
     if (subcategory) {
-
       setName(subcategory.name);
-
-      setDescription(
-        subcategory.description ?? ""
-      );
-
-      setImageUrl(
-        subcategory.image_url ?? null
-      );
-
-      setSortOrder(
-        subcategory.sort_order
-      );
-
-      setIsActive(
-        subcategory.is_active
-      );
-
-
+      setDescription(subcategory.description ?? "");
+      setImageUrl(subcategory.image_url ?? null);
+      setImagePath(subcategory.image_path ?? null);
+      setSortOrder(subcategory.sort_order);
+      setIsActive(subcategory.is_active);
     } else {
-
       setName("");
-
       setDescription("");
-
       setImageUrl(null);
-
+      setImagePath(null);
       setSortOrder(0);
-
       setIsActive(true);
-
     }
-
   }, [subcategory, open]);
 
-
-
-
-
   function handleSubmit() {
-
     if (!name.trim()) return;
 
-
     onSave({
-
       name,
-
       description,
-
       image_url: imageUrl,
-
+      image_path: imagePath,
       sort_order: sortOrder,
-
       is_active: isActive,
-
     });
-
   }
 
-
-
-
-
   return (
-
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
     >
-
       <DialogContent
-
         className="
           flex
           max-w-lg
@@ -149,43 +99,23 @@ export default function SubcategoryFormDialog({
           overflow-hidden
           p-0
         "
-
       >
-
-
-        {/* Fixed Header */}
-
         <DialogHeader
-
           className="
             shrink-0
             border-b
             px-6
             py-4
           "
-
         >
-
           <DialogTitle>
-
             {subcategory
               ? "Edit Subcategory"
-              : "Add Subcategory"
-            }
-
+              : "Add Subcategory"}
           </DialogTitle>
-
-
         </DialogHeader>
 
-
-
-
-
-        {/* Scroll Area */}
-
         <div
-
           className="
             min-h-0
             flex-1
@@ -193,166 +123,87 @@ export default function SubcategoryFormDialog({
             px-6
             py-5
           "
-
         >
-
           <div className="space-y-5">
-
-
             <div>
-
-              <Label>
-                Category
-              </Label>
-
-
+              <Label>Category</Label>
               <Input
-
                 value={category.name}
-
                 disabled
-
               />
-
             </div>
 
-
-
-
-
             <div>
-
-              <Label>
-                Subcategory Name
-              </Label>
-
-
+              <Label>Subcategory Name</Label>
               <Input
-
                 value={name}
-
-                onChange={(e)=>
+                onChange={(e) =>
                   setName(e.target.value)
                 }
-
                 placeholder="Enter subcategory name"
-
               />
-
             </div>
 
-
-
-
-
             <div>
-
-              <Label>
-                Description
-              </Label>
-
-
+              <Label>Description</Label>
               <Textarea
-
                 rows={3}
-
                 value={description}
-
-                onChange={(e)=>
+                onChange={(e) =>
                   setDescription(e.target.value)
                 }
-
                 placeholder="Optional description"
-
               />
-
             </div>
 
-
-
-
-
             <div>
-
-              <Label>
-                Subcategory Image
-              </Label>
-
+              <Label>Subcategory Image</Label>
 
               <div className="mt-2">
-
                 <MediaUploader
-
                   folder="subcategories"
-
                   value={
                     imageUrl
-                    ? [
-                        {
-                          url: imageUrl,
-                          isCover: true,
-                          sortOrder: 0,
-                          persisted: true,
-                        },
-                      ]
-                    : []
+                      ? [
+                          {
+                            url: imageUrl,
+                            path:
+                              imagePath ?? undefined,
+                            isCover: true,
+                            sortOrder: 0,
+                            persisted: true,
+                          },
+                        ]
+                      : []
                   }
-
-
-                  onChange={(images)=>{
-
+                  onChange={(images) => {
                     setImageUrl(
                       images[0]?.url ?? null
                     );
-
+                    setImagePath(
+                      images[0]?.path ?? null
+                    );
                   }}
-
-
                   maxImages={1}
-
                   enableSorting={false}
-
                   showCoverLabel={false}
-
                   title="Subcategory Image"
-
                 />
-
-
               </div>
-
             </div>
 
-
-
-
-
             <div>
-
-              <Label>
-                Sort Order
-              </Label>
-
-
+              <Label>Sort Order</Label>
               <Input
-
                 type="number"
-
                 value={sortOrder}
-
-                onChange={(e)=>
+                onChange={(e) =>
                   setSortOrder(
                     Number(e.target.value)
                   )
                 }
-
               />
-
             </div>
-
-
-
-
 
             <label
               className="
@@ -361,39 +212,21 @@ export default function SubcategoryFormDialog({
                 gap-2
               "
             >
-
               <input
-
                 type="checkbox"
-
                 checked={isActive}
-
-                onChange={(e)=>
+                onChange={(e) =>
                   setIsActive(
                     e.target.checked
                   )
                 }
-
               />
-
               Active
-
             </label>
-
-
           </div>
-
-
         </div>
 
-
-
-
-
-        {/* Fixed Footer */}
-
         <div
-
           className="
             shrink-0
             flex
@@ -404,51 +237,26 @@ export default function SubcategoryFormDialog({
             px-6
             py-4
           "
-
         >
-
           <Button
-
             variant="outline"
-
-            onClick={()=>
+            onClick={() =>
               onOpenChange(false)
             }
-
           >
-
             Cancel
-
           </Button>
-
-
-
-
 
           <Button
-
             onClick={handleSubmit}
-
             disabled={isSaving}
-
           >
-
             {subcategory
               ? "Update"
-              : "Create"
-            }
-
+              : "Create"}
           </Button>
-
-
         </div>
-
-
       </DialogContent>
-
-
     </Dialog>
-
   );
-
 }

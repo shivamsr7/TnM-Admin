@@ -5,6 +5,8 @@ export interface CreateSubcategoryData {
   category_id: string;
   name: string;
   description?: string;
+  image_url?: string | null;
+  image_path?: string | null;
   sort_order?: number;
   is_active?: boolean;
 }
@@ -12,6 +14,8 @@ export interface CreateSubcategoryData {
 export interface UpdateSubcategoryData {
   name: string;
   description?: string;
+  image_url?: string | null;
+  image_path?: string | null;
   sort_order?: number;
   is_active?: boolean;
 }
