@@ -1541,6 +1541,47 @@ class OrderService {
 
 
 
+  private async getWalletBalanceRemaining(customerId: string | null): Promise<number | null> {
+    if (!customerId) {
+      return null;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "admin_get_customer_wallet",
+        {
+          p_customer_id: customerId,
+        }
+      );
+
+      if (error) {
+        console.error(
+          "⚠️ Failed to fetch wallet balance remaining:",
+          error
+        );
+        return null;
+      }
+
+      const wallet = Array.isArray(data) ? data[0] : data;
+
+      if (!wallet) {
+        return null;
+      }
+
+      return Math.max(
+        0,
+        Number(wallet.balance_paise ?? 0) / 100
+      );
+    } catch (error) {
+      console.error(
+        "⚠️ Wallet balance lookup failed:",
+        error
+      );
+      return null;
+    }
+  }
+
+
   private async getWalletPaymentAmount(orderId: string): Promise<number> {
     try {
       const { data, error } = await supabase.rpc(
@@ -1680,6 +1721,8 @@ class OrderService {
 
     if (
 
+      status !== "confirmed" &&
+
       status !== "packed" &&
 
       status !== "shipped" &&
@@ -1721,6 +1764,11 @@ class OrderService {
 
     const walletPaymentAmount =
       await this.getWalletPaymentAmount(order.id);
+
+    const walletBalanceRemaining =
+      await this.getWalletBalanceRemaining(
+        order.customer_id
+      );
 
 
 
@@ -1853,6 +1901,9 @@ class OrderService {
 
             walletAmount:
               walletPaymentAmount,
+
+            walletBalanceRemaining:
+              walletBalanceRemaining,
 
 
 
