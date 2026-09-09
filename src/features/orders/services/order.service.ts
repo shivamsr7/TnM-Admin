@@ -1218,6 +1218,9 @@ class OrderService {
       return;
     }
 
+    const walletPaymentAmount =
+      await this.getWalletPaymentAmount(order.id);
+
     const items = await this.getOrderItems(order.id);
 
     console.log("📧 Sending refund processed email:", {
@@ -1249,6 +1252,7 @@ class OrderService {
         advanceAmount: order.advance_amount,
         paymentTransactionId: order.payment_transaction_id,
         refundAmount: Number(order.refund_amount ?? 0),
+        walletAmount: walletPaymentAmount,
         refundTransactionId,
         refundProcessedAt,
         shipping: {
@@ -1537,6 +1541,113 @@ class OrderService {
 
 
 
+  private async getWalletPaymentAmount(orderId: string): Promise<number> {
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_order_wallet_payment",
+        { p_order_id: orderId }
+      );
+
+      if (error) {
+        console.error(
+          "⚠️ Failed to fetch wallet payment amount:",
+          error
+        );
+        return 0;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+
+      return Math.max(
+        0,
+        Number(row?.wallet_amount ?? 0)
+      );
+    } catch (error) {
+      console.error(
+        "⚠️ Wallet payment lookup failed:",
+        error
+      );
+      return 0;
+    }
+  }
+
+
+  private async prepareReviewLinks(order: Order) {
+    if (!order.customer_id || !order.customer_email) {
+      return {
+        reviewLinks: [],
+        requestIds: [],
+      };
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "product-review-request",
+        {
+          body: {
+            mode: "prepare",
+            orderId: order.id,
+          },
+        }
+      );
+
+      if (error) {
+        console.error(
+          "❌ Review link preparation failed:",
+          error
+        );
+
+        return {
+          reviewLinks: [],
+          requestIds: [],
+        };
+      }
+
+      const products = Array.isArray(data?.products)
+        ? data.products
+        : [];
+
+      const requestIds = Array.isArray(data?.requestIds)
+        ? data.requestIds.filter(
+            (requestId: unknown): requestId is string =>
+              typeof requestId === "string" &&
+              requestId.length > 0
+          )
+        : [];
+
+      const reviewLinks = products
+        .filter(
+          (product: any) =>
+            typeof product?.reviewUrl === "string" &&
+            product.reviewUrl.length > 0
+        )
+        .map((product: any) => ({
+          productId: product.productId,
+          productName: product.productName,
+          // product-review-request returns the image as `imageUrl`.
+          // notificationService expects `productImage`.
+          productImage: product.imageUrl ?? null,
+          reviewUrl: product.reviewUrl,
+        }));
+
+      return {
+        reviewLinks,
+        requestIds,
+      };
+    } catch (error) {
+      console.error(
+        "❌ Review link preparation request failed:",
+        error
+      );
+
+      return {
+        reviewLinks: [],
+        requestIds: [],
+      };
+    }
+  }
+
+
   private async sendStatusEmail(
 
     order: Order,
@@ -1608,12 +1719,31 @@ class OrderService {
 
       );
 
+    const walletPaymentAmount =
+      await this.getWalletPaymentAmount(order.id);
 
 
 
+
+
+
+    
+
+    const reviewPreparation =
+      status === "delivered"
+        ? await this.prepareReviewLinks(order)
+        : {
+            reviewLinks: [],
+            requestIds: [],
+          };
+
+    const reviewLinks =
+      reviewPreparation.reviewLinks;
+
+    const reviewRequestIds =
+      reviewPreparation.requestIds;
 
     console.log(
-
       "📧 Sending status email:",
 
       {
@@ -1721,6 +1851,9 @@ class OrderService {
             remainingAmount:
               order.remaining_amount,
 
+            walletAmount:
+              walletPaymentAmount,
+
 
 
 
@@ -1771,6 +1904,8 @@ class OrderService {
             trackingNumber:
               order.tracking_number,
 
+
+            reviewLinks,
           });
 
 
@@ -1785,9 +1920,52 @@ class OrderService {
 
       );
 
+      /*
+       * The review-request function creates secure review links
+       * during prepare, but the request is only considered
+       * initially sent after the actual Delivered email succeeds.
+       *
+       * This is important because the 24-hour reminder scheduler
+       * only considers requests with initial_sent_at populated.
+       */
+      if (
+        status === "delivered" &&
+        reviewRequestIds.length > 0
+      ) {
+        try {
+          const {
+            data: markData,
+            error: markError,
+          } = await supabase.functions.invoke(
+            "product-review-request",
+            {
+              body: {
+                mode: "mark_initial_sent",
+                orderId: order.id,
+                customerEmail: order.customer_email,
+                requestIds: reviewRequestIds,
+              },
+            }
+          );
 
-
-
+          if (markError) {
+            console.error(
+              "⚠️ Failed to mark initial review requests as sent:",
+              markError
+            );
+          } else {
+            console.log(
+              "✅ Initial review requests marked as sent:",
+              markData
+            );
+          }
+        } catch (error) {
+          console.error(
+            "⚠️ Initial review request marking failed:",
+            error
+          );
+        }
+      }
 
     } catch (error) {
 
@@ -1841,6 +2019,10 @@ class OrderService {
         order.id
 
       );
+
+    const walletPaymentAmount =
+      await this.getWalletPaymentAmount(order.id);
+
 
 
 
@@ -1958,6 +2140,9 @@ class OrderService {
 
             remainingAmount:
               order.remaining_amount,
+
+            walletAmount:
+              walletPaymentAmount,
 
             paymentTransactionId:
               order.payment_transaction_id,

@@ -18,7 +18,8 @@ import {
   MessageSquare,
   HelpCircle,
   FileText,
-  MessageCircle
+  MessageCircle,
+  Handshake
 } from "lucide-react";
 
 export const menuItems = [
@@ -69,7 +70,11 @@ export const menuItems = [
     path: "/customers",
     icon: Users,
   },
-
+{
+  title: "Collaborators",
+  path: "/collaborators",
+  icon: Handshake,
+},
   {
     title: "Coupons",
     path: "/coupons",

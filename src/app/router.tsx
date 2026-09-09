@@ -52,6 +52,7 @@ import FAQsPage from "@/features/faqs/pages/FAQsPage";
 import PoliciesPage from "@/features/cms/pages/PoliciesPage";
 import InstagramReviewsPage
   from "@/features/instagramReviews/pages/InstagramReviewsPage";
+  import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage";
 export const router = createBrowserRouter([
   // ---------------- Public Routes ----------------
 
@@ -205,6 +206,10 @@ export const router = createBrowserRouter([
 {
   path: "Customers",
   element: <CustomersPage />,
+},
+{
+  path: "collaborators",
+  element: <CollaboratorsPage />,
 },
 {
   path: "customers/new",
