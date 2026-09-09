@@ -320,6 +320,16 @@ class OrderService {
 
   ) {
 
+    /*
+     * Fetch the current order once.
+     *
+     * This is reused for cancellation/refund calculations and
+     * for safely setting delivered_at only when the order first
+     * transitions into the delivered state.
+     */
+    const existingOrder =
+      await this.getById(id);
+
     let cancellationRefundAmount =
       0;
 
@@ -340,15 +350,6 @@ class OrderService {
       status ===
       "cancelled"
     ) {
-
-      const existingOrder =
-        await this.getById(id);
-
-
-
-
-
-
 
       /*
        * For prepaid orders, total_amount is the authoritative
@@ -422,6 +423,27 @@ class OrderService {
         new Date().toISOString(),
 
     };
+
+
+
+
+
+    /*
+     * Record the exact time the order first becomes delivered.
+     *
+     * We intentionally do not overwrite delivered_at if the
+     * order is already delivered, so later edits cannot reset
+     * the 24-hour review-email timer.
+     */
+    if (
+      status === "delivered" &&
+      existingOrder.order_status !== "delivered"
+    ) {
+
+      updateData.delivered_at =
+        new Date().toISOString();
+
+    }
 
 
 
