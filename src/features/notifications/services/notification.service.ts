@@ -576,11 +576,30 @@ class NotificationService {
         ? Math.max(0, totalAmount - walletAmount)
         : advanceAmount;
 
-    const walletUsedSection =
+    /*
+     * Wallet summary for the order-placed email.
+     *
+     * When the remaining balance is available, the balance before
+     * the order can be derived as:
+     * previous balance = remaining balance + amount used.
+     *
+     * This keeps the wallet movement clear without mixing it into
+     * the normal payment totals.
+     */
+    const walletBalanceBefore =
+      walletBalanceRemaining !== null &&
+      walletBalanceRemaining !== undefined
+        ? Math.max(
+            0,
+            walletBalanceRemaining + walletAmount
+          )
+        : null;
+
+    const walletSummarySection =
       walletAmount > 0
         ? `
           <tr>
-            <td style="padding:0 24px 0;">
+            <td style="padding:24px 24px 0;">
               <div
                 style="
                   padding:18px;
@@ -597,7 +616,7 @@ class NotificationService {
                     color:#49371d;
                   "
                 >
-                  Your T&amp;M Wallet Was Used
+                  T&amp;M Wallet Activity
                 </div>
 
                 <div
@@ -608,47 +627,61 @@ class NotificationService {
                     color:#625e57;
                   "
                 >
-                  ${formatMoney(walletAmount)} from your T&amp;M Wallet was applied to this order.
+                  Your wallet was used as part of this order payment.
                 </div>
 
-                ${
-                  status === "placed" &&
-                  walletBalanceRemaining !== null &&
-                  walletBalanceRemaining !== undefined
-                    ? `
-                <div
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
                   style="
-                    margin-top:10px;
-                    padding-top:10px;
+                    margin-top:13px;
                     border-top:1px solid #dce9d6;
-                    font-size:13px;
-                    color:#4f7b45;
                   "
                 >
-                  Wallet balance remaining:
-                  <strong>${formatMoney(walletBalanceRemaining)}</strong>
-                </div>
-                `
-                    : ""
-                }
-              </div>
-            </td>
-          </tr>
-        `
-        : "";
+                  ${
+                    walletBalanceBefore !== null
+                      ? `
+                  <tr>
+                    <td style="padding:9px 0;font-size:13px;color:#77736c;">
+                      Wallet Balance Before Order
+                    </td>
+                    <td align="right" style="padding:9px 0;font-size:13px;font-weight:600;color:#222222;">
+                      ${formatMoney(walletBalanceBefore)}
+                    </td>
+                  </tr>
+                  `
+                      : ""
+                  }
 
-    const walletBalanceRow =
-      status === "placed" &&
-      walletAmount > 0 &&
-      walletBalanceRemaining !== null &&
-      walletBalanceRemaining !== undefined
-        ? `
-          <tr>
-            <td style="padding:6px 0;font-size:13px;color:#77736c;">
-              Wallet Balance Remaining
-            </td>
-            <td align="right" style="padding:6px 0;font-size:13px;font-weight:600;color:#4f7b45;">
-              ${formatMoney(walletBalanceRemaining)}
+                  <tr>
+                    <td style="padding:9px 0;font-size:13px;color:#77736c;">
+                      Wallet Used
+                    </td>
+                    <td align="right" style="padding:9px 0;font-size:13px;font-weight:700;color:#4f7b45;">
+                      −${formatMoney(walletAmount)}
+                    </td>
+                  </tr>
+
+                  ${
+                    walletBalanceRemaining !== null &&
+                    walletBalanceRemaining !== undefined
+                      ? `
+                  <tr>
+                    <td style="padding:10px 0 2px;font-size:13px;font-weight:600;color:#49371d;border-top:1px solid #dce9d6;">
+                      Wallet Balance After Order
+                    </td>
+                    <td align="right" style="padding:10px 0 2px;font-size:14px;font-weight:700;color:#4f7b45;border-top:1px solid #dce9d6;">
+                      ${formatMoney(walletBalanceRemaining)}
+                    </td>
+                  </tr>
+                  `
+                      : ""
+                  }
+                </table>
+              </div>
             </td>
           </tr>
         `
@@ -667,7 +700,7 @@ class NotificationService {
           "✓",
 
         message:
-          "Thank you for shopping with T&M Jewels. We’ve received your order and our team will review it shortly.",
+          "Thank you for shopping with T&M Jewels. We’ve received your order and our team is now getting everything ready for you.",
 
       },
 
@@ -2525,7 +2558,7 @@ class NotificationService {
 
 
 
-                ${walletBalanceRow}
+                
 
                 ${remainingPaymentRow}
 
@@ -2697,7 +2730,7 @@ class NotificationService {
 
 
 
-        ${walletUsedSection}
+        ${walletSummarySection}
 
         ${trackingSection}
 
