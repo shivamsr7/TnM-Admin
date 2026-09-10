@@ -1,15 +1,60 @@
-export interface ProductReview {
+export type ReviewStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
+
+export interface ReviewProductImage {
+  id: string;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
+export interface ReviewProduct {
+  id: string;
+  name: string;
+  slug: string;
+  product_images: ReviewProductImage[];
+}
+
+export interface ReviewCustomer {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+}
+
+export interface ReviewOrder {
+  id: string;
+  order_number: string;
+}
+
+export interface Review {
   id: string;
   product_id: string;
   customer_id: string | null;
   order_id: string | null;
+
   rating: number;
   title: string | null;
   review: string;
-  status: "pending" | "approved" | "rejected";
+
+  status: ReviewStatus;
   is_verified: boolean;
+
   created_at: string;
   updated_at: string;
+
+  product?: ReviewProduct | null;
+  customer?: ReviewCustomer | null;
+  order?: ReviewOrder | null;
+}
+
+export interface ReviewStats {
+  totalReviews: number;
+  approvedReviews: number;
+  pendingReviews: number;
+  rejectedReviews: number;
+  averageRating: number;
 }
 
 
@@ -56,7 +101,6 @@ export interface SubmitTokenReviewInput {
   title: string | null;
   review: string;
 }
-
 
 export interface SubmitTokenReviewResponse {
   success: boolean;
