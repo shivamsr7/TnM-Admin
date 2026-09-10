@@ -130,10 +130,50 @@ const {
       {/* Profile + Notes */}
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 space-y-4">
           <CustomerProfileCard
             customer={customer}
           />
+
+          {/* Date of Birth */}
+          <div className="rounded-xl border bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Date of Birth
+                </p>
+
+                <p className="mt-1 text-base font-semibold">
+                  {customer.date_of_birth
+                    ? (() => {
+                        const [year, month, day] =
+                          customer.date_of_birth.split("-");
+
+                        return `${day}/${month}/${year}`;
+                      })()
+                    : "Not added"}
+                </p>
+              </div>
+
+              <div className="text-right">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Changes Used
+                </p>
+
+                <p className="mt-1 text-base font-semibold">
+                  {customer.date_of_birth_update_count ?? 0}/2
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs text-muted-foreground">
+              {(
+                customer.date_of_birth_update_count ?? 0
+              ) >= 2
+                ? "Date of birth can no longer be changed by the customer."
+                : "Customer can update their date of birth up to 2 times."}
+            </p>
+          </div>
         </div>
 
         <CustomerNotesCard

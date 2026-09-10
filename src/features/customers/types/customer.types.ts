@@ -9,9 +9,12 @@ export interface Customer {
   email: string | null;
   phone: string | null;
 
-  avatar: string | null;
+avatar: string | null;
 
-  status: CustomerStatus;
+date_of_birth: string | null;
+date_of_birth_update_count: number;
+
+status: CustomerStatus;
 
   email_verified: boolean;
   phone_verified: boolean;
