@@ -41,6 +41,9 @@ export const bannerSchema = z.object({
   ends_at: z.string().nullable(),
 
   is_active: z.boolean(),
+
+  show_overlay_content: z.boolean(),
 });
 
-export type BannerSchema = z.infer<typeof bannerSchema>;
+export type BannerSchema =
+  z.infer<typeof bannerSchema>;

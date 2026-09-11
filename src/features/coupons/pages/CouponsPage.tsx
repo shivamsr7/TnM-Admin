@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/shared/PageHeader";
 import CouponFilters from "../components/CouponFilters";
 import EmptyState from "@/shared/components/admin/EmptyState";
-
+import BirthdayCouponSettings from "../components/BirthdayCouponSettings";
 import { useCoupons } from "../hooks/useCoupons";
 import {
   couponService,
@@ -258,7 +258,7 @@ export default function CouponsPage() {
           </Button>
         }
       />
-
+<BirthdayCouponSettings />
       <CouponStats
         coupons={coupons}
       />

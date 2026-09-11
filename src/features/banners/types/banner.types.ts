@@ -30,6 +30,8 @@ export interface Banner {
 
   is_active: boolean;
 
+  show_overlay_content: boolean;
+
   created_at: string;
   updated_at: string;
 }
@@ -55,4 +57,6 @@ export interface BannerFormData {
   ends_at: string | null;
 
   is_active: boolean;
+
+  show_overlay_content: boolean;
 }
