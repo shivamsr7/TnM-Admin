@@ -19,7 +19,8 @@ import {
   HelpCircle,
   FileText,
   MessageCircle,
-  Handshake
+  Handshake,
+  Wallet,
 } from "lucide-react";
 
 export const menuItems = [
@@ -70,11 +71,33 @@ export const menuItems = [
     path: "/customers",
     icon: Users,
   },
-{
-  title: "Collaborators",
-  path: "/collaborators",
-  icon: Handshake,
+
+  {
+  title: "Wallet",
+  icon: Wallet,
+
+  children: [
+
+    {
+      title: "Dashboard",
+      path: "/wallet",
+    },
+    {
+      title: "Customer Wallets",
+      path: "/wallet/customers",
+    },
+    {
+      title: "Settings",
+      path: "/wallet/settings",
+    },
+  ],
 },
+  {
+    title: "Collaborators",
+    path: "/collaborators",
+    icon: Handshake,
+  },
+
   {
     title: "Coupons",
     path: "/coupons",
@@ -92,91 +115,95 @@ export const menuItems = [
     path: "/settings",
     icon: Settings,
   },
- {
-  title: "Homepage",
-  path: "/homepage",
-  icon: LayoutTemplate,
-},
 
-{
-  title: "Instagram Reviews",
-  path: "/instagram-reviews",
-  icon: MessageCircle,
-},
+  {
+    title: "Homepage",
+    path: "/homepage",
+    icon: LayoutTemplate,
+  },
 
-{
-  title: "Homepage Sections",
-  path: "/homepage/sections",
-  icon: LayoutTemplate,
-},
+  {
+    title: "Instagram Reviews",
+    path: "/instagram-reviews",
+    icon: MessageCircle,
+  },
 
-{
-  title: "Featured Collections",
-  path: "/homepage/featured-collections",
-  icon: Layers3,
-},
-{
-  title: "Announcements",
-  path: "/announcements",
-  icon: Megaphone,
-},
-{
-  title: "Membership",
-  path: "/membership",
-  icon: Crown,
-  
-},
-{
-  title: "Reviews",
-  path: "/reviews",
-  icon: MessageSquare,
-},
-{
-  title: "Rewards",
-  path: "/rewards",
-  icon: Gift,
+  {
+    title: "Homepage Sections",
+    path: "/homepage/sections",
+    icon: LayoutTemplate,
+  },
 
-  children: [
-    {
-      title: "Dashboard",
-      path: "/rewards",
-    },
-    {
-      title: "Reward Rules",
-      path: "/rewards/rules",
-    },
-    {
-      title: "Reward Tiers",
-      path: "/rewards/tiers",
-    },
-    {
-  title: "Customer Rewards",
-  path: "/rewards/customers",
-},
-{
-  title: "Notify Requests",
-  path: "/notify",
-  icon: Bell,
-},
-  ],
-  
-},
-{
-  title: "CMS",
-  icon: FileText,
+  {
+    title: "Featured Collections",
+    path: "/homepage/featured-collections",
+    icon: Layers3,
+  },
 
-  children: [
-    {
-      title: "FAQs",
-      path: "/faqs",
-      icon: HelpCircle,
-    },
+  {
+    title: "Announcements",
+    path: "/announcements",
+    icon: Megaphone,
+  },
 
-    {
-      title: "Policies",
-      path: "/policies",
-      icon: FileText,
-    },
-  ],
-}
+  {
+    title: "Membership",
+    path: "/membership",
+    icon: Crown,
+  },
+
+  {
+    title: "Reviews",
+    path: "/reviews",
+    icon: MessageSquare,
+  },
+
+  {
+    title: "Rewards",
+    path: "/rewards",
+    icon: Gift,
+
+    children: [
+      {
+        title: "Dashboard",
+        path: "/rewards",
+      },
+      {
+        title: "Reward Rules",
+        path: "/rewards/rules",
+      },
+      {
+        title: "Reward Tiers",
+        path: "/rewards/tiers",
+      },
+      {
+        title: "Customer Rewards",
+        path: "/rewards/customers",
+      },
+      {
+        title: "Notify Requests",
+        path: "/notify",
+        icon: Bell,
+      },
+    ],
+  },
+
+  {
+    title: "CMS",
+    icon: FileText,
+
+    children: [
+      {
+        title: "FAQs",
+        path: "/faqs",
+        icon: HelpCircle,
+      },
+
+      {
+        title: "Policies",
+        path: "/policies",
+        icon: FileText,
+      },
+    ],
+  },
 ];
