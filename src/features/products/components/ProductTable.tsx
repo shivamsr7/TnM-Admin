@@ -3,21 +3,13 @@ import ProductStatusBadge from "./ProductStatusBadge";
 
 export interface ProductTableItem {
   id: string;
-
   name: string;
-
   sku: string;
-
   image?: string;
-
   category?: string;
-
   brand?: string;
-
   price: number;
-
   stock: number;
-
   status:
     | "active"
     | "draft"
@@ -28,10 +20,8 @@ export interface ProductTableItem {
 
 interface ProductTableProps {
   products: ProductTableItem[];
-
   selectedProducts: string[];
   onSelectionChange: (ids: string[]) => void;
-
   onView: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -47,13 +37,15 @@ export default function ProductTable({
 }: ProductTableProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-xl border bg-white py-16 text-center">
-        <h3 className="text-lg font-semibold">
+      <div className="px-5 py-16 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+          <span className="text-xl">⌕</span>
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-slate-900">
           No products found
         </h3>
-
-        <p className="mt-2 text-gray-500">
-          Start by creating your first product.
+        <p className="mt-1 text-sm text-slate-500">
+          Try changing your search or filters.
         </p>
       </div>
     );
@@ -78,12 +70,12 @@ export default function ProductTable({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+    <div className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full border-separate border-spacing-0">
-          <thead className="sticky top-0 z-10 bg-gray-50">
-            <tr className="border-b">
-              <th className="w-12 px-4">
+        <table className="min-w-[1080px] w-full border-separate border-spacing-0">
+          <thead>
+            <tr className="bg-slate-50">
+              <th className="sticky left-0 z-20 w-12 border-b border-slate-200 bg-slate-50 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={
@@ -91,123 +83,141 @@ export default function ProductTable({
                     selectedProducts.length === products.length
                   }
                   onChange={handleSelectAll}
+                  aria-label="Select all products"
+                  className="h-4 w-4 rounded border-slate-300"
                 />
               </th>
 
-              <th className="px-5 py-4 text-left text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Product
               </th>
 
-              <th className="px-5 py-4 text-left text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 SKU
               </th>
 
-              <th className="px-5 py-4 text-left text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Category
               </th>
 
-              <th className="px-5 py-4 text-left text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Brand
               </th>
 
-              <th className="px-5 py-4 text-right text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Price
               </th>
 
-              <th className="px-5 py-4 text-center text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Stock
               </th>
 
-              <th className="px-5 py-4 text-center text-sm font-semibold">
+              <th className="border-b border-slate-200 px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                 Status
               </th>
 
-              <th className="px-5 py-4 text-center text-sm font-semibold">
+              <th className="sticky right-0 z-30 min-w-[92px] border-b border-l border-slate-200 bg-slate-50 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-[-8px_0_14px_-12px_rgba(15,23,42,0.5)]">
                 Actions
               </th>
             </tr>
           </thead>
 
           <tbody>
-            {products.map((product) => (
-              <tr
-                key={product.id}
-                className="border-b last:border-0 hover:bg-gray-50"
-              >
-                <td className="px-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => handleSelectProduct(product.id)}
-                  />
-                </td>
+            {products.map((product, index) => {
+              const isSelected = selectedProducts.includes(product.id);
+              const rowBase =
+                index % 2 === 0 ? "bg-white" : "bg-slate-50/40";
 
-                <td className="min-w-[300px] px-6 py-4">
-  <div className="flex items-center gap-4">
-    <img
-  src={product.image || "https://placehold.co/100x100"}
-  alt={product.name}
-  className="h-14 w-14 flex-shrink-0 rounded-xl border bg-gray-100 object-cover"
-/>
+              return (
+                <tr
+                  key={product.id}
+                  className={`${rowBase} group transition-colors hover:bg-slate-50`}
+                >
+                  <td
+                    className={`sticky left-0 z-10 border-b border-slate-100 px-4 py-4 ${rowBase} group-hover:bg-slate-50`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleSelectProduct(product.id)}
+                      aria-label={`Select ${product.name}`}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                  </td>
 
-    <div className="min-w-0">
-      <h3 className="truncate text-sm font-semibold text-gray-900">
-        {product.name}
-      </h3>
+                  <td className="min-w-[320px] border-b border-slate-100 px-5 py-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                        <img
+                          src={
+                            product.image ||
+                            "https://placehold.co/100x100"
+                          }
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
 
-      <p className="mt-1 text-xs text-gray-500">
-        ID: {product.id}
-      </p>
-    </div>
-  </div>
-</td>
+                      <div className="min-w-0">
+                        <h3 className="truncate text-sm font-semibold text-slate-900">
+                          {product.name}
+                        </h3>
+                        <p className="mt-1 truncate text-[11px] text-slate-400">
+                          ID: {product.id}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
 
-                <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-gray-700">
-  {product.sku}
-</td>
+                  <td className="whitespace-nowrap border-b border-slate-100 px-5 py-4 font-mono text-xs text-slate-600">
+                    {product.sku}
+                  </td>
 
-<td className="whitespace-nowrap px-6 py-4 text-sm">
-  {product.category || "-"}
-</td>
+                  <td className="whitespace-nowrap border-b border-slate-100 px-5 py-4 text-sm text-slate-700">
+                    {product.category || "-"}
+                  </td>
 
-<td className="whitespace-nowrap px-6 py-4 text-sm">
-  {product.brand || "-"}
-</td>
+                  <td className="whitespace-nowrap border-b border-slate-100 px-5 py-4 text-sm text-slate-700">
+                    {product.brand || "-"}
+                  </td>
 
-<td className="whitespace-nowrap px-6 py-4 text-right font-semibold">
-  ₹{product.price.toLocaleString()}
-</td>
+                  <td className="whitespace-nowrap border-b border-slate-100 px-5 py-4 text-right text-sm font-semibold text-slate-900">
+                    ₹{product.price.toLocaleString()}
+                  </td>
 
-<td className="px-6 py-4 text-center">
-  <span
-    className={`rounded-md px-3 py-1 text-sm font-medium ${
-      product.stock <= 0
-        ? "bg-red-100 text-red-700"
-        : product.stock <= 5
-        ? "bg-yellow-100 text-yellow-700"
-        : "bg-green-100 text-green-700"
-    }`}
-  >
-    {product.stock}
-  </span>
-</td>
+                  <td className="border-b border-slate-100 px-5 py-4 text-center">
+                    <span
+                      className={`inline-flex min-w-10 justify-center rounded-lg px-2.5 py-1 text-xs font-semibold ${
+                        product.stock <= 0
+                          ? "bg-red-50 text-red-700"
+                          : product.stock <= 5
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {product.stock}
+                    </span>
+                  </td>
 
-                <td className="px-5 py-4 text-center">
-                  <ProductStatusBadge
-                    status={product.status}
-                  />
-                </td>
+                  <td className="border-b border-slate-100 px-5 py-4 text-center">
+                    <ProductStatusBadge status={product.status} />
+                  </td>
 
-                <td className="px-5 py-4">
-                  <ProductActionsMenu
-  productId={product.id}
-  onView={onView}
-  onEdit={onEdit}
-  onDelete={onDelete}
-/>
-                </td>
-              </tr>
-            ))}
+                  <td
+                    className={`sticky right-0 z-10 border-b border-l border-slate-200 px-4 py-4 text-center shadow-[-8px_0_14px_-12px_rgba(15,23,42,0.5)] ${rowBase} group-hover:bg-slate-50`}
+                  >
+                    <div className="flex justify-center">
+                      <ProductActionsMenu
+                        productId={product.id}
+                        onView={onView}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

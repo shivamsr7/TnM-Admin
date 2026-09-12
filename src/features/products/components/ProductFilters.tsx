@@ -29,16 +29,11 @@ export default function ProductFilters({
   onSortChange,
 }: ProductFiltersProps) {
   return (
-    <div className="flex flex-wrap gap-3">
-
-      <Select
-        value={category}
-        onValueChange={onCategoryChange}
-      >
-        <SelectTrigger className="w-[180px]">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+      <Select value={category} onValueChange={onCategoryChange}>
+        <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white text-sm shadow-none">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
-
         <SelectContent>
           <SelectItem value="all">All Categories</SelectItem>
           <SelectItem value="Ring">Ring</SelectItem>
@@ -48,33 +43,20 @@ export default function ProductFilters({
         </SelectContent>
       </Select>
 
-      <Select
-        value={brand}
-        onValueChange={onBrandChange}
-      >
-        <SelectTrigger className="w-[180px]">
+      <Select value={brand} onValueChange={onBrandChange}>
+        <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white text-sm shadow-none">
           <SelectValue placeholder="Brand" />
         </SelectTrigger>
-
         <SelectContent>
-          <SelectItem value="all">
-            All Brands
-          </SelectItem>
-
-          <SelectItem value="T&M Jewels">
-            T&M Jewels
-          </SelectItem>
+          <SelectItem value="all">All Brands</SelectItem>
+          <SelectItem value="T&M Jewels">T&M Jewels</SelectItem>
         </SelectContent>
       </Select>
 
-      <Select
-        value={status}
-        onValueChange={onStatusChange}
-      >
-        <SelectTrigger className="w-[170px]">
+      <Select value={status} onValueChange={onStatusChange}>
+        <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white text-sm shadow-none">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
-
         <SelectContent>
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="active">Active</SelectItem>
@@ -83,37 +65,18 @@ export default function ProductFilters({
         </SelectContent>
       </Select>
 
-      <Select
-        value={sort}
-        onValueChange={onSortChange}
-      >
-        <SelectTrigger className="w-[180px]">
+      <Select value={sort} onValueChange={onSortChange}>
+        <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white text-sm shadow-none">
           <SelectValue placeholder="Sort" />
         </SelectTrigger>
-
         <SelectContent>
-          <SelectItem value="newest">
-            Newest
-          </SelectItem>
-
-          <SelectItem value="oldest">
-            Oldest
-          </SelectItem>
-
-          <SelectItem value="price-low">
-            Price Low → High
-          </SelectItem>
-
-          <SelectItem value="price-high">
-            Price High → Low
-          </SelectItem>
-
-          <SelectItem value="stock">
-            Stock
-          </SelectItem>
+          <SelectItem value="newest">Newest</SelectItem>
+          <SelectItem value="oldest">Oldest</SelectItem>
+          <SelectItem value="price-low">Price Low → High</SelectItem>
+          <SelectItem value="price-high">Price High → Low</SelectItem>
+          <SelectItem value="stock">Stock</SelectItem>
         </SelectContent>
       </Select>
-
     </div>
   );
 }

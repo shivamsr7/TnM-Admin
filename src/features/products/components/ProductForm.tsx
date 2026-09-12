@@ -25,6 +25,25 @@ import {
   Button,
 } from "@/components/ui/button";
 
+import {
+  ArrowLeft,
+  Boxes,
+  Check,
+  CheckCircle2,
+  CircleDollarSign,
+  FileText,
+  Image as ImageIcon,
+  LayoutList,
+  Loader2,
+  Package,
+  Search,
+  Settings2,
+  Tags,
+  Truck,
+
+  ChevronRight,
+  Sparkles,} from "lucide-react";
+
 
 /*
  * =========================================================
@@ -1386,6 +1405,358 @@ export default function ProductForm({
   }
 
 
+
+  /*
+   * =======================================================
+   * LIVE PAGE SUMMARY
+   * =======================================================
+   */
+
+  const watchedName =
+    form.watch("name") || "";
+
+  const watchedCategory =
+    form.watch("category_id") || "";
+
+  const watchedPrice =
+    Number(form.watch("price")) || 0;
+
+  const watchedStock =
+    Number(form.watch("stock")) || 0;
+
+
+
+
+
+  
+
+
+
+
+
+
+  const saveLabel =
+    saving
+      ? mode === "create"
+        ? "Creating product..."
+        : "Saving changes..."
+      : mode === "create"
+        ? "Create Product"
+        : "Save Changes";
+
+  /*
+   * =======================================================
+   * GUIDED PRODUCT WIZARD
+   * =======================================================
+   */
+
+  type WizardStep = {
+    id: string;
+    label: string;
+    shortLabel: string;
+    icon: typeof FileText;
+  };
+
+  const baseSteps: WizardStep[] = [
+    {
+      id: "basic",
+      label: "Basic Information",
+      shortLabel: "Basic Info",
+      icon: FileText,
+    },
+    {
+      id: "specifications",
+      label: "Specifications",
+      shortLabel: "Specs",
+      icon: Tags,
+    },
+    ...(isRingProduct
+      ? [
+          {
+            id: "ring-sizes",
+            label: "Ring Sizes",
+            shortLabel: "Ring Sizes",
+            icon: Settings2,
+          },
+        ]
+      : []),
+    {
+      id: "dimensions",
+      label: "Weight & Dimensions",
+      shortLabel: "Dimensions",
+      icon: Truck,
+    },
+    {
+      id: "pricing",
+      label: "Pricing",
+      shortLabel: "Pricing",
+      icon: CircleDollarSign,
+    },
+    {
+      id: "inventory",
+      label: "Inventory",
+      shortLabel: "Inventory",
+      icon: Boxes,
+    },
+    {
+      id: "organization",
+      label: "Organization",
+      shortLabel: "Organization",
+      icon: LayoutList,
+    },
+    {
+      id: "images",
+      label: "Product Images",
+      shortLabel: "Images",
+      icon: ImageIcon,
+    },
+    {
+      id: "seo",
+      label: "Search Engine Optimization",
+      shortLabel: "SEO",
+      icon: Search,
+    },
+    {
+      id: "status",
+      label: "Publishing & Visibility",
+      shortLabel: "Publishing",
+      icon: Package,
+    },
+  ];
+
+  const [currentStep, setCurrentStep] = useState(0);
+
+  /*
+   * If category changes while the wizard is open and Ring Sizes
+   * disappears, keep the current step inside the valid range.
+   */
+  useEffect(() => {
+    setCurrentStep((step) =>
+      Math.min(step, baseSteps.length - 1)
+    );
+  }, [baseSteps.length, isRingProduct]);
+
+  const currentWizardStep =
+    baseSteps[currentStep] ?? baseSteps[0];
+
+  /*
+   * Section completion is intentionally lightweight. It is used
+   * for the progress UI; actual Continue validation uses RHF.
+   */
+  const isStepComplete = (stepId: string) => {
+    switch (stepId) {
+      case "basic":
+        return Boolean(
+          watchedName.trim() &&
+            form.watch("description")?.trim()
+        );
+
+      case "specifications":
+        return (
+          (form.watch("specifications")?.length ?? 0) > 0
+        );
+
+      case "ring-sizes":
+        return ringSizes.length > 0;
+
+      case "dimensions":
+        return Boolean(
+          form.watch("weight") !== null &&
+            form.watch("weight") !== undefined
+        );
+
+      case "pricing":
+        return watchedPrice > 0;
+
+      case "inventory":
+        return Boolean(
+          form.watch("stock") !== undefined
+        );
+
+      case "organization":
+        return Boolean(watchedCategory);
+
+      case "images":
+        return images.length > 0;
+
+      case "seo":
+        return Boolean(
+          form.watch("seo_title")?.trim()
+        );
+
+      case "status":
+        return Boolean(form.watch("status"));
+
+      default:
+        return false;
+    }
+  };
+
+  const completedStepCount = baseSteps.filter(
+    (step) => isStepComplete(step.id)
+  ).length;
+
+  const progressPercent = Math.round(
+    ((currentStep + 1) / baseSteps.length) * 100
+  );
+
+  const wizardCompletionPercent = Math.round(
+    (completedStepCount / baseSteps.length) * 100
+  );
+
+  /*
+   * Validate only the fields belonging to the current step.
+   * This keeps the wizard focused and does not alter the final
+   * submit/schema logic.
+   */
+  const validateCurrentStep = async () => {
+    let valid = true;
+
+    switch (currentWizardStep.id) {
+      case "basic":
+        valid = await form.trigger([
+          "name",
+          "slug",
+          "short_description",
+          "description",
+          "care_instructions",
+        ]);
+        break;
+
+      case "specifications":
+        valid = await form.trigger("specifications");
+        break;
+
+      case "ring-sizes":
+        if (ringSizes.length === 0) {
+          toast.error("Select at least one ring size to continue.");
+          return false;
+        }
+        valid = true;
+        break;
+
+      case "dimensions":
+        valid = await form.trigger([
+          "weight",
+          "length",
+          "width",
+          "height",
+        ]);
+        break;
+
+      case "pricing":
+        valid = await form.trigger([
+          "cost_price",
+          "price",
+          "compare_price",
+          "special_discount_enabled",
+          "special_discount_type",
+          "special_discount_value",
+          "special_discount_ends_at",
+        ]);
+        break;
+
+      case "inventory":
+        valid = await form.trigger([
+          "stock",
+          "low_stock_threshold",
+          "track_inventory",
+          "allow_backorders",
+        ]);
+        break;
+
+      case "organization":
+        valid = await form.trigger([
+          "category_id",
+          "subcategory_id",
+          "brand_id",
+          "collection_ids",
+          "tag_ids",
+          "featured",
+          "new_arrival",
+          "best_seller",
+          "trending",
+          "editors_pick",
+        ]);
+        break;
+
+      case "images":
+        if (images.length === 0) {
+          toast.error("Add at least one product image to continue.");
+          return false;
+        }
+        valid = true;
+        break;
+
+      case "seo":
+        valid = await form.trigger([
+          "seo_title",
+          "seo_description",
+          "meta_keywords",
+        ]);
+        break;
+
+      case "status":
+        valid = await form.trigger("status");
+        break;
+    }
+
+    if (!valid) {
+      toast.error(
+        "Please complete the highlighted fields before continuing."
+      );
+    }
+
+    return valid;
+  };
+
+  const goNext = async () => {
+    const valid = await validateCurrentStep();
+
+    if (!valid) return;
+
+    if (currentStep < baseSteps.length - 1) {
+      setCurrentStep((step) => step + 1);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const goBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep((step) => step - 1);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const goToStep = (index: number) => {
+    /*
+     * Only completed/current steps are directly navigable.
+     * This prevents accidentally skipping required setup.
+     */
+    if (
+      index <= currentStep ||
+      index < completedStepCount
+    ) {
+      setCurrentStep(index);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const isLastStep =
+    currentStep === baseSteps.length - 1;
+
   /*
    * =======================================================
    * RENDER
@@ -1393,478 +1764,575 @@ export default function ProductForm({
    */
 
   return (
-
     <form
-
-      onSubmit={
-        form.handleSubmit(
-          onSubmit
-        )
-      }
-
-      className="
-        space-y-8
-      "
-
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="min-w-0 pb-28"
     >
+      {/* Header */}
+      <header className="mb-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.05)]">
+        <div className="relative px-5 py-5 sm:px-7 sm:py-6">
+          <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-slate-100 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-1/3 h-44 w-44 rounded-full bg-amber-50 blur-3xl" />
 
-      {/* ===================================================
-          HEADER
-      ==================================================== */}
-
-      <div
-
-        className="
-          flex
-          flex-col
-          gap-4
-          rounded-xl
-          border
-          bg-white
-          p-6
-          shadow-sm
-
-          md:flex-row
-          md:items-center
-          md:justify-between
-        "
-
-      >
-
-        <div>
-
-          <h1
-            className="
-              text-2xl
-              font-bold
-            "
-          >
-
-            {
-              mode === "create"
-                ? "Add Product"
-                : "Edit Product"
-            }
-
-          </h1>
-
-
-          <p
-            className="
-              mt-1
-              text-sm
-              text-muted-foreground
-            "
-          >
-
-            {
-              mode === "create"
-
-                ? "Create a new product for your store."
-
-                : "Update your product details."
-            }
-
-          </p>
-
-        </div>
-
-
-        <div
-          className="
-            flex
-            gap-3
-          "
-        >
-
-          <Button
-
-            type="button"
-
-            variant="outline"
-
-            onClick={() =>
-              navigate(-1)
-            }
-
-          >
-
-            Cancel
-
-          </Button>
-
-
-          <Button
-
-            type="submit"
-
-            disabled={
-              saving ||
-              isLoading
-            }
-
-          >
-
-            {
-              saving
-
-                ? mode === "create"
-                  ? "Saving Product..."
-                  : "Updating Product..."
-
-                : mode === "create"
-                  ? "Save Product"
-                  : "Update Product"
-            }
-
-          </Button>
-
-        </div>
-
-      </div>
-
-
-      {/* ===================================================
-          BASIC INFORMATION
-      ==================================================== */}
-
-      <BasicInfoSection
-        form={form}
-      />
-
-
-      {/* ===================================================
-          PRODUCT SPECIFICATIONS
-      ==================================================== */}
-
-      <SpecificationsSection
-        form={form}
-      />
-
-
-      {/* ===================================================
-          RING SIZE AVAILABILITY
-      ==================================================== */}
-
-      {
-        isRingProduct && (
-
-          <section
-            className="
-              rounded-xl
-              border
-              bg-white
-              p-6
-              shadow-sm
-            "
-          >
-
-            <div>
-              <h2
-                className="
-                  text-lg
-                  font-semibold
-                  text-foreground
-                "
+          <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="mb-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-950"
               >
-                Available Ring Sizes
-              </h2>
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to products
+              </button>
 
-              <p
-                className="
-                  mt-1
-                  text-sm
-                  text-muted-foreground
-                "
-              >
-                Select the ring sizes available for this product.
-              </p>
+              <div className="flex items-start gap-3.5">
+                <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white sm:flex">
+                  <Package className="h-5 w-5" />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                      {mode === "create"
+                        ? "Add a new product"
+                        : "Edit product"}
+                    </h1>
+
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                      Step {currentStep + 1} of {baseSteps.length}
+                    </span>
+                  </div>
+
+                  <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                    Complete each section one at a time. Your product will
+                    only be saved when you click the final button.
+                  </p>
+                </div>
+              </div>
             </div>
 
+            <div className="hidden items-center gap-2 sm:flex">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  Setup
+                </p>
+                <p className="mt-0.5 text-sm font-bold text-slate-900">
+                  {wizardCompletionPercent}% complete
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-            <div
-              className="
-                mt-5
-                grid
-                grid-cols-4
-                gap-3
-                sm:grid-cols-6
-                md:grid-cols-8
-              "
-            >
+      {/* Overall progress */}
+      <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+              Product setup
+            </p>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              {currentWizardStep.label}
+            </p>
+          </div>
 
-              {
-                RING_SIZES.map(
-                  (size) => {
+          <div className="text-right">
+            <p className="text-sm font-bold text-slate-900">
+              {progressPercent}%
+            </p>
+            <p className="text-[10px] text-slate-400">
+              Step {currentStep + 1}/{baseSteps.length}
+            </p>
+          </div>
+        </div>
 
-                    const selected =
-                      ringSizes.includes(size);
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-slate-950 transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
 
-                    return (
+        {/* Desktop step navigation */}
+        <div className="mt-4 hidden grid-cols-5 gap-2 lg:grid xl:grid-cols-10">
+          {baseSteps.map((step, index) => {
+            const Icon = step.icon;
+            const completed = isStepComplete(step.id);
+            const active = index === currentStep;
+            const clickable =
+              index <= currentStep ||
+              index < completedStepCount;
 
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => {
+            return (
+              <button
+                key={step.id}
+                type="button"
+                disabled={!clickable}
+                onClick={() => goToStep(index)}
+                className={`group rounded-xl border p-2.5 text-left transition ${
+                  active
+                    ? "border-slate-950 bg-slate-950 text-white"
+                    : completed
+                      ? "border-emerald-100 bg-emerald-50/60 text-slate-800"
+                      : clickable
+                        ? "border-slate-200 bg-white hover:bg-slate-50"
+                        : "cursor-not-allowed border-slate-100 bg-slate-50/50 text-slate-400"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-lg ${
+                      active
+                        ? "bg-white/10"
+                        : completed
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {completed && !active ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <Icon className="h-3.5 w-3.5" />
+                    )}
+                  </span>
 
-                          setRingSizes(
-                            (current) =>
+                  <span
+                    className={`text-[9px] font-bold ${
+                      active ? "text-white/60" : "text-slate-400"
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+
+                <p
+                  className={`mt-2 truncate text-[10px] font-semibold ${
+                    active ? "text-white" : ""
+                  }`}
+                >
+                  {step.shortLabel}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile step navigation */}
+        <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1 lg:hidden">
+          {baseSteps.map((step, index) => {
+            const completed = isStepComplete(step.id);
+            const active = index === currentStep;
+            const clickable =
+              index <= currentStep ||
+              index < completedStepCount;
+
+            return (
+              <button
+                key={step.id}
+                type="button"
+                disabled={!clickable}
+                onClick={() => goToStep(index)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-semibold ${
+                  active
+                    ? "bg-slate-950 text-white"
+                    : completed
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {completed && !active && (
+                  <Check className="h-3 w-3" />
+                )}
+                {index + 1}. {step.shortLabel}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_250px] xl:grid-cols-[minmax(0,1fr)_270px]">
+        {/* Main step */}
+        <main className="min-w-0">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-5 sm:px-7">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-white">
+                  {(() => {
+                    const Icon = currentWizardStep.icon;
+                    return <Icon className="h-4.5 w-4.5" />;
+                  })()}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    Section {currentStep + 1}
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                    {currentWizardStep.label}
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {currentWizardStep.id === "basic" &&
+                      "Start with the product identity and customer-facing details."}
+                    {currentWizardStep.id === "specifications" &&
+                      "Add the important product characteristics customers need."}
+                    {currentWizardStep.id === "ring-sizes" &&
+                      "Choose every ring size available for this product."}
+                    {currentWizardStep.id === "dimensions" &&
+                      "Add weight and measurements for accurate product and shipping information."}
+                    {currentWizardStep.id === "pricing" &&
+                      "Set your costs, selling price and any special product offer."}
+                    {currentWizardStep.id === "inventory" &&
+                      "Set stock levels and decide how inventory should behave."}
+                    {currentWizardStep.id === "organization" &&
+                      "Place the product in the right categories, collections and storefront sections."}
+                    {currentWizardStep.id === "images" &&
+                      "Add the images that will make customers want to see the product."}
+                    {currentWizardStep.id === "seo" &&
+                      "Prepare the product for search engines and Google previews."}
+                    {currentWizardStep.id === "status" &&
+                      "Choose how the product should appear on your storefront."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-6">
+              {currentWizardStep.id === "basic" && (
+                <BasicInfoSection form={form} />
+              )}
+
+              {currentWizardStep.id === "specifications" && (
+                <SpecificationsSection form={form} />
+              )}
+
+              {currentWizardStep.id === "ring-sizes" && (
+                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <div className="mb-5 grid grid-cols-4 gap-2.5 sm:grid-cols-6 md:grid-cols-8 xl:grid-cols-9">
+                    {RING_SIZES.map((size) => {
+                      const selected = ringSizes.includes(size);
+
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => {
+                            setRingSizes((current) =>
                               current.includes(size)
                                 ? current.filter(
-                                    (item) =>
-                                      item !== size
+                                    (item) => item !== size
                                   )
-                                : [
-                                    ...current,
-                                    size,
-                                  ].sort(
+                                : [...current, size].sort(
                                     (a, b) =>
-                                      Number(a) -
-                                      Number(b)
+                                      Number(a) - Number(b)
                                   )
-                          );
-
-                        }}
-                        className={`
-                          flex
-                          h-11
-                          items-center
-                          justify-center
-                          rounded-lg
-                          border
-                          text-sm
-                          font-medium
-                          transition
-
-                          ${
+                            );
+                          }}
+                          className={`relative flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition ${
                             selected
-                              ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                              : "border-input bg-background text-foreground hover:bg-muted"
-                          }
-                        `}
+                              ? "border-slate-950 bg-slate-950 text-white shadow-sm"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                          }`}
+                        >
+                          {size}
+                          {selected && (
+                            <Check className="absolute right-1.5 top-1.5 h-2.5 w-2.5" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                    <p className="text-xs text-slate-500">
+                      {ringSizes.length > 0
+                        ? `${ringSizes.length} size${ringSizes.length === 1 ? "" : "s"} selected`
+                        : "No ring sizes selected"}
+                    </p>
+
+                    {ringSizes.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setRingSizes([])}
+                        className="text-xs font-semibold text-slate-600 hover:text-slate-950"
                       >
-                        {size}
+                        Clear sizes
                       </button>
+                    )}
+                  </div>
+                </section>
+              )}
 
-                    );
+              {currentWizardStep.id === "dimensions" && (
+                <DimensionsSection form={form} />
+              )}
 
-                  }
-                )
-              }
+              {currentWizardStep.id === "pricing" && (
+                <PricingSection form={form} />
+              )}
 
+              {currentWizardStep.id === "inventory" && (
+                <InventorySection form={form} />
+              )}
+
+              {currentWizardStep.id === "organization" && (
+                <OrganizationSection
+                  form={form}
+                  categories={categories}
+                  subcategories={subcategories}
+                  brands={brands}
+                  collections={collections}
+                  tags={tags}
+                />
+              )}
+
+              {currentWizardStep.id === "images" && (
+                <ImagesSection
+                  images={images}
+                  setImages={setImages}
+                  uploaderRef={mediaUploaderRef}
+                />
+              )}
+
+              {currentWizardStep.id === "seo" && (
+                <SeoSection form={form} />
+              )}
+
+              {currentWizardStep.id === "status" && (
+                <StatusSection form={form} />
+              )}
             </div>
 
+            {/* Step controls */}
+            <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4 sm:px-6">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={goBack}
+                  disabled={currentStep === 0 || saving}
+                  className="h-11 rounded-xl border-slate-200 bg-white px-5"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
 
-            <p
-              className="
-                mt-4
-                text-xs
-                text-muted-foreground
-              "
-            >
-              {
-                ringSizes.length > 0
-                  ? `${ringSizes.length} size${ringSizes.length === 1 ? "" : "s"} selected`
-                  : "No ring sizes selected"
-              }
-            </p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {!isLastStep && (
+                    <Button
+                      type="button"
+                      onClick={goNext}
+                      disabled={saving}
+                      className="h-11 rounded-xl bg-slate-950 px-6 font-semibold text-white shadow-sm hover:bg-slate-800"
+                    >
+                      Save & Continue
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
 
+                  {isLastStep && (
+                    <Button
+                      type="submit"
+                      disabled={saving}
+                      className="h-11 rounded-xl bg-slate-950 px-6 font-semibold text-white shadow-sm hover:bg-slate-800"
+                    >
+                      {saving ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                      )}
+                      {saveLabel}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
           </section>
+        </main>
 
-        )
-      }
+        {/* Desktop progress/sidebar */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-5 space-y-4">
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-4 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Progress
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-slate-950">
+                      {completedStepCount}/{baseSteps.length}
+                    </p>
+                  </div>
 
+                  <span className="text-sm font-bold text-slate-700">
+                    {wizardCompletionPercent}%
+                  </span>
+                </div>
 
-      {/* ===================================================
-          WEIGHT & DIMENSIONS
-      ==================================================== */}
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-slate-950 transition-all duration-500"
+                    style={{
+                      width: `${wizardCompletionPercent}%`,
+                    }}
+                  />
+                </div>
+              </div>
 
-      <DimensionsSection
-        form={form}
-      />
+              <div className="p-2">
+                {baseSteps.map((step, index) => {
+                  const Icon = step.icon;
+                  const completed = isStepComplete(step.id);
+                  const active = index === currentStep;
+                  const clickable =
+                    index <= currentStep ||
+                    index < completedStepCount;
 
+                  return (
+                    <button
+                      key={step.id}
+                      type="button"
+                      disabled={!clickable}
+                      onClick={() => goToStep(index)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                        active
+                          ? "bg-slate-950 text-white"
+                          : "hover:bg-slate-50"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                          active
+                            ? "bg-white/10 text-white"
+                            : completed
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {completed && !active ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Icon className="h-4 w-4" />
+                        )}
+                      </span>
 
-      {/* ===================================================
-          PRICING + INVENTORY
-      ==================================================== */}
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block truncate text-xs font-semibold ${
+                            active ? "text-white" : "text-slate-700"
+                          }`}
+                        >
+                          {index + 1}. {step.label}
+                        </span>
+                        <span
+                          className={`mt-0.5 block text-[10px] ${
+                            active
+                              ? "text-white/50"
+                              : completed
+                                ? "text-emerald-600"
+                                : "text-slate-400"
+                          }`}
+                        >
+                          {active
+                            ? "Current section"
+                            : completed
+                              ? "Complete"
+                              : "Not completed"}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
 
-      <div
+            {/* Live snapshot */}
+            <section className="overflow-hidden rounded-2xl bg-slate-950 text-white shadow-sm">
+              <div className="p-4">
+                <div className="flex items-center gap-2 text-white/50">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
+                    Live snapshot
+                  </span>
+                </div>
 
-        className="
-          grid
-          gap-6
-          xl:grid-cols-2
-        "
+                <h3 className="mt-3 line-clamp-2 text-sm font-semibold">
+                  {watchedName || "Your product name"}
+                </h3>
 
-      >
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-white/10 p-3">
+                    <p className="text-[10px] text-white/40">Price</p>
+                    <p className="mt-1 text-sm font-semibold">
+                      {watchedPrice > 0
+                        ? `₹${watchedPrice.toLocaleString()}`
+                        : "—"}
+                    </p>
+                  </div>
 
-        <PricingSection
-          form={form}
-        />
+                  <div className="rounded-xl bg-white/10 p-3">
+                    <p className="text-[10px] text-white/40">Stock</p>
+                    <p className="mt-1 text-sm font-semibold">
+                      {watchedStock}
+                    </p>
+                  </div>
 
-
-        <InventorySection
-          form={form}
-        />
-
+                  <div className="col-span-2 rounded-xl bg-white/10 p-3">
+                    <p className="text-[10px] text-white/40">
+                      Images
+                    </p>
+                    <p className="mt-1 text-xs font-semibold">
+                      {images.length} / 10 uploaded
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </aside>
       </div>
 
+      {/* Mobile sticky action bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_25px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-3xl gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={goBack}
+            disabled={currentStep === 0 || saving}
+            className="h-11 flex-1 rounded-xl border-slate-200 bg-white"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Back
+          </Button>
 
-      {/* ===================================================
-          ORGANIZATION + STATUS
-      ==================================================== */}
-
-      <div
-
-        className="
-          grid
-          gap-6
-          xl:grid-cols-2
-        "
-
-      >
-
-        <OrganizationSection
-
-          form={
-            form
-          }
-
-          categories={
-            categories
-          }
-
-          subcategories={
-            subcategories
-          }
-
-          brands={
-            brands
-          }
-
-          collections={
-            collections
-          }
-
-          tags={
-            tags
-          }
-
-        />
-
-
-        <StatusSection
-          form={form}
-        />
-
+          {!isLastStep ? (
+            <Button
+              type="button"
+              onClick={goNext}
+              disabled={saving}
+              className="h-11 flex-[1.5] rounded-xl bg-slate-950 font-semibold text-white hover:bg-slate-800"
+            >
+              Save & Continue
+              <ChevronRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={saving}
+              className="h-11 flex-[1.5] rounded-xl bg-slate-950 font-semibold text-white hover:bg-slate-800"
+            >
+              {saving ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="mr-1.5 h-4 w-4" />
+              )}
+              {saveLabel}
+            </Button>
+          )}
+        </div>
       </div>
-
-
-      {/* ===================================================
-          IMAGES
-      ==================================================== */}
-
-      <ImagesSection
-
-        images={
-          images
-        }
-
-        setImages={
-          setImages
-        }
-
-        uploaderRef={
-          mediaUploaderRef
-        }
-
-      />
-
-
-      {/* ===================================================
-          SEO
-      ==================================================== */}
-
-      <SeoSection
-        form={form}
-      />
-
-
-      {/* ===================================================
-          BOTTOM ACTIONS
-      ==================================================== */}
-
-      <div
-
-        className="
-          sticky
-          bottom-0
-          z-20
-
-          flex
-          flex-col
-          gap-3
-
-          rounded-xl
-          border
-
-          bg-background/95
-
-          p-4
-
-          backdrop-blur
-
-          md:flex-row
-          md:justify-end
-        "
-
-      >
-
-        <Button
-
-          type="button"
-
-          variant="outline"
-
-          onClick={() =>
-            navigate(-1)
-          }
-
-        >
-
-          Cancel
-
-        </Button>
-
-
-        <Button
-
-          type="submit"
-
-          disabled={
-            saving
-          }
-
-        >
-
-          {
-            saving
-
-              ? mode === "create"
-                ? "Saving Product..."
-                : "Updating Product..."
-
-              : mode === "create"
-                ? "Save Product"
-                : "Update Product"
-          }
-
-        </Button>
-
-      </div>
-
     </form>
-
   );
-
 }
