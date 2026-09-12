@@ -13,6 +13,8 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronUp,
+  Clock3,
+  PackageOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +26,10 @@ import {
   useAddWalletCredit,
   useDeductWalletCredit,
 } from "../hooks/useAdminWallet";
+
+import {
+  useAdminWalletCreditLots,
+} from "../hooks/useAdminWalletCreditLots";
 
 interface AdminCustomerWalletProps {
   customerId: string;
@@ -140,6 +146,9 @@ export default function AdminCustomerWallet({
   const transactionsQuery =
     useAdminWalletTransactions(customerId);
 
+  const creditLotsQuery =
+    useAdminWalletCreditLots(customerId);
+
   const addCreditMutation =
     useAddWalletCredit(customerId);
 
@@ -150,6 +159,9 @@ export default function AdminCustomerWallet({
 
   const transactions =
     transactionsQuery.data ?? [];
+
+  const creditLots =
+    creditLotsQuery.data ?? [];
 
   const recentTransactions = useMemo(
     () =>
@@ -256,6 +268,7 @@ export default function AdminCustomerWallet({
       setCreditReason("");
       setCreditExpiry("");
       setShowCreditForm(false);
+      void creditLotsQuery.refetch();
     } catch (error) {
       console.error(error);
 
@@ -349,6 +362,7 @@ export default function AdminCustomerWallet({
       setDebitReason("");
       setShowDebitForm(false);
       setShowDebitConfirmation(false);
+      void creditLotsQuery.refetch();
     } catch (error) {
       console.error(error);
 
@@ -881,6 +895,214 @@ export default function AdminCustomerWallet({
               </div>
 
             </div>
+          )}
+
+        </div>
+
+
+        {/* =====================================================
+            CREDIT LOTS & EXPIRY
+        ===================================================== */}
+
+        <div className="border-t">
+
+          {/* HEADER */}
+
+          <div className="flex items-center justify-between border-b px-5 py-4 sm:px-6">
+
+            <div className="flex items-center gap-2">
+
+              <PackageOpen className="h-4 w-4 text-[#C8A44D]" />
+
+              <h3 className="text-sm font-semibold">
+                Credit Lots & Expiry
+              </h3>
+
+            </div>
+
+            <span className="text-[11px] text-muted-foreground">
+              {creditLots.length}{" "}
+              {creditLots.length === 1
+                ? "lot"
+                : "lots"}
+            </span>
+
+          </div>
+
+
+          {/* LOADING */}
+
+          {creditLotsQuery.isLoading ? (
+
+            <div className="flex h-28 items-center justify-center">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+
+          ) : creditLotsQuery.isError ? (
+
+            <div className="px-6 py-8 text-center">
+
+              <p className="text-sm font-medium">
+                Unable to load credit lots
+              </p>
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                Please refresh and try again.
+              </p>
+
+            </div>
+
+          ) : creditLots.length === 0 ? (
+
+            <div className="px-6 py-10 text-center">
+
+              <PackageOpen className="mx-auto h-8 w-8 text-neutral-300" />
+
+              <p className="mt-3 text-sm font-medium">
+                No credit lots yet
+              </p>
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                Credit lots will appear here when wallet credit is added.
+              </p>
+
+            </div>
+
+          ) : (
+
+            <div className="divide-y">
+
+              {creditLots.map((lot) => {
+
+                const isExpired =
+                  lot.status === "expired";
+
+                const usedAmountPaise =
+                  Math.max(
+                    0,
+                    Number(lot.original_amount_paise) -
+                      Number(lot.remaining_amount_paise)
+                  );
+
+                const statusLabel =
+                  isExpired
+                    ? "Expired"
+                    : lot.status === "exhausted"
+                    ? "Exhausted"
+                    : "Active";
+
+                const statusClass =
+                  isExpired
+                    ? "bg-red-50 text-red-600"
+                    : lot.status === "exhausted"
+                    ? "bg-neutral-100 text-neutral-600"
+                    : "bg-emerald-50 text-emerald-600";
+
+                return (
+                  <div
+                    key={lot.id}
+                    className="px-5 py-4 sm:px-6"
+                  >
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                      {/* SOURCE / EXPIRY */}
+
+                      <div className="min-w-0">
+
+                        <div className="flex flex-wrap items-center gap-2">
+
+                          <p className="text-sm font-medium">
+                            {lot.source_transaction_type
+                              ? lot.source_transaction_type
+                                  .replaceAll("_", " ")
+                                  .replace(/\b\w/g, (character) =>
+                                    character.toUpperCase()
+                                  )
+                              : "Wallet Credit"}
+                          </p>
+
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${statusClass}`}
+                          >
+                            {statusLabel}
+                          </span>
+
+                        </div>
+
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                          {lot.source_description ||
+                            "Wallet credit"}
+                        </p>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+
+                          <span>
+                            Added {formatShortDate(lot.created_at)}
+                          </span>
+
+                          {lot.expires_at ? (
+                            <span
+                              className={`inline-flex items-center gap-1 ${
+                                isExpired
+                                  ? "text-red-500"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              <Clock3 className="h-3 w-3" />
+                              {isExpired
+                                ? "Expired"
+                                : "Expires"}{" "}
+                              {formatShortDate(lot.expires_at)}
+                            </span>
+                          ) : (
+                            <span>
+                              No expiry
+                            </span>
+                          )}
+
+                        </div>
+
+                      </div>
+
+
+                      {/* AMOUNTS */}
+
+                      <div className="shrink-0 sm:text-right">
+
+                        <p className="text-sm font-semibold">
+                          {formatCurrency(
+                            Number(lot.remaining_amount_paise)
+                          )}
+                        </p>
+
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          of{" "}
+                          {formatCurrency(
+                            Number(lot.original_amount_paise)
+                          )}{" "}
+                          remaining
+                        </p>
+
+                        {usedAmountPaise > 0 && (
+                          <p className="mt-1 text-[10px] text-muted-foreground">
+                            Used{" "}
+                            {formatCurrency(
+                              usedAmountPaise
+                            )}
+                          </p>
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  </div>
+                );
+              })}
+
+            </div>
+
           )}
 
         </div>

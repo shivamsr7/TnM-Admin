@@ -6229,7 +6229,599 @@ async sendRefundProcessedEmail(
       `,
     });
   }
+  async sendReviewRewardEmail({
+  to,
+  customerName,
+  productName,
+  rewardType,
+  rewardAmount,
+  walletBalance,
+  expiresAt,
+}: {
+  to: string;
+  customerName: string;
+  productName: string;
+  rewardType: "text" | "image" | "video";
+  rewardAmount: number;
+  walletBalance: number;
+  expiresAt: string | null;
+}) {
+  const validExpiry =
+    expiresAt && !Number.isNaN(new Date(expiresAt).getTime())
+      ? new Date(expiresAt)
+      : null;
 
+  const formattedExpiry = validExpiry
+    ? validExpiry.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  const expiryRow = validExpiry
+    ? `
+                <tr>
+                  <td
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      color:#77736c;
+                    "
+                  >
+                    Reward Valid Until
+                  </td>
+
+                  <td
+                    align="right"
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      font-weight:700;
+                      color:#a04d45;
+                    "
+                  >
+                    ${formattedExpiry}
+                  </td>
+                </tr>
+              `
+    : `
+                <tr>
+                  <td
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      color:#77736c;
+                    "
+                  >
+                    Reward Validity
+                  </td>
+
+                  <td
+                    align="right"
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      font-weight:600;
+                      color:#4f7b45;
+                    "
+                  >
+                    Never expires
+                  </td>
+                </tr>
+              `;
+    const formatMoney = (value: number) =>
+      `₹${value.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const rewardTypeLabel = {
+      text: "Text Review",
+      image: "Image Review",
+      video: "Video Review",
+    }[rewardType];
+
+    return this.sendEmail({
+      to,
+
+      subject:
+        `✨ Thank You for Reviewing ${productName} — ${formatMoney(
+          rewardAmount
+        )} Added to Your Wallet`,
+
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+
+  <title>T&amp;M Jewels — Thank You for Your Review</title>
+</head>
+
+<body
+  style="
+    margin:0;
+    padding:0;
+    background:#f5f3ef;
+    color:#222222;
+    font-family:Arial,Helvetica,sans-serif;
+    -webkit-text-size-adjust:100%;
+  "
+>
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="background:#f5f3ef;"
+>
+  <tr>
+    <td align="center" style="padding:28px 12px;">
+
+      <table
+        role="presentation"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+        border="0"
+        style="
+          width:100%;
+          max-width:640px;
+          background:#ffffff;
+          border:1px solid #e9e3d8;
+        "
+      >
+
+        <!-- LOGO -->
+
+        <tr>
+          <td
+            align="center"
+            style="
+              padding:30px 20px 24px;
+              border-bottom:1px solid #eeeae2;
+            "
+          >
+
+            <img
+              src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png"
+              alt="T&amp;M Jewels"
+              width="190"
+              style="
+                display:block;
+                width:190px;
+                max-width:80%;
+                height:auto;
+                margin:0 auto;
+              "
+            />
+
+            <div
+              style="
+                margin-top:10px;
+                font-size:11px;
+                line-height:18px;
+                letter-spacing:1.5px;
+                color:#999287;
+                text-transform:uppercase;
+              "
+            >
+              Create your own style. Create your own trend.
+            </div>
+
+          </td>
+        </tr>
+
+
+        <!-- HEADER -->
+
+        <tr>
+          <td
+            align="center"
+            style="
+              padding:40px 24px 24px;
+            "
+          >
+
+            <div
+              style="
+                width:58px;
+                height:58px;
+                line-height:58px;
+                border-radius:50%;
+                background:#f3f7ef;
+                color:#4f7b45;
+                font-size:27px;
+                font-weight:bold;
+              "
+            >
+              ✓
+            </div>
+
+            <h1
+              style="
+                margin:18px 0 10px;
+                font-family:Georgia,'Times New Roman',serif;
+                font-size:29px;
+                line-height:38px;
+                font-weight:600;
+                color:#8b6424;
+              "
+            >
+              Thank You for Your Review!
+            </h1>
+
+            <p
+              style="
+                margin:0;
+                max-width:500px;
+                font-size:14px;
+                line-height:24px;
+                color:#6e6a63;
+              "
+            >
+              Dear ${escapeHtml(customerName)},<br><br>
+
+              Thank you for taking the time to share your
+              experience with T&amp;M Jewels.
+              Your feedback means a lot to us and helps
+              other jewellery lovers choose their next
+              favourite piece.
+            </p>
+
+          </td>
+        </tr>
+
+
+        <!-- PRODUCT -->
+
+        <tr>
+          <td style="padding:4px 24px 20px;">
+
+            <div
+              style="
+                padding:18px;
+                background:#faf8f3;
+                border:1px solid #e8dfd0;
+              "
+            >
+
+              <div
+                style="
+                  font-size:10px;
+                  line-height:16px;
+                  color:#999287;
+                  text-transform:uppercase;
+                  letter-spacing:1.2px;
+                "
+              >
+                You Reviewed
+              </div>
+
+              <div
+                style="
+                  margin-top:7px;
+                  font-family:Georgia,'Times New Roman',serif;
+                  font-size:20px;
+                  line-height:28px;
+                  font-weight:600;
+                  color:#49371d;
+                "
+              >
+                ${escapeHtml(productName)}
+              </div>
+
+            </div>
+
+          </td>
+        </tr>
+
+
+        <!-- REWARD -->
+
+        <tr>
+          <td style="padding:0 24px 22px;">
+
+            <div
+              style="
+                padding:24px 18px;
+                background:#f3f7ef;
+                border:1px solid #dce9d6;
+                text-align:center;
+              "
+            >
+
+              <div
+                style="
+                  font-size:10px;
+                  line-height:16px;
+                  color:#77736c;
+                  text-transform:uppercase;
+                  letter-spacing:1.4px;
+                  font-weight:700;
+                "
+              >
+                Your Review Reward
+              </div>
+
+              <div
+                style="
+                  margin-top:7px;
+                  font-family:Georgia,'Times New Roman',serif;
+                  font-size:36px;
+                  line-height:44px;
+                  font-weight:600;
+                  color:#4f7b45;
+                "
+              >
+                ${formatMoney(rewardAmount)}
+              </div>
+
+              <div
+                style="
+                  margin-top:8px;
+                  font-size:13px;
+                  line-height:21px;
+                  color:#625e57;
+                "
+              >
+                ${escapeHtml(rewardTypeLabel)} reward
+                has been added to your T&amp;M Jewels Wallet.
+              </div>
+
+            </div>
+
+          </td>
+        </tr>
+
+
+        <!-- WALLET DETAILS -->
+
+        <tr>
+          <td style="padding:0 24px 24px;">
+
+            <div
+              style="
+                padding:18px;
+                background:#faf8f3;
+                border:1px solid #e8dfd0;
+              "
+            >
+
+              <div
+                style="
+                  font-family:Georgia,'Times New Roman',serif;
+                  font-size:19px;
+                  font-weight:600;
+                  color:#49371d;
+                "
+              >
+                Wallet Details
+              </div>
+
+              <table
+                role="presentation"
+                width="100%"
+                cellspacing="0"
+                cellpadding="0"
+                border="0"
+                style="margin-top:10px;"
+              >
+
+                <tr>
+                  <td
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      color:#77736c;
+                    "
+                  >
+                    Reward Added
+                  </td>
+
+                  <td
+                    align="right"
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      font-weight:700;
+                      color:#4f7b45;
+                    "
+                  >
+                    ${formatMoney(rewardAmount)}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td
+                    style="
+                      padding:9px 0;
+                      font-size:13px;
+                      color:#77736c;
+                    "
+                  >
+                    Wallet Balance
+                  </td>
+
+                  <td
+                    align="right"
+                    style="
+                      padding:9px 0;
+                      font-size:14px;
+                      font-weight:700;
+                      color:#222222;
+                    "
+                  >
+                    ${formatMoney(walletBalance)}
+                  </td>
+                </tr>
+
+                ${expiryRow}
+
+              </table>
+
+            </div>
+
+          </td>
+        </tr>
+
+
+        <!-- MESSAGE -->
+
+        <tr>
+          <td style="padding:0 24px 28px;">
+
+            <div
+              style="
+                padding:20px;
+                background:#fbfaf7;
+                border-left:3px solid #c8a44d;
+              "
+            >
+
+              <div
+                style="
+                  font-family:Georgia,'Times New Roman',serif;
+                  font-size:21px;
+                  line-height:29px;
+                  font-weight:600;
+                  color:#49371d;
+                "
+              >
+                A little thank-you from us. ✨
+              </div>
+
+              <div
+                style="
+                  margin-top:8px;
+                  font-size:13px;
+                  line-height:22px;
+                  color:#625e57;
+                "
+              >
+                Your wallet reward is ready to use on
+                your next T&amp;M Jewels purchase.
+                ${
+                  validExpiry
+                    ? `Please use this reward before ${formattedExpiry}.`
+                    : "This reward does not have an expiry date."
+                }
+                We hope you find something beautiful
+                to add to your collection.
+              </div>
+
+            </div>
+
+          </td>
+        </tr>
+
+
+        <!-- SHOP BUTTON -->
+
+        <tr>
+          <td
+            align="center"
+            style="padding:0 24px 34px;"
+          >
+
+            <a
+              href="https://tnmonline.in"
+              target="_blank"
+              style="
+                display:inline-block;
+                padding:13px 30px;
+                background:#8b6424;
+                color:#ffffff;
+                text-decoration:none;
+                font-size:12px;
+                font-weight:700;
+                letter-spacing:.8px;
+              "
+            >
+              SHOP T&amp;M JEWELS&nbsp; →
+            </a>
+
+          </td>
+        </tr>
+
+
+        <!-- FOOTER -->
+
+        <tr>
+          <td
+            align="center"
+            style="
+              padding:32px 24px;
+              border-top:1px solid #eeeae2;
+            "
+          >
+
+            <img
+              src="https://wzphyyoftwxvpqxtfgtb.supabase.co/storage/v1/object/public/Logo/MainLogo.png"
+              alt="T&amp;M Jewels"
+              width="125"
+              style="
+                display:block;
+                width:125px;
+                height:auto;
+                margin:0 auto;
+              "
+            />
+
+            <div
+              style="
+                margin-top:12px;
+                font-size:12px;
+                line-height:20px;
+                color:#999287;
+              "
+            >
+              Need help?
+              <br>
+              Contact us at
+              <strong>shop.tnm.official@gmail.com</strong>
+            </div>
+
+            <div
+              style="
+                margin-top:14px;
+                font-size:11px;
+                line-height:18px;
+                color:#aaa49a;
+              "
+            >
+              © T&amp;M Jewels. All rights reserved.
+            </div>
+
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+      `,
+    });
+  }
 }
 
 

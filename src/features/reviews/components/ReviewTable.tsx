@@ -26,12 +26,21 @@ import {
   useUpdateReviewStatus,
 } from "../hooks/useReviewMutations";
 
+interface ReviewWalletRewardSettings {
+  enabled: boolean;
+  textReward: number;
+  imageReward: number;
+  videoReward: number;
+}
+
 interface ReviewTableProps {
   reviews: Review[];
+  reviewRewardSettings?: ReviewWalletRewardSettings;
 }
 
 export default function ReviewTable({
   reviews,
+  reviewRewardSettings,
 }: ReviewTableProps) {
   const [selectedReview, setSelectedReview] =
     useState<Review | null>(null);
@@ -53,7 +62,6 @@ export default function ReviewTable({
 
   const deleteReview =
     useDeleteReview();
-
 
   /*
    * =========================================================
@@ -600,10 +608,12 @@ export default function ReviewTable({
           updateStatus.isPending ||
           deleteReview.isPending
         }
-        onApprove={(id) =>
+        rewardSettings={reviewRewardSettings ?? null}
+        onApprove={(id, rewardType) =>
           updateStatus.mutate({
             id,
             status: "approved",
+            rewardType,
           })
         }
         onReject={(id) =>
