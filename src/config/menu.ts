@@ -73,6 +73,12 @@ export const menuItems = [
   },
 
   {
+    title: "Customer Queries",
+    path: "/customer-queries",
+    icon: MessageSquare,
+  },
+
+  {
   title: "Wallet",
   icon: Wallet,
 

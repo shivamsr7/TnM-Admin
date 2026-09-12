@@ -7,6 +7,12 @@ export interface Column<T extends object> {
     value: unknown,
     row: T
   ) => React.ReactNode;
+  /**
+   * Sticky columns are opt-in.
+   * Use sticky="right" only on tables where the column
+   * should remain visible during horizontal scrolling.
+   */
+  sticky?: "right";
 }
 
 interface DataTableProps<T extends object> {
@@ -37,40 +43,48 @@ export default function DataTable<T extends object>({
 }: DataTableProps<T>) {
   return (
     <div className="rounded-xl border bg-white shadow-sm">
-  {(title || actions) && (
-    <div className="flex items-center justify-between border-b px-6 py-5">
-      <div>
-        {title && (
-          <h2 className="text-lg font-semibold text-slate-900">
-            {title}
-          </h2>
-        )}
+      {(title || actions) && (
+        <div className="flex items-center justify-between border-b px-6 py-5">
+          <div>
+            {title && (
+              <h2 className="text-lg font-semibold text-slate-900">
+                {title}
+              </h2>
+            )}
 
-        {description && (
-          <p className="mt-1 text-sm text-slate-500">
-            {description}
-          </p>
-        )}
-      </div>
+            {description && (
+              <p className="mt-1 text-sm text-slate-500">
+                {description}
+              </p>
+            )}
+          </div>
 
-      {actions}
-    </div>
-  )}
+          {actions}
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-xl">
-
-        <table className="min-w-[900px] w-full">
-
-          <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm">
+        <table className="min-w-[900px] w-full border-separate border-spacing-0">
+          <thead className="sticky top-0 z-20 bg-slate-50 shadow-sm">
             <tr>
-              {columns.map((column) => (
-                <th
-                  key={String(column.key)}
-                  className="whitespace-nowrap px-4 py-4 text-left text-sm font-semibold text-slate-700"
-                >
-                  {column.title}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const isSticky =
+                  column.sticky === "right";
+
+                return (
+                  <th
+                    key={String(column.key)}
+                    className={[
+                      "whitespace-nowrap px-4 py-4 text-left text-sm font-semibold text-slate-700",
+                      isSticky
+                        ? "sticky right-0 z-30 border-l border-slate-200 bg-slate-50 shadow-[-6px_0_12px_-10px_rgba(15,23,42,0.35)]"
+                        : "",
+                    ].join(" ")}
+                  >
+                    {column.title}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
@@ -82,19 +96,19 @@ export default function DataTable<T extends object>({
                   className="py-14"
                 >
                   <div className="flex flex-col items-center justify-center py-6">
-  <div className="mb-4 text-5xl">
-    {emptyIcon ?? "📦"}
-  </div>
+                    <div className="mb-4 text-5xl">
+                      {emptyIcon ?? "📦"}
+                    </div>
 
-  <h3 className="text-lg font-semibold">
-    {emptyTitle ?? "Nothing here yet"}
-  </h3>
+                    <h3 className="text-lg font-semibold">
+                      {emptyTitle ?? "Nothing here yet"}
+                    </h3>
 
-  <p className="mt-1 text-sm text-gray-500">
-    {emptyDescription ??
-      "Create your first item to get started."}
-  </p>
-</div>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {emptyDescription ??
+                        "Create your first item to get started."}
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -110,10 +124,24 @@ export default function DataTable<T extends object>({
                   {columns.map((column) => {
                     const value = row[column.key];
 
+                    const isSticky =
+                      column.sticky === "right";
+
                     return (
                       <td
                         key={String(column.key)}
-                        className="whitespace-nowrap px-4 py-5 align-middle"
+                        className={[
+                          "whitespace-nowrap px-4 py-5 align-middle",
+                          isSticky
+                            ? [
+                                "sticky right-0 z-10 border-l border-slate-200",
+                                index % 2 === 0
+                                  ? "bg-white"
+                                  : "bg-gray-50",
+                                "shadow-[-6px_0_12px_-10px_rgba(15,23,42,0.35)]",
+                              ].join(" ")
+                            : "",
+                        ].join(" ")}
                       >
                         {column.render
                           ? column.render(value, row)
@@ -125,11 +153,8 @@ export default function DataTable<T extends object>({
               ))
             )}
           </tbody>
-
         </table>
-
       </div>
-
     </div>
   );
 }

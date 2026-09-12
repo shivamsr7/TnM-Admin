@@ -43,6 +43,8 @@ import FeaturedCollectionsPage from "@/features/homepage/featured-collections/pa
 import AnnouncementsPage from "@/features/announcements/pages/AnnouncementsPage";
 
 import CustomersPage from "@/features/customers/pages/CustomersPage";
+import CustomerQueriesPage
+  from "@/features/customerQueries/pages/CustomerQueriesPage";
 import CustomerDetailsPage from "@/features/customers/pages/CustomerDetailsPage";
 import CreateCustomerPage from "@/features/customers/pages/CreateCustomerPage";
 import EditCustomerPage from "@/features/customers/pages/EditCustomerPage";
@@ -255,6 +257,11 @@ export const router = createBrowserRouter([
           {
             path: "Customers",
             element: <CustomersPage />,
+          },
+
+          {
+            path: "customer-queries",
+            element: <CustomerQueriesPage />,
           },
 
           {

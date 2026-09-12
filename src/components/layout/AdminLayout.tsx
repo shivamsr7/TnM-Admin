@@ -1,39 +1,39 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
-import Header from "./Header";
+import AdminHeader from "./Header";
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-screen bg-[#f6f7f9] text-slate-900">
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <Sidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+      <div className="min-h-screen lg:pl-[272px]">
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Content */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            onMenuClick={() => setSidebarOpen(true)}
-          />
-
-          <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 px-4 pb-8 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
+          <div className="mx-auto w-full max-w-[1600px]">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

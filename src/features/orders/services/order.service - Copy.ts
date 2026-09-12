@@ -1785,49 +1785,11 @@ class OrderService {
             requestIds: [],
           };
 
-
+    const reviewLinks =
+      reviewPreparation.reviewLinks;
 
     const reviewRequestIds =
       reviewPreparation.requestIds;
-
-    let reviewWalletRewardSettings:
-      {
-        enabled: boolean;
-        text_reward_paise: number;
-        image_reward_paise: number;
-        video_reward_paise: number;
-      } | null = null;
-
-    if (status === "delivered") {
-      try {
-        const {
-          data: rewardSettingsData,
-          error: rewardSettingsError,
-        } = await supabase.rpc(
-          "get_customer_review_wallet_reward_settings"
-        );
-
-        if (rewardSettingsError) {
-          console.error(
-            "⚠️ Failed to fetch review wallet reward settings:",
-            rewardSettingsError
-          );
-        } else if (rewardSettingsData) {
-          reviewWalletRewardSettings =
-            rewardSettingsData as {
-              enabled: boolean;
-              text_reward_paise: number;
-              image_reward_paise: number;
-              video_reward_paise: number;
-            };
-        }
-      } catch (error) {
-        console.error(
-          "⚠️ Review wallet reward settings lookup failed:",
-          error
-        );
-      }
-    }
 
     console.log(
       "📧 Sending status email:",
@@ -1993,7 +1955,8 @@ class OrderService {
             trackingNumber:
               order.tracking_number,
 
-            reviewWalletRewardSettings,
+
+            reviewLinks,
           });
 
 
