@@ -7,13 +7,15 @@ import SalesChart from "../components/SalesChart";
 import RecentOrdersTable from "../components/RecentOrdersTable";
 import QuickActions from "../components/QuickActions";
 import ActivityTimeline from "../components/ActivityTimeline";
+import WebsiteAnalytics from "../components/WebsiteAnalytics";
+
 export default function DashboardPage() {
   const {
-  isLoading,
-  isFetching,
-  error,
-  refetch,
-} = useDashboardStats();
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useDashboardStats();
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -49,20 +51,16 @@ export default function DashboardPage() {
 
       <StatsGrid />
 
-<div className="mt-6">
-  <QuickActions />
-</div>
+      <WebsiteAnalytics />
 
-<div className="mt-6">
-  <SalesChart />
-</div>
+      <QuickActions />
+
+      <SalesChart />
 
       <div className="grid gap-6 xl:grid-cols-2">
-        {/* Recent Orders */}
-
         <RecentOrdersTable />
- <ActivityTimeline />
-        {/* Top Products */}
+
+        <ActivityTimeline />
 
         <div className="rounded-2xl border bg-white p-8 shadow-sm">
           <h2 className="text-xl font-semibold">
@@ -74,8 +72,6 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
-
-      {/* Low Stock */}
 
       <div className="rounded-2xl border bg-white p-8 shadow-sm">
         <h2 className="text-xl font-semibold">
