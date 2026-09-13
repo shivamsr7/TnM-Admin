@@ -1004,7 +1004,7 @@ const [
 
         <div
 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/50 p-3 sm:p-4"
 
           onMouseDown={(event) => {
 
@@ -1029,9 +1029,12 @@ const [
 
         >
 
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+          <div
+            className="flex w-full max-w-md max-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
 
-            <div className="border-b p-6">
+            <div className="shrink-0 border-b p-5 sm:p-6">
 
               <div className="flex items-start gap-3">
 
@@ -1073,7 +1076,7 @@ const [
 
 
 
-            <div className="space-y-5 p-6">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 sm:p-6">
 
               <div className="rounded-lg border bg-gray-50 p-4">
 
@@ -1314,7 +1317,7 @@ const [
 
 
 
-            <div className="flex justify-end gap-3 border-t bg-gray-50 p-4">
+            <div className="shrink-0 flex justify-end gap-3 border-t bg-gray-50 p-4">
 
               <Button
 
