@@ -339,8 +339,9 @@ export default function AdminCourierRateChecker({
         border
         border-slate-200
         bg-white
-        p-5
+        p-4
         shadow-[0_18px_50px_rgba(15,23,42,0.08)]
+        sm:p-5
         md:p-7
       "
     >
@@ -441,9 +442,10 @@ export default function AdminCourierRateChecker({
 
       <div
         className="
-          mt-6
+          mt-5
           grid
           gap-3
+          sm:gap-3
           md:grid-cols-[1.5fr_0.65fr_0.75fr_auto]
           md:items-end
         "
@@ -716,7 +718,7 @@ export default function AdminCourierRateChecker({
               mb-4
               flex
               flex-col
-              gap-2
+              gap-3
               sm:flex-row
               sm:items-end
               sm:justify-between
@@ -1148,153 +1150,127 @@ export default function AdminCourierRateChecker({
 
 
           {/* =================================================
-              MOBILE
+              MOBILE — COMPACT RESPONSIVE CARDS
           ================================================== */}
 
-          <div
-            className="
-              space-y-3
-              md:hidden
-            "
-          >
+          <div className="space-y-3 md:hidden">
 
             {couriers.map(
-              (
-                courier,
-                index
-              ) => {
+              (courier, index) => {
 
                 const courierId =
                   courier?.id ??
                   courier?.courier_company_id;
 
                 const isCheapest =
-                  courierId ===
-                  cheapestCourierId;
+                  courierId === cheapestCourierId;
 
                 return (
-
-                  <div
+                  <article
                     key={`${courierId}-${index}`}
                     className="
+                      overflow-hidden
                       rounded-2xl
                       border
                       border-slate-200
                       bg-white
-                      p-4
-                      shadow-[0_8px_24px_rgba(15,23,42,0.05)]
+                      shadow-[0_6px_20px_rgba(15,23,42,0.05)]
                     "
                   >
 
-                    <div
-                      className="
-                        flex
-                        items-start
-                        justify-between
-                        gap-3
-                      "
-                    >
+                    {/* TOP ROW */}
+                    <div className="flex items-center gap-3 p-4">
 
                       <div
                         className="
                           flex
-                          min-w-0
+                          h-11
+                          w-11
+                          shrink-0
                           items-center
-                          gap-3
+                          justify-center
+                          rounded-xl
+                          border
+                          border-[#D4AF37]/20
+                          bg-[#D4AF37]/[0.08]
+                          text-[#D4AF37]
                         "
                       >
+                        <Truck size={19} />
+                      </div>
 
-                        <div
-                          className="
-                            flex
-                            h-10
-                            w-10
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-xl
-                            bg-[#D4AF37]/10
-                            text-[#D4AF37]
-                          "
-                        >
-                          <Truck size={17} />
-                        </div>
+                      <div className="min-w-0 flex-1">
 
-                        <div className="min-w-0">
-
-                          <div
-                            className="
-                              flex
-                              items-center
-                              gap-2
-                            "
-                          >
-
-                            <p
-                              className="
-                                truncate
-                                text-sm
-                                font-semibold
-                                text-white
-                              "
-                            >
-                              {courier?.courier_name ||
-                                "Unknown Courier"}
-                            </p>
-
-                            {isCheapest && (
-                              <span
-                                className="
-                                  text-[9px]
-                                  font-bold
-                                  text-emerald-400
-                                "
-                              >
-                                LOWEST
-                              </span>
-                            )}
-
-                          </div>
+                        <div className="flex min-w-0 items-center gap-2">
 
                           <p
                             className="
-                              mt-1
-                              text-xs
-                              text-slate-500
+                              min-w-0
+                              truncate
+                              text-[15px]
+                              font-semibold
+                              leading-5
+                              text-slate-900
                             "
                           >
-                            {getModeText(courier)}
+                            {courier?.courier_name ||
+                              "Unknown Courier"}
                           </p>
+
+                          {isCheapest && (
+                            <span
+                              className="
+                                shrink-0
+                                rounded-full
+                                bg-emerald-50
+                                px-2
+                                py-1
+                                text-[9px]
+                                font-bold
+                                uppercase
+                                tracking-wide
+                                text-emerald-600
+                              "
+                            >
+                              Lowest
+                            </span>
+                          )}
 
                         </div>
 
+                        <p
+                          className="
+                            mt-1
+                            text-xs
+                            font-medium
+                            text-slate-500
+                          "
+                        >
+                          {getModeText(courier)}
+                        </p>
+
                       </div>
 
-
-                      <div
-                        className="
-                          shrink-0
-                          text-right
-                        "
-                      >
+                      <div className="shrink-0 text-right">
 
                         <p
                           className="
-                            text-lg
+                            whitespace-nowrap
+                            text-[19px]
                             font-bold
+                            leading-6
                             tracking-tight
                             text-slate-950
                           "
                         >
-                          {formatAmount(
-                            courier?.rate
-                          )}
+                          {formatAmount(courier?.rate)}
                         </p>
 
                         <p
                           className="
                             mt-0.5
                             text-[10px]
+                            font-medium
                             text-slate-400
                           "
                         >
@@ -1306,61 +1282,59 @@ export default function AdminCourierRateChecker({
                     </div>
 
 
+                    {/* DELIVERY */}
                     <div
                       className="
-                        mt-4
-                        grid
-                        grid-cols-2
-                        gap-2
+                        border-t
+                        border-slate-100
+                        bg-slate-50/70
+                        px-4
+                        py-3
                       "
                     >
 
-                      <div
-                        className="
-                          rounded-xl
-                          border
-                          border-slate-100
-                          bg-slate-50
-                          px-3
-                          py-2.5
-                        "
-                      >
+                      <div className="flex items-center justify-between">
 
-                        <p
+                        <div className="flex items-center gap-2">
+
+                          <Clock3
+                            size={14}
+                            className="text-slate-500"
+                          />
+
+                          <span
+                            className="
+                              text-xs
+                              font-medium
+                              text-slate-500
+                            "
+                          >
+                            Estimated delivery
+                          </span>
+
+                        </div>
+
+                        <span
                           className="
-                            text-[10px]
-                            text-slate-400
+                            text-sm
+                            font-semibold
+                            text-slate-800
                           "
                         >
-                          Delivery
-                        </p>
-
-                        <p
-                          className="
-                            mt-1
-                            text-xs
-                            text-slate-700
-                          "
-                        >
-                          {getDeliveryText(
-                            courier
-                          )}
-                        </p>
+                          {getDeliveryText(courier)}
+                        </span>
 
                       </div>
 
-
                     </div>
 
-                  </div>
-
+                  </article>
                 );
 
               }
             )}
 
           </div>
-
         </div>
 
       )}
