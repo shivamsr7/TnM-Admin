@@ -72,6 +72,8 @@ import WalletCustomersPage from "@/features/wallet/pages/WalletCustomersPage";
 import WalletSettingsPage from "@/features/wallet/pages/WalletSettingsPage";
 import WalletDashboardPage from "@/features/wallet/pages/WalletDashboardPage";
 
+import AdminCourierRateChecker from "@/features/shipping/components/AdminCourierRateChecker";
+
 /*
  * ============================================================
  * PLAY & EARN ADMIN
@@ -321,6 +323,15 @@ export const router = createBrowserRouter([
           {
             path: "customers/:id/edit",
             element: <EditCustomerPage />,
+          },
+
+          // ======================================================
+          // SHIPPING — ADMIN COURIER RATE CHECKER
+          // ======================================================
+
+          {
+            path: "courier-rates",
+            element: <AdminCourierRateChecker />,
           },
 
           // ======================================================

@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Handshake,
   Wallet,
+  Truck,
 } from "lucide-react";
 
 export const menuItems = [
@@ -80,49 +81,61 @@ export const menuItems = [
   },
 
   {
-  title: "Wallet",
-  icon: Wallet,
+    title: "Shipping",
+    icon: Truck,
 
-  children: [
+    children: [
+      {
+        title: "Courier Rate Checker",
+        path: "/courier-rates",
+      },
+    ],
+  },
 
-    {
-      title: "Dashboard",
-      path: "/wallet",
-    },
-    {
-      title: "Customer Wallets",
-      path: "/wallet/customers",
-    },
-    {
-      title: "Settings",
-      path: "/wallet/settings",
-    },
-  ],
-},
+  {
+    title: "Wallet",
+    icon: Wallet,
 
-{
-  title: "Play & Earn",
-  icon: Gamepad2,
+    children: [
+      {
+        title: "Dashboard",
+        path: "/wallet",
+      },
+      {
+        title: "Customer Wallets",
+        path: "/wallet/customers",
+      },
+      {
+        title: "Settings",
+        path: "/wallet/settings",
+      },
+    ],
+  },
 
-  children: [
-    {
-      title: "Dashboard",
-      path: "/play-earn-admin",
-    },
-    {
-      title: "Game Settings",
-      path: "/play-earn-admin/games",
-    },
-    {
-      title: "Customer Wallets",
-      path: "/play-earn-admin/wallets",
-    },
-    {
-      title: "Checkout Settings",
-      path: "/play-earn-admin/checkout",
-    },
-  ],
-},
+  {
+    title: "Play & Earn",
+    icon: Gamepad2,
+
+    children: [
+      {
+        title: "Dashboard",
+        path: "/play-earn-admin",
+      },
+      {
+        title: "Game Settings",
+        path: "/play-earn-admin/games",
+      },
+      {
+        title: "Customer Wallets",
+        path: "/play-earn-admin/wallets",
+      },
+      {
+        title: "Checkout Settings",
+        path: "/play-earn-admin/checkout",
+      },
+    ],
+  },
+
   {
     title: "Collaborators",
     path: "/collaborators",
