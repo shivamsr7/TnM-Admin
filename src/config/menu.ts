@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
+  Gamepad2,
   Tag,
   Layers3,
   Tags,
@@ -95,6 +96,30 @@ export const menuItems = [
     {
       title: "Settings",
       path: "/wallet/settings",
+    },
+  ],
+},
+
+{
+  title: "Play & Earn",
+  icon: Gamepad2,
+
+  children: [
+    {
+      title: "Dashboard",
+      path: "/play-earn-admin",
+    },
+    {
+      title: "Game Settings",
+      path: "/play-earn-admin/games",
+    },
+    {
+      title: "Customer Wallets",
+      path: "/play-earn-admin/wallets",
+    },
+    {
+      title: "Checkout Settings",
+      path: "/play-earn-admin/checkout",
     },
   ],
 },

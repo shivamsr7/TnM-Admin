@@ -43,8 +43,7 @@ import FeaturedCollectionsPage from "@/features/homepage/featured-collections/pa
 import AnnouncementsPage from "@/features/announcements/pages/AnnouncementsPage";
 
 import CustomersPage from "@/features/customers/pages/CustomersPage";
-import CustomerQueriesPage
-  from "@/features/customerQueries/pages/CustomerQueriesPage";
+import CustomerQueriesPage from "@/features/customerQueries/pages/CustomerQueriesPage";
 import CustomerDetailsPage from "@/features/customers/pages/CustomerDetailsPage";
 import CreateCustomerPage from "@/features/customers/pages/CreateCustomerPage";
 import EditCustomerPage from "@/features/customers/pages/EditCustomerPage";
@@ -65,22 +64,39 @@ import ReviewsPage from "@/features/reviews/pages/ReviewsPage";
 import FAQsPage from "@/features/faqs/pages/FAQsPage";
 import PoliciesPage from "@/features/cms/pages/PoliciesPage";
 
-import InstagramReviewsPage
-  from "@/features/instagramReviews/pages/InstagramReviewsPage";
+import InstagramReviewsPage from "@/features/instagramReviews/pages/InstagramReviewsPage";
 
-import CollaboratorsPage
-  from "@/features/collaborators/pages/CollaboratorsPage";
+import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage";
 
-import WalletCustomersPage
-  from "@/features/wallet/pages/WalletCustomersPage";
-import WalletSettingsPage
-  from "@/features/wallet/pages/WalletSettingsPage";
+import WalletCustomersPage from "@/features/wallet/pages/WalletCustomersPage";
+import WalletSettingsPage from "@/features/wallet/pages/WalletSettingsPage";
+import WalletDashboardPage from "@/features/wallet/pages/WalletDashboardPage";
 
-  import WalletDashboardPage
-  from "@/features/wallet/pages/WalletDashboardPage";
+/*
+ * ============================================================
+ * PLAY & EARN ADMIN
+ * ============================================================
+ *
+ * These pages are intentionally kept separate from the regular
+ * Wallet and Rewards modules.
+ */
+
+import PlayEarnAdminDashboardPage
+  from "@/features/playEarnAdmin/pages/PlayEarnAdminDashboardPage";
+
+import PlayEarnGameSettingsPage
+  from "@/features/playEarnAdmin/pages/PlayEarnGameSettingsPage";
+
+import PlayEarnWalletCustomersPage
+  from "@/features/playEarnAdmin/pages/PlayEarnWalletCustomersPage";
+
+import PlayEarnCheckoutSettingsPage
+  from "@/features/playEarnAdmin/pages/PlayEarnCheckoutSettingsPage";
 
 export const router = createBrowserRouter([
-  // ---------------- Public Routes ----------------
+  // ============================================================
+  // PUBLIC ROUTES
+  // ============================================================
 
   {
     element: <PublicRoute />,
@@ -100,7 +116,9 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ---------------- Protected Routes ----------------
+  // ============================================================
+  // PROTECTED ADMIN ROUTES
+  // ============================================================
 
   {
     element: <ProtectedRoute />,
@@ -115,21 +133,27 @@ export const router = createBrowserRouter([
             element: <Navigate to="/dashboard" replace />,
           },
 
-          // ---------------- Dashboard ----------------
+          // ======================================================
+          // DASHBOARD
+          // ======================================================
 
           {
             path: "dashboard",
             element: <DashboardPage />,
           },
 
-          // ---------------- Categories ----------------
+          // ======================================================
+          // CATEGORIES
+          // ======================================================
 
           {
             path: "categories",
             element: <CategoriesPage />,
           },
 
-          // ---------------- Brands ----------------
+          // ======================================================
+          // BRANDS
+          // ======================================================
 
           {
             path: "brands",
@@ -144,7 +168,9 @@ export const router = createBrowserRouter([
             element: <EditBrandPage />,
           },
 
-          // ---------------- Collections ----------------
+          // ======================================================
+          // COLLECTIONS
+          // ======================================================
 
           {
             path: "collections",
@@ -159,7 +185,9 @@ export const router = createBrowserRouter([
             element: <EditCollectionPage />,
           },
 
-          // ---------------- Tags ----------------
+          // ======================================================
+          // TAGS
+          // ======================================================
 
           {
             path: "tags",
@@ -174,7 +202,9 @@ export const router = createBrowserRouter([
             element: <EditTagPage />,
           },
 
-          // ---------------- Products ----------------
+          // ======================================================
+          // PRODUCTS
+          // ======================================================
 
           {
             path: "products",
@@ -189,7 +219,9 @@ export const router = createBrowserRouter([
             element: <EditProductPage />,
           },
 
-          // ---------------- Orders ----------------
+          // ======================================================
+          // ORDERS
+          // ======================================================
 
           {
             path: "orders",
@@ -200,165 +232,204 @@ export const router = createBrowserRouter([
             element: <OrderDetailsPage />,
           },
 
-          // ---------------- Coupons ----------------
+          // ======================================================
+          // COUPONS
+          // ======================================================
 
           {
             path: "coupons",
             element: <CouponsPage />,
           },
 
-          // ---------------- Banners ----------------
+          // ======================================================
+          // BANNERS
+          // ======================================================
 
           {
             path: "banners",
             element: <BannersPage />,
           },
 
-          // ---------------- Settings ----------------
+          // ======================================================
+          // SETTINGS
+          // ======================================================
 
           {
             path: "settings",
             element: <SettingsPage />,
           },
 
-          // ---------------- Instagram Reviews ----------------
+          // ======================================================
+          // INSTAGRAM REVIEWS
+          // ======================================================
 
           {
             path: "instagram-reviews",
             element: <InstagramReviewsPage />,
           },
 
-          // ---------------- Homepage ----------------
+          // ======================================================
+          // HOMEPAGE
+          // ======================================================
 
           {
             path: "homepage",
             element: <HomepagePage />,
           },
-
           {
             path: "homepage/sections",
             element: <HomepageSectionsPage />,
           },
-
           {
             path: "homepage/featured-collections",
             element: <FeaturedCollectionsPage />,
           },
 
-          // ---------------- Announcements ----------------
+          // ======================================================
+          // ANNOUNCEMENTS
+          // ======================================================
 
           {
             path: "announcements",
             element: <AnnouncementsPage />,
           },
 
-          // ---------------- Customers ----------------
+          // ======================================================
+          // CUSTOMERS
+          // ======================================================
 
           {
-            path: "Customers",
+            path: "customers",
             element: <CustomersPage />,
           },
-
           {
             path: "customer-queries",
             element: <CustomerQueriesPage />,
           },
-
           {
             path: "collaborators",
             element: <CollaboratorsPage />,
           },
-
           {
             path: "customers/new",
             element: <CreateCustomerPage />,
           },
-
           {
             path: "customers/:id",
             element: <CustomerDetailsPage />,
           },
-
           {
             path: "customers/:id/edit",
             element: <EditCustomerPage />,
           },
 
-          // ---------------- Wallet ----------------
-{
-  path: "wallet",
-  element: <WalletDashboardPage />,
-},
+          // ======================================================
+          // REGULAR WALLET
+          // ======================================================
+
+          {
+            path: "wallet",
+            element: <WalletDashboardPage />,
+          },
           {
             path: "wallet/customers",
             element: <WalletCustomersPage />,
           },
-{
-  path: "wallet/settings",
-  element: <WalletSettingsPage />,
-},
-          // ---------------- Rewards ----------------
+          {
+            path: "wallet/settings",
+            element: <WalletSettingsPage />,
+          },
+
+          // ======================================================
+          // PLAY & EARN ADMIN
+          // ======================================================
+
+          {
+            path: "play-earn-admin",
+            element: <PlayEarnAdminDashboardPage />,
+          },
+
+          {
+            path: "play-earn-admin/games",
+            element: <PlayEarnGameSettingsPage />,
+          },
+
+          {
+            path: "play-earn-admin/wallets",
+            element: <PlayEarnWalletCustomersPage />,
+          },
+
+          {
+            path: "play-earn-admin/checkout",
+            element: <PlayEarnCheckoutSettingsPage />,
+          },
+
+          // ======================================================
+          // REWARDS
+          // ======================================================
 
           {
             path: "rewards",
             element: <RewardsDashboardPage />,
           },
-
           {
             path: "rewards/rules",
             element: <RewardRulesPage />,
           },
-
           {
             path: "rewards/tiers",
             element: <RewardTiersPage />,
           },
-
           {
             path: "rewards/customers",
             element: <CustomerRewardsPage />,
           },
-
           {
             path: "rewards/customers/:customerId",
             element: <CustomerRewardDetailsPage />,
           },
 
-          // ---------------- Membership ----------------
+          // ======================================================
+          // MEMBERSHIP
+          // ======================================================
 
           {
-            path: "/membership",
+            path: "membership",
             element: <MembersPage />,
           },
-
           {
-            path: "/membership/:customerId",
+            path: "membership/:customerId",
             element: <MembershipDetailsPage />,
           },
 
-          // ---------------- Notify ----------------
+          // ======================================================
+          // NOTIFY
+          // ======================================================
 
           {
-            path: "/notify",
+            path: "notify",
             element: <NotifyRequestsPage />,
           },
 
-          // ---------------- Reviews ----------------
+          // ======================================================
+          // REVIEWS
+          // ======================================================
 
           {
-            path: "/reviews",
+            path: "reviews",
             element: <ReviewsPage />,
           },
 
-          // ---------------- CMS ----------------
+          // ======================================================
+          // CMS
+          // ======================================================
 
           {
-            path: "/faqs",
+            path: "faqs",
             element: <FAQsPage />,
           },
-
           {
-            path: "/policies",
+            path: "policies",
             element: <PoliciesPage />,
           },
         ],
