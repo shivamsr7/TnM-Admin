@@ -23,6 +23,7 @@ import {
   Handshake,
   Wallet,
   Truck,
+  Sparkles,
 } from "lucide-react";
 
 export const menuItems = [
@@ -66,6 +67,12 @@ export const menuItems = [
     title: "Orders",
     path: "/orders",
     icon: ShoppingCart,
+  },
+
+  {
+    title: "Moments",
+    path: "/moments",
+    icon: Sparkles,
   },
 
   {

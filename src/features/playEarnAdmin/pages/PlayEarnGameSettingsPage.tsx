@@ -43,6 +43,27 @@ type GameSetting = {
   daily_limit: number | null;
   reward_expiry_days: number;
   reward_config: Record<string, unknown>;
+
+  unlock_type:
+    | "immediate"
+    | "completed_orders"
+    | "customer_spend"
+    | "membership_tier"
+    | "manual";
+  unlock_required_orders: number;
+  unlock_min_order_value_paise: number;
+  unlock_order_value_basis:
+    | "product_subtotal"
+    | "after_product_discounts"
+    | "after_coupon_discount"
+    | "final_paid_amount";
+  unlock_order_statuses: string[];
+  unlock_allow_sale_products: boolean;
+  unlock_allow_coupon_orders: boolean;
+  unlock_allow_cod: boolean;
+  unlock_allow_online_payment: boolean;
+  unlock_permanent: boolean;
+  unlock_keep_after_refund: boolean;
 };
 
 
@@ -127,6 +148,17 @@ const DEFAULT_GAMES: GameSetting[] = [
     enabled: true,
     daily_limit: 5,
     reward_expiry_days: 7,
+    unlock_type: "immediate",
+    unlock_required_orders: 0,
+    unlock_min_order_value_paise: 0,
+    unlock_order_value_basis: "after_product_discounts",
+    unlock_order_statuses: ["delivered"],
+    unlock_allow_sale_products: true,
+    unlock_allow_coupon_orders: true,
+    unlock_allow_cod: true,
+    unlock_allow_online_payment: true,
+    unlock_permanent: true,
+    unlock_keep_after_refund: true,
     reward_config: {
       mode: "configurable",
       rewards: {},
@@ -140,6 +172,17 @@ const DEFAULT_GAMES: GameSetting[] = [
     enabled: true,
     daily_limit: 1,
     reward_expiry_days: 7,
+    unlock_type: "completed_orders",
+    unlock_required_orders: 2,
+    unlock_min_order_value_paise: 49900,
+    unlock_order_value_basis: "after_product_discounts",
+    unlock_order_statuses: ["delivered"],
+    unlock_allow_sale_products: true,
+    unlock_allow_coupon_orders: true,
+    unlock_allow_cod: true,
+    unlock_allow_online_payment: true,
+    unlock_permanent: true,
+    unlock_keep_after_refund: true,
     reward_config: {
       mode: "weighted_random",
       rewards: [],
@@ -153,6 +196,17 @@ const DEFAULT_GAMES: GameSetting[] = [
     enabled: true,
     daily_limit: 1,
     reward_expiry_days: 7,
+    unlock_type: "immediate",
+    unlock_required_orders: 0,
+    unlock_min_order_value_paise: 0,
+    unlock_order_value_basis: "after_product_discounts",
+    unlock_order_statuses: ["delivered"],
+    unlock_allow_sale_products: true,
+    unlock_allow_coupon_orders: true,
+    unlock_allow_cod: true,
+    unlock_allow_online_payment: true,
+    unlock_permanent: true,
+    unlock_keep_after_refund: true,
     reward_config: {
       base_reward_paise: 0,
       streak_rewards: {
@@ -557,6 +611,56 @@ function ScratchLabelField({
 
 
 /* ============================================================
+   UNLOCK TOGGLE
+============================================================ */
+
+function UnlockToggle({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-start gap-3 rounded-xl border p-4 text-left transition ${
+        checked
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-slate-200 bg-white hover:bg-slate-50"
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+          checked
+            ? "border-emerald-600 bg-emerald-600 text-white"
+            : "border-slate-300 bg-white"
+        }`}
+      >
+        {checked && <Check size={12} strokeWidth={3} />}
+      </span>
+
+      <span className="min-w-0">
+        <span className="block text-xs font-semibold text-slate-800">
+          {label}
+        </span>
+        {description && (
+          <span className="mt-1 block text-[11px] leading-5 text-slate-400">
+            {description}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
+
+
+/* ============================================================
    MAIN PAGE
 ============================================================ */
 
@@ -654,22 +758,70 @@ export default function PlayEarnGameSettingsPage() {
           }
 
           const loadedGames =
-            (data || []) as GameSetting[];
+            (data || []) as Partial<GameSetting>[];
 
           const mergedGames =
             DEFAULT_GAMES.map(
-              (fallback) =>
-                loadedGames.find(
-                  (game) =>
-                    game.game_key ===
-                    fallback.game_key
-                ) ||
-                fallback
+              (fallback) => {
+                const loaded =
+                  loadedGames.find(
+                    (game) =>
+                      game.game_key ===
+                      fallback.game_key
+                  );
+
+                if (!loaded) {
+                  return fallback;
+                }
+
+                return {
+                  ...fallback,
+                  ...loaded,
+                  unlock_type:
+                    loaded.unlock_type ??
+                    fallback.unlock_type,
+                  unlock_required_orders:
+                    Number(
+                      loaded.unlock_required_orders ??
+                        fallback.unlock_required_orders
+                    ),
+                  unlock_min_order_value_paise:
+                    Number(
+                      loaded.unlock_min_order_value_paise ??
+                        fallback.unlock_min_order_value_paise
+                    ),
+                  unlock_order_value_basis:
+                    loaded.unlock_order_value_basis ??
+                    fallback.unlock_order_value_basis,
+                  unlock_order_statuses:
+                    Array.isArray(
+                      loaded.unlock_order_statuses
+                    )
+                      ? loaded.unlock_order_statuses
+                      : fallback.unlock_order_statuses,
+                  unlock_allow_sale_products:
+                    loaded.unlock_allow_sale_products ??
+                    fallback.unlock_allow_sale_products,
+                  unlock_allow_coupon_orders:
+                    loaded.unlock_allow_coupon_orders ??
+                    fallback.unlock_allow_coupon_orders,
+                  unlock_allow_cod:
+                    loaded.unlock_allow_cod ??
+                    fallback.unlock_allow_cod,
+                  unlock_allow_online_payment:
+                    loaded.unlock_allow_online_payment ??
+                    fallback.unlock_allow_online_payment,
+                  unlock_permanent:
+                    loaded.unlock_permanent ??
+                    fallback.unlock_permanent,
+                  unlock_keep_after_refund:
+                    loaded.unlock_keep_after_refund ??
+                    fallback.unlock_keep_after_refund,
+                } as GameSetting;
+              }
             );
 
-          setGames(
-            mergedGames
-          );
+          setGames(mergedGames);
 
         } catch (err) {
 
@@ -1115,7 +1267,7 @@ export default function PlayEarnGameSettingsPage() {
         ==================================================== */
 
         const {
-          data,
+          
           error: rpcError,
         } =
           await supabase.rpc(
@@ -1146,29 +1298,60 @@ export default function PlayEarnGameSettingsPage() {
         }
 
 
-        const saved =
-          Array.isArray(data)
-            ? data[0]
-            : data;
+        /* ====================================================
+           SAVE GAME-SPECIFIC UNLOCK SETTINGS
+        ==================================================== */
 
+        const {
+          error: unlockError,
+        } = await supabase.rpc(
+          "admin_update_play_earn_game_unlock_settings",
+          {
+            p_game_key:
+              selectedGame.game_key,
 
-        if (saved) {
+            p_unlock_type:
+              selectedGame.unlock_type,
 
-          setGames(
-            (current) =>
-              current.map(
-                (game) =>
-                  game.game_key ===
-                  selectedGame.game_key
-                    ? (
-                        saved as GameSetting
-                      )
-                    : game
-              )
+            p_unlock_required_orders:
+              selectedGame.unlock_required_orders,
+
+            p_unlock_min_order_value_paise:
+              selectedGame.unlock_min_order_value_paise,
+
+            p_unlock_order_value_basis:
+              selectedGame.unlock_order_value_basis,
+
+            p_unlock_order_statuses:
+              selectedGame.unlock_order_statuses,
+
+            p_unlock_allow_sale_products:
+              selectedGame.unlock_allow_sale_products,
+
+            p_unlock_allow_coupon_orders:
+              selectedGame.unlock_allow_coupon_orders,
+
+            p_unlock_allow_cod:
+              selectedGame.unlock_allow_cod,
+
+            p_unlock_allow_online_payment:
+              selectedGame.unlock_allow_online_payment,
+
+            p_unlock_permanent:
+              selectedGame.unlock_permanent,
+
+            p_unlock_keep_after_refund:
+              selectedGame.unlock_keep_after_refund,
+          }
+        );
+
+        if (unlockError) {
+          throw new Error(
+            unlockError.message
           );
-
         }
 
+        await loadGames();
 
         setSuccess(
           `${selectedGame.display_name} settings saved successfully.`
@@ -1910,6 +2093,336 @@ export default function PlayEarnGameSettingsPage() {
 
             </div>
 
+          </SectionCard>
+
+
+          {/* ==================================================
+              UNLOCK SETTINGS
+          ================================================== */}
+
+          <SectionCard
+            title="Unlock Settings"
+            description="Configure how this specific game becomes available to members."
+          >
+            <div className="space-y-6">
+
+              <div>
+                <FieldLabel>
+                  Unlock Type
+                </FieldLabel>
+
+                <select
+                  value={selectedGame.unlock_type}
+                  onChange={(event) =>
+                    updateSelectedGame((game) => ({
+                      ...game,
+                      unlock_type:
+                        event.target.value as GameSetting["unlock_type"],
+                    }))
+                  }
+                  className="
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-3
+                    text-sm
+                    font-medium
+                    text-slate-900
+                    outline-none
+                    transition
+                    focus:border-slate-400
+                    focus:ring-4
+                    focus:ring-slate-100
+                  "
+                >
+                  <option value="immediate">
+                    Immediately Available
+                  </option>
+                  <option value="completed_orders">
+                    Completed Orders
+                  </option>
+                  <option value="customer_spend">
+                    Customer Spend
+                  </option>
+                  <option value="membership_tier">
+                    Membership Tier
+                  </option>
+                  <option value="manual">
+                    Manual Unlock
+                  </option>
+                </select>
+              </div>
+
+              {selectedGame.unlock_type === "completed_orders" && (
+                <>
+                  <div className="grid gap-5 sm:grid-cols-2">
+
+                    <NumberField
+                      label="Required Orders"
+                      hint="Qualifying orders"
+                      value={selectedGame.unlock_required_orders}
+                      min={1}
+                      step={1}
+                      onChange={(value) =>
+                        updateSelectedGame((game) => ({
+                          ...game,
+                          unlock_required_orders: Math.max(
+                            1,
+                            Number(value) || 1
+                          ),
+                        }))
+                      }
+                    />
+
+                    <NumberField
+                      label="Minimum Order Value"
+                      hint="INR per order"
+                      value={paiseToRupees(
+                        selectedGame.unlock_min_order_value_paise
+                      )}
+                      min={0}
+                      step={1}
+                      onChange={(value) =>
+                        updateSelectedGame((game) => ({
+                          ...game,
+                          unlock_min_order_value_paise:
+                            rupeesToPaise(value),
+                        }))
+                      }
+                    />
+
+                  </div>
+
+                  <div>
+                    <FieldLabel>
+                      Order Value Based On
+                    </FieldLabel>
+
+                    <select
+                      value={selectedGame.unlock_order_value_basis}
+                      onChange={(event) =>
+                        updateSelectedGame((game) => ({
+                          ...game,
+                          unlock_order_value_basis:
+                            event.target.value as GameSetting["unlock_order_value_basis"],
+                        }))
+                      }
+                      className="
+                        h-11
+                        w-full
+                        rounded-xl
+                        border
+                        border-slate-200
+                        bg-white
+                        px-3
+                        text-sm
+                        font-medium
+                        text-slate-900
+                        outline-none
+                        transition
+                        focus:border-slate-400
+                        focus:ring-4
+                        focus:ring-slate-100
+                      "
+                    >
+                      <option value="product_subtotal">
+                        Product Subtotal
+                      </option>
+                      <option value="after_product_discounts">
+                        After Product Discounts
+                      </option>
+                      <option value="after_coupon_discount">
+                        After Coupon Discount
+                      </option>
+                      <option value="final_paid_amount">
+                        Final Paid Amount
+                      </option>
+                    </select>
+
+                    <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                      Determines which order value is used for qualification.
+                    </p>
+                  </div>
+
+                  <div>
+                    <FieldLabel>
+                      Qualifying Order Statuses
+                    </FieldLabel>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+
+                      {[
+                        ["confirmed", "Confirmed"],
+                        ["packed", "Packed"],
+                        ["shipped", "Shipped"],
+                        ["delivered", "Delivered"],
+                        ["cancelled", "Cancelled"],
+                        ["returned", "Returned"],
+                        ["refunded", "Refunded"],
+                      ].map(([value, label]) => (
+                        <UnlockToggle
+                          key={value}
+                          label={label}
+                          checked={selectedGame.unlock_order_statuses.includes(value)}
+                          onChange={(next) =>
+                            updateSelectedGame((game) => ({
+                              ...game,
+                              unlock_order_statuses: next
+                                ? Array.from(
+                                    new Set([
+                                      ...game.unlock_order_statuses,
+                                      value,
+                                    ])
+                                  )
+                                : game.unlock_order_statuses.filter(
+                                    (status) => status !== value
+                                  ),
+                            }))
+                          }
+                        />
+                      ))}
+
+                    </div>
+                  </div>
+
+                  <div>
+                    <FieldLabel>
+                      Qualification Rules
+                    </FieldLabel>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+
+                      <UnlockToggle
+                        label="Sale Products Count"
+                        description="Orders containing sale products can qualify."
+                        checked={selectedGame.unlock_allow_sale_products}
+                        onChange={(value) =>
+                          updateSelectedGame((game) => ({
+                            ...game,
+                            unlock_allow_sale_products: value,
+                          }))
+                        }
+                      />
+
+                      <UnlockToggle
+                        label="Coupon Orders Count"
+                        description="Orders using a coupon can qualify."
+                        checked={selectedGame.unlock_allow_coupon_orders}
+                        onChange={(value) =>
+                          updateSelectedGame((game) => ({
+                            ...game,
+                            unlock_allow_coupon_orders: value,
+                          }))
+                        }
+                      />
+
+                      <UnlockToggle
+                        label="COD Orders Count"
+                        description="Cash-on-delivery orders can qualify."
+                        checked={selectedGame.unlock_allow_cod}
+                        onChange={(value) =>
+                          updateSelectedGame((game) => ({
+                            ...game,
+                            unlock_allow_cod: value,
+                          }))
+                        }
+                      />
+
+                      <UnlockToggle
+                        label="Online Payment Orders Count"
+                        description="Online payment orders can qualify."
+                        checked={selectedGame.unlock_allow_online_payment}
+                        onChange={(value) =>
+                          updateSelectedGame((game) => ({
+                            ...game,
+                            unlock_allow_online_payment: value,
+                          }))
+                        }
+                      />
+
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <FieldLabel>
+                  Unlock Behaviour
+                </FieldLabel>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+
+                  <UnlockToggle
+                    label="Permanent Unlock"
+                    description="Once earned, the game remains unlocked."
+                    checked={selectedGame.unlock_permanent}
+                    onChange={(value) =>
+                      updateSelectedGame((game) => ({
+                        ...game,
+                        unlock_permanent: value,
+                      }))
+                    }
+                  />
+
+                  <UnlockToggle
+                    label="Keep Unlock After Refund"
+                    description="A later refund won't remove an earned unlock."
+                    checked={selectedGame.unlock_keep_after_refund}
+                    onChange={(value) =>
+                      updateSelectedGame((game) => ({
+                        ...game,
+                        unlock_keep_after_refund: value,
+                      }))
+                    }
+                  />
+
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-violet-100 bg-violet-50 p-4">
+                <div className="flex items-start gap-3">
+                  <Trophy
+                    size={18}
+                    className="mt-0.5 shrink-0 text-violet-600"
+                  />
+
+                  <div>
+                    <p className="text-xs font-bold text-violet-900">
+                      Unlock Summary
+                    </p>
+
+                    {selectedGame.unlock_type === "immediate" ? (
+                      <p className="mt-1 text-xs leading-5 text-violet-700">
+                        This game is immediately available to eligible members.
+                      </p>
+                    ) : selectedGame.unlock_type === "completed_orders" ? (
+                      <p className="mt-1 text-xs leading-5 text-violet-700">
+                        Members need{" "}
+                        <strong>
+                          {selectedGame.unlock_required_orders}
+                        </strong>{" "}
+                        qualifying order
+                        {selectedGame.unlock_required_orders === 1 ? "" : "s"} of at least{" "}
+                        <strong>
+                          ₹{paiseToRupees(
+                            selectedGame.unlock_min_order_value_paise
+                          )}
+                        </strong>{" "}
+                        to unlock this game.
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-xs leading-5 text-violet-700">
+                        This unlock method is configured for future eligibility rules.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </SectionCard>
 
 

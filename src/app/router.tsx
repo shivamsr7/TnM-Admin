@@ -74,6 +74,8 @@ import WalletDashboardPage from "@/features/wallet/pages/WalletDashboardPage";
 
 import AdminCourierRateChecker from "@/features/shipping/components/AdminCourierRateChecker";
 
+import MomentsAdminPage from "@/features/moments/pages/MomentsAdminPage";
+
 /*
  * ============================================================
  * PLAY & EARN ADMIN
@@ -232,6 +234,15 @@ export const router = createBrowserRouter([
           {
             path: "orders/:id",
             element: <OrderDetailsPage />,
+          },
+
+          // ======================================================
+          // MOMENTS
+          // ======================================================
+
+          {
+            path: "moments",
+            element: <MomentsAdminPage />,
           },
 
           // ======================================================
